@@ -12,6 +12,7 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -446,14 +447,14 @@ int main()
     sf::Text description(font, "Current effect: " + effectNames[current], 20);
     description.setPosition({10.f, 530.f});
     description.setFillColor(sf::Color(80, 80, 80));
-    description.setOutlineThickness(2.f);
+    description.setOutlineThickness(3.f);
     description.setOutlineColor(sf::Color::Red);
 
     // Create the instructions text
     sf::Text instructions(font, "Press left and right arrows to change the current shader", 20);
     instructions.setPosition({280.f, 555.f});
     instructions.setFillColor(sf::Color(80, 80, 80));
-    instructions.setOutlineThickness(2.f);
+    instructions.setOutlineThickness(3.f);
     instructions.setOutlineColor(sf::Color::Red);
 
     // Start the game loop

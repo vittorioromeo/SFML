@@ -56,15 +56,12 @@ void addLine(std::vector<sf::Vertex>& vertices,
     const float top    = std::floor(lineTop + offset - (thickness / 2) + 0.5f);
     const float bottom = top + std::floor(thickness + 0.5f);
 
-    const sf::Vertex vertexData[]{{{-outlineThickness, top - outlineThickness}, color, {1.0f, 1.0f}},
-                                  {{lineLength + outlineThickness, top - outlineThickness}, color, {1.0f, 1.0f}},
-                                  {{-outlineThickness, bottom + outlineThickness}, color, {1.0f, 1.0f}},
-                                  {{-outlineThickness, bottom + outlineThickness}, color, {1.0f, 1.0f}},
-                                  {{lineLength + outlineThickness, top - outlineThickness}, color, {1.0f, 1.0f}},
-                                  {{lineLength + outlineThickness, bottom + outlineThickness}, color, {1.0f, 1.0f}}};
-
-    std::memcpy(vertices.data() + index, vertexData, sizeof(sf::Vertex) * 6);
-    index += 6;
+    vertices[index++] = {{-outlineThickness, top - outlineThickness}, color, {1.0f, 1.0f}};
+    vertices[index++] = {{lineLength + outlineThickness, top - outlineThickness}, color, {1.0f, 1.0f}};
+    vertices[index++] = {{-outlineThickness, bottom + outlineThickness}, color, {1.0f, 1.0f}};
+    vertices[index++] = {{-outlineThickness, bottom + outlineThickness}, color, {1.0f, 1.0f}};
+    vertices[index++] = {{lineLength + outlineThickness, top - outlineThickness}, color, {1.0f, 1.0f}};
+    vertices[index++] = {{lineLength + outlineThickness, bottom + outlineThickness}, color, {1.0f, 1.0f}};
 }
 
 // Add a glyph quad to the vertex array
@@ -83,16 +80,14 @@ void addGlyphQuad(std::vector<sf::Vertex>& vertices,
     const auto uv1 = sf::Vector2f(glyph.textureRect.position) - padding;
     const auto uv2 = sf::Vector2f(glyph.textureRect.position + glyph.textureRect.size) + padding;
 
-    const sf::Vertex vertexData[]{{position + sf::Vector2f(p1.x - italicShear * p1.y, p1.y), color, {uv1.x, uv1.y}},
-                                  {position + sf::Vector2f(p2.x - italicShear * p1.y, p1.y), color, {uv2.x, uv1.y}},
-                                  {position + sf::Vector2f(p1.x - italicShear * p2.y, p2.y), color, {uv1.x, uv2.y}},
-                                  {position + sf::Vector2f(p1.x - italicShear * p2.y, p2.y), color, {uv1.x, uv2.y}},
-                                  {position + sf::Vector2f(p2.x - italicShear * p1.y, p1.y), color, {uv2.x, uv1.y}},
-                                  {position + sf::Vector2f(p2.x - italicShear * p2.y, p2.y), color, {uv2.x, uv2.y}}};
-
-    std::memcpy(vertices.data() + index, vertexData, sizeof(sf::Vertex) * 6);
-    index += 6;
+    vertices[index++] = {position + sf::Vector2f(p1.x - italicShear * p1.y, p1.y), color, {uv1.x, uv1.y}};
+    vertices[index++] = {position + sf::Vector2f(p2.x - italicShear * p1.y, p1.y), color, {uv2.x, uv1.y}};
+    vertices[index++] = {position + sf::Vector2f(p1.x - italicShear * p2.y, p2.y), color, {uv1.x, uv2.y}};
+    vertices[index++] = {position + sf::Vector2f(p1.x - italicShear * p2.y, p2.y), color, {uv1.x, uv2.y}};
+    vertices[index++] = {position + sf::Vector2f(p2.x - italicShear * p1.y, p1.y), color, {uv2.x, uv1.y}};
+    vertices[index++] = {position + sf::Vector2f(p2.x - italicShear * p2.y, p2.y), color, {uv2.x, uv2.y}};
 }
+
 } // namespace
 
 
@@ -379,7 +374,7 @@ void Text::ensureGeometryUpdate() const
     // Clear the previous geometry
     m_vertices.clear();
     m_fillVerticesStartIndex = 0u;
-    m_bounds                 = FloatRect();
+    m_bounds                 = {};
 
     // No text: nothing to draw
     if (m_string.isEmpty())
@@ -403,14 +398,24 @@ void Text::ensureGeometryUpdate() const
     const float letterSpacing   = (whitespaceWidth / 3.f) * (m_letterSpacingFactor - 1.f);
     whitespaceWidth += letterSpacing;
     const float lineSpacing = m_font->getLineSpacing(m_characterSize) * m_lineSpacingFactor;
-    float       x           = 0.f;
-    auto        y           = static_cast<float>(m_characterSize);
 
     // TODO
-    std::size_t fillVerticesCount    = 0;
-    std::size_t outlineVerticesCount = 0;
+    std::size_t fillQuadCount    = 0;
+    std::size_t outlineQuadCount = 0;
 
     {
+        float x = 0.f;
+
+        const std::size_t outlineQuadIncrement = (m_outlineThickness == 0) ? 0 : 1;
+
+        const auto addLinesFake = [&]
+        {
+            outlineQuadCount += outlineQuadIncrement;
+            ++fillQuadCount;
+        };
+
+        const auto addGlyphsFake = addLinesFake;
+
         std::uint32_t prevChar = 0;
 
         for (const std::uint32_t curChar : m_string)
@@ -419,72 +424,79 @@ void Text::ensureGeometryUpdate() const
             if (curChar == U'\r')
                 continue;
 
-            // If we're using the underlined style and there's a new line, draw a line
-            if (isUnderlined && (curChar == U'\n' && prevChar != U'\n'))
-            {
-                fillVerticesCount += 6;
+            // Apply the kerning offset
+            x += 1.f;
 
-                if (m_outlineThickness != 0)
-                    outlineVerticesCount += 6;
-            }
-
-            // If we're using the strike through style and there's a new line, draw a line across all characters
-            if (isStrikeThrough && (curChar == U'\n' && prevChar != U'\n'))
-            {
-                fillVerticesCount += 6;
-
-                if (m_outlineThickness != 0)
-                    outlineVerticesCount += 6;
-            }
+            // If we're using the underlined or strike through style and there's a new line, draw a line
+            if ((curChar == U'\n' && prevChar != U'\n') && (isUnderlined || isStrikeThrough))
+                addLinesFake();
 
             prevChar = curChar;
 
             // Handle special characters
             if ((curChar == U' ') || (curChar == U'\n') || (curChar == U'\t'))
             {
+                switch (curChar)
+                {
+                    case U' ':
+                        x += 1.f;
+                        break;
+                    case U'\t':
+                        x += 1.f;
+                        break;
+                    case U'\n':
+                        x = 0;
+                        break;
+                }
+
                 // Next glyph, no need to create a quad for whitespace
                 continue;
             }
 
             // Apply the outline
-            if (m_outlineThickness != 0)
-            {
-                outlineVerticesCount += 6;
-            }
+            addGlyphsFake();
 
-            fillVerticesCount += 6;
+            // Advance to the next character
+            x += letterSpacing;
         }
 
+        // If we're using the underlined style, add the last line
         if (isUnderlined && (x > 0))
-        {
-            fillVerticesCount += 6;
-
-            if (m_outlineThickness != 0)
-                outlineVerticesCount += 6;
-        }
+            addLinesFake();
 
         // If we're using the strike through style, add the last line across all characters
         if (isStrikeThrough && (x > 0))
-        {
-            fillVerticesCount += 6;
-
-            if (m_outlineThickness != 0)
-                outlineVerticesCount += 6;
-        }
+            addLinesFake();
     }
 
-    m_vertices.resize(outlineVerticesCount + fillVerticesCount);
-    m_fillVerticesStartIndex = outlineVerticesCount;
+    const std::size_t outlineVertexCount = outlineQuadCount * 6;
+    const std::size_t fillVertexCount    = fillQuadCount * 6;
 
-    std::size_t currFillIndex    = outlineVerticesCount;
+    m_vertices.resize(outlineVertexCount + fillVertexCount);
+    m_fillVerticesStartIndex = outlineVertexCount;
+
+    std::size_t currFillIndex    = outlineVertexCount;
     std::size_t currOutlineIndex = 0;
 
+    float x = 0.f;
+    auto  y = static_cast<float>(m_characterSize);
+
     // Create one quad for each character
-    auto          minX     = static_cast<float>(m_characterSize);
-    auto          minY     = static_cast<float>(m_characterSize);
-    float         maxX     = 0.f;
-    float         maxY     = 0.f;
+    auto  minX = static_cast<float>(m_characterSize);
+    auto  minY = static_cast<float>(m_characterSize);
+    float maxX = 0.f;
+    float maxY = 0.f;
+
     std::uint32_t prevChar = 0;
+
+    const auto addLines = [this, &currFillIndex, &currOutlineIndex, &x, &y, &underlineThickness](float offset)
+    {
+        addLine(m_vertices, currFillIndex, x, y, m_fillColor, offset, underlineThickness);
+
+        if (m_outlineThickness != 0)
+            addLine(m_vertices, currOutlineIndex, x, y, m_outlineColor, offset, underlineThickness, m_outlineThickness);
+    };
+
     for (const std::uint32_t curChar : m_string)
     {
         // Skip the \r char to avoid weird graphical issues
@@ -494,22 +506,15 @@ void Text::ensureGeometryUpdate() const
         // Apply the kerning offset
         x += m_font->getKerning(prevChar, curChar, m_characterSize, isBold);
 
-        // If we're using the underlined style and there's a new line, draw a line
-        if (isUnderlined && (curChar == U'\n' && prevChar != U'\n'))
+        if (curChar == U'\n' && prevChar != U'\n')
         {
-            addLine(m_vertices, currFillIndex, x, y, m_fillColor, underlineOffset, underlineThickness);
+            // If we're using the underlined style and there's a new line, draw a line
+            if (isUnderlined)
+                addLines(underlineOffset);
 
-            if (m_outlineThickness != 0)
-                addLine(m_vertices, currOutlineIndex, x, y, m_outlineColor, underlineOffset, underlineThickness, m_outlineThickness);
-        }
-
-        // If we're using the strike through style and there's a new line, draw a line across all characters
-        if (isStrikeThrough && (curChar == U'\n' && prevChar != U'\n'))
-        {
-            addLine(m_vertices, currFillIndex, x, y, m_fillColor, strikeThroughOffset, underlineThickness);
-
-            if (m_outlineThickness != 0)
-                addLine(m_vertices, currOutlineIndex, x, y, m_outlineColor, strikeThroughOffset, underlineThickness, m_outlineThickness);
+            // If we're using the strike through style and there's a new line, draw a line across all characters
+            if (isStrikeThrough)
+                addLines(strikeThroughOffset);
         }
 
         prevChar = curChar;
@@ -583,24 +588,11 @@ void Text::ensureGeometryUpdate() const
 
     // If we're using the underlined style, add the last line
     if (isUnderlined && (x > 0))
-    {
-        addLine(m_vertices, currFillIndex, x, y, m_fillColor, underlineOffset, underlineThickness);
-
-        if (m_outlineThickness != 0)
-            addLine(m_vertices, currOutlineIndex, x, y, m_outlineColor, underlineOffset, underlineThickness, m_outlineThickness);
-    }
+        addLines(underlineOffset);
 
     // If we're using the strike through style, add the last line across all characters
     if (isStrikeThrough && (x > 0))
-    {
-        addLine(m_vertices, currFillIndex, x, y, m_fillColor, strikeThroughOffset, underlineThickness);
-
-        if (m_outlineThickness != 0)
-            addLine(m_vertices, currOutlineIndex, x, y, m_outlineColor, strikeThroughOffset, underlineThickness, m_outlineThickness);
-    }
-
-    // TODO
-
+        addLines(strikeThroughOffset);
 
     // Update the bounding rectangle
     m_bounds.position = Vector2f(minX, minY);
