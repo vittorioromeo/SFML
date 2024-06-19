@@ -1,7 +1,25 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/VertexBuffer.hpp>
+
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/VideoMode.hpp>
+
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Sleep.hpp>
+#include <SFML/System/Time.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/System/Vector3.hpp>
+
 
 #define STB_PERLIN_IMPLEMENTATION
 #include <stb_perlin.h>
@@ -174,20 +192,21 @@ int main()
     while (window.isOpen())
     {
         // Handle events
-        while (const auto event = window.pollEvent())
+        while (const std::optional event = window.pollEvent())
         {
             // Window closed or escape key pressed: exit
-            if (event.is<sf::Event::Closed>() || (event.is<sf::Event::KeyPressed>() &&
-                                                  event.getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
+            if (event->is<sf::Event::Closed>() ||
+                (event->is<sf::Event::KeyPressed>() &&
+                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
             {
                 window.close();
                 break;
             }
 
             // Arrow key pressed:
-            if (terrainShader.has_value() && event.is<sf::Event::KeyPressed>())
+            if (terrainShader.has_value() && event->is<sf::Event::KeyPressed>())
             {
-                switch (event.getIf<sf::Event::KeyPressed>()->code)
+                switch (event->getIf<sf::Event::KeyPressed>()->code)
                 {
                     case sf::Keyboard::Key::Enter:
                         generateTerrain(terrainStagingBuffer.data());

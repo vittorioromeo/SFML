@@ -757,33 +757,33 @@ EGLConfig DRMContext::getBestConfig(EGLDisplay display, unsigned int bitsPerPixe
 {
     // Set our video settings constraint
     const EGLint attributes[] =
-    { EGL_BUFFER_SIZE,
-      static_cast<EGLint>(bitsPerPixel),
-      EGL_DEPTH_SIZE,
-      static_cast<EGLint>(settings.depthBits),
-      EGL_STENCIL_SIZE,
-      static_cast<EGLint>(settings.stencilBits),
-      EGL_SAMPLE_BUFFERS,
-      static_cast<EGLint>(settings.antialiasingLevel),
-      EGL_BLUE_SIZE,
-      8,
-      EGL_GREEN_SIZE,
-      8,
-      EGL_RED_SIZE,
-      8,
-      EGL_ALPHA_SIZE,
-      8,
+        {EGL_BUFFER_SIZE,
+         static_cast<EGLint>(bitsPerPixel),
+         EGL_DEPTH_SIZE,
+         static_cast<EGLint>(settings.depthBits),
+         EGL_STENCIL_SIZE,
+         static_cast<EGLint>(settings.stencilBits),
+         EGL_SAMPLE_BUFFERS,
+         static_cast<EGLint>(settings.antialiasingLevel),
+         EGL_BLUE_SIZE,
+         8,
+         EGL_GREEN_SIZE,
+         8,
+         EGL_RED_SIZE,
+         8,
+         EGL_ALPHA_SIZE,
+         8,
 
-      EGL_SURFACE_TYPE,
-      EGL_WINDOW_BIT,
+         EGL_SURFACE_TYPE,
+         EGL_WINDOW_BIT,
 #if defined(SFML_OPENGL_ES)
-      EGL_RENDERABLE_TYPE,
-      EGL_OPENGL_ES_BIT,
+         EGL_RENDERABLE_TYPE,
+         EGL_OPENGL_ES_BIT,
 #else
-      EGL_RENDERABLE_TYPE,
-      EGL_OPENGL_BIT,
+         EGL_RENDERABLE_TYPE,
+         EGL_OPENGL_BIT,
 #endif
-      EGL_NONE };
+         EGL_NONE};
 
     EGLint    configCount = 0;
     EGLConfig configs[1];

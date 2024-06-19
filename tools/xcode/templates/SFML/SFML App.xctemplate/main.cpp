@@ -13,9 +13,17 @@
 // function `resourcePath()` from ResourcePath.hpp
 //
 
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include <SFML/Audio.hpp>
+#include <SFML/Audio/Music.hpp>
+
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
 // Here is a small helper for you! Have a look.
 #include "ResourcePath.hpp"
@@ -31,7 +39,7 @@ int main()
 
     // Load a sprite to display
     const auto texture = sf::Texture::loadFromFile(resourcePath() / "background.jpg").value();
-    sf::Sprite sprite(texture);
+    sf::Sprite sprite(texture.getRect());
 
     // Create a graphical text to display
     const auto font = sf::Font::loadFromFile(resourcePath() / "tuffy.ttf").value();
@@ -52,19 +60,15 @@ int main()
     while (window.isOpen())
     {
         // Process events
-        while (const auto event = window.pollEvent())
+        while (const std::optional event = window.pollEvent())
         {
-            // Close window: exit
-            if (event.is<sf::Event::Closed>())
+            // Window closed or escape key pressed: exit
+            if (event->is<sf::Event::Closed>() ||
+                (event->is<sf::Event::KeyPressed>() &&
+                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
             {
                 window.close();
-            }
-
-            // Escape pressed: exit
-            if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>();
-                keyPressed && keyPressed->code == sf::Keyboard::Key::Escape)
-            {
-                window.close();
+                break;
             }
         }
 
@@ -72,7 +76,7 @@ int main()
         window.clear();
 
         // Draw the sprite
-        window.draw(sprite);
+        window.draw(sprite, texture);
 
         // Draw the string
         window.draw(text);

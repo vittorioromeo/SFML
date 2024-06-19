@@ -27,9 +27,9 @@
 ////////////////////////////////////////////////////////////
 #define MINIMP3_IMPLEMENTATION // Minimp3 control define, places implementation in this file.
 #ifndef NOMINMAX
-#define NOMINMAX // To avoid windows.h and std::min issue
+#define NOMINMAX               // To avoid windows.h and std::min issue
 #endif
-#define MINIMP3_NO_STDIO // Minimp3 control define, eliminate file manipulation code which is useless here
+#define MINIMP3_NO_STDIO       // Minimp3 control define, eliminate file manipulation code which is useless here
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -127,13 +127,15 @@ std::optional<SoundFileReader::Info> SoundFileReaderMp3::open(InputStream& strea
     m_io.read_data = &stream;
     m_io.seek_data = &stream;
 
+    std::optional<Info> result; // Use a single local variable for NRVO
+
     // Init mp3 decoder
     mp3dec_ex_open_cb(&m_decoder, &m_io, MP3D_SEEK_TO_SAMPLE);
     if (!m_decoder.samples)
-        return std::nullopt;
+        return result; // Empty optional
 
     // Retrieve the music attributes
-    Info info;
+    Info& info        = result.emplace();
     info.channelCount = static_cast<unsigned int>(m_decoder.info.channels);
     info.sampleRate   = static_cast<unsigned int>(m_decoder.info.hz);
     info.sampleCount  = m_decoder.samples;
@@ -157,7 +159,7 @@ std::optional<SoundFileReader::Info> SoundFileReaderMp3::open(InputStream& strea
     }
 
     m_numSamples = info.sampleCount;
-    return info;
+    return result;
 }
 
 

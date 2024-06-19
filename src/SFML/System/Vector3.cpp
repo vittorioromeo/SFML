@@ -24,10 +24,23 @@
 
 #include <SFML/System/Vector3.hpp>
 
-#include <type_traits>
-
 #include <cassert>
 #include <cmath>
+
+
+namespace
+{
+
+// Named differently from the one in 'Vector2.cpp' to support unity builds.
+
+// clang-format off
+template <typename> constexpr bool isVec3FloatingPoint              = false;
+template <>         constexpr bool isVec3FloatingPoint<float>       = true;
+template <>         constexpr bool isVec3FloatingPoint<double>      = true;
+template <>         constexpr bool isVec3FloatingPoint<long double> = true;
+// clang-format on
+
+} // namespace
 
 
 namespace sf
@@ -36,7 +49,7 @@ namespace sf
 template <typename T>
 Vector3<T> Vector3<T>::normalized() const
 {
-    static_assert(std::is_floating_point_v<T>, "Vector3::normalized() is only supported for floating point types");
+    static_assert(isVec3FloatingPoint<T>, "Vector3::normalized() is only supported for floating point types");
 
     assert(*this != Vector3<T>() && "Vector3::normalized() cannot normalize a zero vector");
     return (*this) / length();
@@ -47,7 +60,7 @@ Vector3<T> Vector3<T>::normalized() const
 template <typename T>
 T Vector3<T>::length() const
 {
-    static_assert(std::is_floating_point_v<T>, "Vector3::length() is only supported for floating point types");
+    static_assert(isVec3FloatingPoint<T>, "Vector3::length() is only supported for floating point types");
 
     // don't use std::hypot because of slow performance
     return std::sqrt(x * x + y * y + z * z);
@@ -57,9 +70,27 @@ T Vector3<T>::length() const
 
 
 ////////////////////////////////////////////////////////////
-// Explicit template instantiations
+// Explicit instantiation definitions
 ////////////////////////////////////////////////////////////
 
 template class sf::Vector3<float>;
 template class sf::Vector3<double>;
 template class sf::Vector3<long double>;
+
+#define SFML_INSTANTIATE_VECTOR3_BASIC_MEMBER_FUNCTIONS(type) \
+    template /*             */ sf::Vector3<type>::Vector3();  \
+    template /*             */ sf::Vector3<type>::Vector3(type, type, type);
+
+#define SFML_INSTANTIATE_VECTOR3_INTEGRAL_MEMBER_FUNCTIONS(type)                      \
+    template type              sf::Vector3<type>::lengthSq() const;                   \
+    template type              sf::Vector3<type>::dot(const Vector3& rhs) const;      \
+    template sf::Vector3<type> sf::Vector3<type>::cross(const Vector3& rhs) const;    \
+    template sf::Vector3<type> sf::Vector3<type>::cwiseMul(const Vector3& rhs) const; \
+    template sf::Vector3<type> sf::Vector3<type>::cwiseDiv(const Vector3& rhs) const;
+
+SFML_INSTANTIATE_VECTOR3_BASIC_MEMBER_FUNCTIONS(bool)
+SFML_INSTANTIATE_VECTOR3_BASIC_MEMBER_FUNCTIONS(int)
+SFML_INSTANTIATE_VECTOR3_BASIC_MEMBER_FUNCTIONS(unsigned int)
+
+SFML_INSTANTIATE_VECTOR3_INTEGRAL_MEMBER_FUNCTIONS(int)
+SFML_INSTANTIATE_VECTOR3_INTEGRAL_MEMBER_FUNCTIONS(unsigned int)

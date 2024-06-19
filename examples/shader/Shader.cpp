@@ -2,7 +2,24 @@
 // Headers
 ////////////////////////////////////////////////////////////
 
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
+#include <SFML/Window/VideoMode.hpp>
+
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
 
 #include <array>
 #include <iostream>
@@ -50,7 +67,7 @@ public:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override
     {
         states.shader = &m_shader;
-        target.draw(sf::Sprite{m_texture}, states);
+        target.draw(sf::Sprite{m_texture.getRect()}, m_texture, states);
     }
 
 private:
@@ -173,22 +190,22 @@ public:
         // Render the updated scene to the off-screen surface
         m_surface.clear(sf::Color::White);
 
-        sf::Sprite backgroundSprite{m_backgroundTexture};
+        sf::Sprite backgroundSprite{m_backgroundTexture.getRect()};
         backgroundSprite.setPosition({135.f, 100.f});
-        m_surface.draw(backgroundSprite);
+        m_surface.draw(backgroundSprite, m_backgroundTexture);
 
         // Update the position of the moving entities
         constexpr int numEntities = 6;
 
         for (int i = 0; i < 6; ++i)
         {
-            sf::Sprite entity{m_entityTexture, sf::IntRect({96 * i, 0}, {96, 96})};
+            sf::Sprite entity{{{96 * i, 0}, {96, 96}}};
 
             entity.setPosition(
                 {std::cos(0.25f * (time * static_cast<float>(i) + static_cast<float>(numEntities - i))) * 300 + 350,
                  std::sin(0.25f * (time * static_cast<float>(numEntities - i) + static_cast<float>(i))) * 200 + 250});
 
-            m_surface.draw(entity);
+            m_surface.draw(entity, m_entityTexture);
         }
 
         m_surface.display();
@@ -196,8 +213,10 @@ public:
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override
     {
+        const sf::Texture& texture = m_surface.getTexture();
+
         states.shader = &m_shader;
-        target.draw(sf::Sprite{m_surface.getTexture()}, states);
+        target.draw(sf::Sprite{texture.getRect()}, texture, states);
     }
 
     explicit Edge(sf::RenderTexture&& surface, sf::Texture&& backgroundTexture, sf::Texture&& entityTexture, sf::Shader&& shader) :
@@ -419,7 +438,7 @@ int main()
 
     // Create the messages background
     const auto textBackgroundTexture = sf::Texture::loadFromFile("resources/text-background.png").value();
-    sf::Sprite textBackground(textBackgroundTexture);
+    sf::Sprite textBackground(textBackgroundTexture.getRect());
     textBackground.setPosition({0.f, 520.f});
     textBackground.setColor(sf::Color(255, 255, 255, 200));
 
@@ -427,27 +446,31 @@ int main()
     sf::Text description(font, "Current effect: " + effectNames[current], 20);
     description.setPosition({10.f, 530.f});
     description.setFillColor(sf::Color(80, 80, 80));
+    description.setOutlineThickness(2.f);
+    description.setOutlineColor(sf::Color::Red);
 
     // Create the instructions text
     sf::Text instructions(font, "Press left and right arrows to change the current shader", 20);
     instructions.setPosition({280.f, 555.f});
     instructions.setFillColor(sf::Color(80, 80, 80));
+    instructions.setOutlineThickness(2.f);
+    instructions.setOutlineColor(sf::Color::Red);
 
     // Start the game loop
     const sf::Clock clock;
     while (window.isOpen())
     {
         // Process events
-        while (const auto event = window.pollEvent())
+        while (const std::optional event = window.pollEvent())
         {
             // Close window: exit
-            if (event.is<sf::Event::Closed>())
+            if (event->is<sf::Event::Closed>())
             {
                 window.close();
                 break;
             }
 
-            if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {
                 switch (keyPressed->code)
                 {
@@ -513,7 +536,7 @@ int main()
         }
 
         // Draw the text
-        window.draw(textBackground);
+        window.draw(textBackground, textBackgroundTexture);
         window.draw(instructions);
         window.draw(description);
 

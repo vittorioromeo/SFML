@@ -1,9 +1,28 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 #include <SFML/Audio.hpp>
+#include <SFML/Audio/Sound.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
+
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Touch.hpp>
+#include <SFML/Window/VideoMode.hpp>
+#include <SFML/Window/WindowEnums.hpp>
+
+#include <SFML/System/Angle.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
+#include <SFML/System/Vector2.hpp>
 
 #include <filesystem>
 #include <random>
@@ -54,7 +73,7 @@ int main()
 
     // Create the SFML logo texture:
     const auto sfmlLogoTexture = sf::Texture::loadFromFile(resourcesDir() / "sfml_logo.png").value();
-    sf::Sprite sfmlLogo(sfmlLogoTexture);
+    sf::Sprite sfmlLogo(sfmlLogoTexture.getRect());
     sfmlLogo.setPosition({170.f, 50.f});
 
     // Create the left paddle
@@ -109,19 +128,21 @@ int main()
     while (window.isOpen())
     {
         // Handle events
-        while (const auto event = window.pollEvent())
+        while (const std::optional event = window.pollEvent())
         {
             // Window closed or escape key pressed: exit
-            if (event.is<sf::Event::Closed>() || (event.is<sf::Event::KeyPressed>() &&
-                                                  event.getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
+            if (event->is<sf::Event::Closed>() ||
+                (event->is<sf::Event::KeyPressed>() &&
+                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
             {
                 window.close();
                 break;
             }
 
             // Space key pressed: play
-            if ((event.is<sf::Event::KeyPressed>() && event.getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Space) ||
-                event.is<sf::Event::TouchBegan>())
+            if ((event->is<sf::Event::KeyPressed>() &&
+                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Space) ||
+                event->is<sf::Event::TouchBegan>())
             {
                 if (!isPlaying)
                 {
@@ -144,7 +165,7 @@ int main()
             }
 
             // Window size changed, adjust view appropriately
-            if (event.is<sf::Event::Resized>())
+            if (event->is<sf::Event::Resized>())
             {
                 sf::View view;
                 view.setSize({gameWidth, gameHeight});
@@ -275,7 +296,7 @@ int main()
         {
             // Draw the pause message
             window.draw(pauseMessage);
-            window.draw(sfmlLogo);
+            window.draw(sfmlLogo, sfmlLogoTexture);
         }
 
         // Display things on screen

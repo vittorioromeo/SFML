@@ -30,6 +30,7 @@
 #include <SFML/Graphics/GLExtensions.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 
@@ -339,6 +340,17 @@ Vector2i RenderTarget::mapCoordsToPixel(const Vector2f& point, const View& view)
 void RenderTarget::draw(const Drawable& drawable, const RenderStates& states)
 {
     drawable.draw(*this, states);
+}
+
+
+////////////////////////////////////////////////////////////
+void RenderTarget::draw(const Sprite& sprite, const Texture& texture, RenderStates states)
+{
+    states.texture = &texture;
+    states.transform *= sprite.getTransform();
+    states.coordinateType = CoordinateType::Pixels;
+
+    draw(sprite.m_vertices.data(), sprite.m_vertices.size(), PrimitiveType::TriangleStrip, states);
 }
 
 
@@ -888,7 +900,7 @@ void RenderTarget::drawPrimitives(PrimitiveType type, std::size_t firstVertex, s
 {
     // Find the OpenGL primitive type
     static constexpr GLenum modes[] = {GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN};
-    const GLenum            mode = modes[static_cast<std::size_t>(type)];
+    const GLenum mode = modes[static_cast<std::size_t>(type)];
 
     // Draw the primitives
     glCheck(glDrawArrays(mode, static_cast<GLint>(firstVertex), static_cast<GLsizei>(vertexCount)));

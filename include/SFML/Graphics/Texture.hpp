@@ -34,6 +34,8 @@
 
 #include <SFML/Window/GlResource.hpp>
 
+#include <SFML/System/LifetimeTracking.hpp>
+#include <SFML/System/PassKey.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <filesystem>
@@ -48,6 +50,8 @@ namespace sf
 class InputStream;
 class Window;
 class Image;
+class Sprite;
+class Shape;
 
 ////////////////////////////////////////////////////////////
 /// \brief Image living on the graphics card that can be used for drawing
@@ -496,6 +500,16 @@ public:
     unsigned int getNativeHandle() const;
 
     ////////////////////////////////////////////////////////////
+    /// \brief Get a rectangle covering the entire texture
+    ///
+    /// This function is useful to conveniently initialize `sf::Sprite`
+    /// objects that are intended to be used with this texture.
+    ///
+    /// \return Rectangle covering the entire texture, from {0, 0} to {width, height}
+    ////////////////////////////////////////////////////////////
+    IntRect getRect() const;
+
+    ////////////////////////////////////////////////////////////
     /// \brief Bind a texture for rendering
     ///
     /// This function is not part of the graphics API, it mustn't be
@@ -545,14 +559,18 @@ private:
     friend class RenderTexture;
     friend class RenderTarget;
 
+public:
     ////////////////////////////////////////////////////////////
+    /// \private
+    ///
     /// \brief Default constructor
     ///
     /// Creates an empty texture.
     ///
     ////////////////////////////////////////////////////////////
-    Texture(const Vector2u& size, const Vector2u& actualSize, unsigned int texture, bool sRgb);
+    Texture(priv::PassKey<Texture>&&, const Vector2u& size, const Vector2u& actualSize, unsigned int texture, bool sRgb);
 
+private:
     ////////////////////////////////////////////////////////////
     /// \brief Get a valid image size according to hardware support
     ///
@@ -590,6 +608,12 @@ private:
     bool          m_fboAttachment{}; //!< Is this texture owned by a framebuffer object?
     bool          m_hasMipmap{};     //!< Has the mipmap been generated?
     std::uint64_t m_cacheId;         //!< Unique number that identifies the texture to the render target's cache
+
+    ////////////////////////////////////////////////////////////
+    // Lifetime tracking
+    ////////////////////////////////////////////////////////////
+    SFML_DEFINE_LIFETIME_DEPENDEE(Texture, Sprite);
+    SFML_DEFINE_LIFETIME_DEPENDEE(Texture, Shape);
 };
 
 ////////////////////////////////////////////////////////////
@@ -664,11 +688,11 @@ SFML_GRAPHICS_API void swap(Texture& left, Texture& right) noexcept;
 /// // Load a texture from a file
 /// const auto texture = sf::Texture::loadFromFile("texture.png").value();
 ///
-/// // Assign it to a sprite
-/// sf::Sprite sprite(texture);
+/// // Create a sprite covering the entirety of the texture
+/// sf::Sprite sprite(texture.getRect());
 ///
-/// // Draw the textured sprite
-/// window.draw(sprite);
+/// // Draw the sprite with the intended texture
+/// window.draw(sprite, texture);
 /// \endcode
 ///
 /// \code
@@ -678,8 +702,8 @@ SFML_GRAPHICS_API void swap(Texture& left, Texture& right) noexcept;
 /// // Create an empty texture
 /// auto texture = sf::Texture::create({640, 480}).value();
 ///
-/// // Create a sprite that will display the texture
-/// sf::Sprite sprite(texture);
+/// // Create a sprite covering the entirety of the texture
+/// sf::Sprite sprite(texture.getRect());
 ///
 /// while (...) // the main loop
 /// {
@@ -689,8 +713,8 @@ SFML_GRAPHICS_API void swap(Texture& left, Texture& right) noexcept;
 ///     std::uint8_t* pixels = ...; // get a fresh chunk of pixels (the next frame of a movie, for example)
 ///     texture.update(pixels);
 ///
-///     // draw it
-///     window.draw(sprite);
+///     // draw the sprite with the intended texture
+///     window.draw(sprite, texture);
 ///
 ///     ...
 /// }

@@ -33,7 +33,7 @@
 #include <SFML/Window/Context.hpp>
 #include <SFML/Window/ContextSettings.hpp>
 
-#include <memory>
+#include <SFML/System/UniquePtr.hpp>
 
 
 namespace sf::priv
@@ -63,7 +63,7 @@ bool RenderTextureImplDefault::create(const Vector2u& size, unsigned int, const 
     m_size = size;
 
     // Create the in-memory OpenGL context
-    m_context = std::make_unique<Context>(settings, size);
+    m_context = priv::makeUnique<Context>(settings, size);
 
     return true;
 }

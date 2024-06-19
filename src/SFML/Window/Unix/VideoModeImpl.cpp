@@ -89,7 +89,7 @@ std::vector<VideoMode> VideoModeImpl::getFullscreenModes()
                                 // Convert to VideoMode
                                 VideoMode mode({static_cast<unsigned int>(sizes[j].width),
                                                 static_cast<unsigned int>(sizes[j].height)},
-                                               static_cast<unsigned int>(depths[i]));
+                                               static_cast<unsigned int>(depths.get()[i]));
 
                                 Rotation currentRotation = 0;
                                 XRRConfigRotations(config.get(), &currentRotation);

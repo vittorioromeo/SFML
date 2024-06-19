@@ -1,7 +1,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+
+#include <SFML/Window/Event.hpp>
 
 #include <cstdlib>
 
@@ -40,10 +43,10 @@ int main()
     while (window.isOpen())
     {
         // Handle events
-        while (const auto event = window.pollEvent())
+        while (const std::optional event = window.pollEvent())
         {
             // Window closed: exit
-            if (event.is<sf::Event::Closed>())
+            if (event->is<sf::Event::Closed>())
             {
                 window.close();
                 break;

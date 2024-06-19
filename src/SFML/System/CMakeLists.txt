@@ -35,6 +35,9 @@ set(SRC
     ${SRCROOT}/MemoryInputStream.cpp
     ${INCROOT}/MemoryInputStream.hpp
     ${INCROOT}/SuspendAwareClock.hpp
+    ${INCROOT}/PassKey.hpp
+    ${SRCROOT}/LifetimeTracking.cpp
+    ${INCROOT}/LifetimeTracking.hpp
 )
 source_group("" FILES ${SRC})
 

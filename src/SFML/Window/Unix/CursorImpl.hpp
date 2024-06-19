@@ -34,6 +34,8 @@
 
 #include <X11/Xlib.h>
 
+#include <memory>
+
 namespace sf::priv
 {
 ////////////////////////////////////////////////////////////

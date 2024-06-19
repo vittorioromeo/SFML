@@ -22,6 +22,7 @@ set(SRC
     ${SRCROOT}/Image.cpp
     ${INCROOT}/Image.hpp
     ${INCROOT}/PrimitiveType.hpp
+    ${SRCROOT}/Rect.cpp
     ${INCROOT}/Rect.hpp
     ${INCROOT}/Rect.inl
     ${SRCROOT}/RenderStates.cpp

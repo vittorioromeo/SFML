@@ -29,7 +29,7 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Keyboard.hpp> // sf::Keyboard::Key
 
-#include <X11/X.h> // KeySym
+#include <X11/X.h>                  // KeySym
 
 namespace sf::priv
 {
