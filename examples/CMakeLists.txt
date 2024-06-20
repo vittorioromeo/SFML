@@ -27,6 +27,7 @@ if(SFML_BUILD_GRAPHICS)
         add_subdirectory(shader)
         add_subdirectory(island)
         add_subdirectory(vulkan)
+        add_subdirectory(text_benchmark)
     endif()
 
     if(SFML_OS_WINDOWS)
