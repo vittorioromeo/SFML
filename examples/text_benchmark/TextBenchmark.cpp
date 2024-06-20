@@ -19,6 +19,6 @@ int main()
         text.setOutlineThickness(5 + (i % 2));
         renderTexture.draw(text);
     }
-    
+
     renderTexture.display();
 }
