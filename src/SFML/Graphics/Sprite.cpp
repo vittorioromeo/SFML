@@ -25,9 +25,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Texture.hpp>
 
 #include <cmath>
 
@@ -35,27 +33,9 @@
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-Sprite::Sprite(const Texture& texture) : Sprite(texture, IntRect({0, 0}, Vector2i(texture.getSize())))
-{
-}
-
-
-////////////////////////////////////////////////////////////
-Sprite::Sprite(const Texture& texture, const IntRect& rectangle) : m_texture(&texture), m_textureRect(rectangle)
+Sprite::Sprite(const IntRect& rectangle) : m_textureRect(rectangle)
 {
     updateVertices();
-}
-
-
-////////////////////////////////////////////////////////////
-void Sprite::setTexture(const Texture& texture, bool resetRect)
-{
-    // Recompute the texture area if requested
-    if (resetRect)
-        setTextureRect(IntRect({0, 0}, Vector2i(texture.getSize())));
-
-    // Assign the new texture
-    m_texture = &texture;
 }
 
 
@@ -79,13 +59,6 @@ void Sprite::setColor(const Color& color)
 
 
 ////////////////////////////////////////////////////////////
-const Texture& Sprite::getTexture() const
-{
-    return *m_texture;
-}
-
-
-////////////////////////////////////////////////////////////
 const IntRect& Sprite::getTextureRect() const
 {
     return m_textureRect;
@@ -102,7 +75,7 @@ const Color& Sprite::getColor() const
 ////////////////////////////////////////////////////////////
 FloatRect Sprite::getLocalBounds() const
 {
-    // Last vertex posiion is equal to texture rect size absolute value
+    // Last vertex position is equal to texture rect size absolute value
     return {{0.f, 0.f}, m_vertices[3].position};
 }
 
@@ -111,17 +84,6 @@ FloatRect Sprite::getLocalBounds() const
 FloatRect Sprite::getGlobalBounds() const
 {
     return getTransform().transformRect(getLocalBounds());
-}
-
-
-////////////////////////////////////////////////////////////
-void Sprite::draw(RenderTarget& target, RenderStates states) const
-{
-    states.transform *= getTransform();
-    states.texture        = m_texture;
-    states.coordinateType = CoordinateType::Pixels;
-
-    target.draw(m_vertices.data(), m_vertices.size(), PrimitiveType::TriangleStrip, states);
 }
 
 

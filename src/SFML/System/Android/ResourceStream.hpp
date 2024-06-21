@@ -30,6 +30,7 @@
 #include <SFML/System/Export.hpp>
 
 #include <SFML/System/InputStream.hpp>
+#include <SFML/System/UniquePtr.hpp>
 
 #include <android/asset_manager.h>
 
@@ -103,7 +104,7 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::unique_ptr<AAsset, AAssetDeleter> m_file; ///< The asset file to read
+    UniquePtr<AAsset, AAssetDeleter> m_file; ///< The asset file to read
 };
 
 } // namespace sf::priv

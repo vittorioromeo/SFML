@@ -6,9 +6,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <LoadIntoMemory.hpp>
 #include <SystemUtil.hpp>
 #include <array>
-#include <fstream>
 #include <type_traits>
 
 TEST_CASE("[Audio] sf::InputSoundFile")

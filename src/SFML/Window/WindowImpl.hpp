@@ -40,12 +40,13 @@
 #include <SFML/Window/WindowEnums.hpp>
 #include <SFML/Window/WindowHandle.hpp>
 
+#include <SFML/System/UniquePtr.hpp>
+
 #include <SFML/System/EnumArray.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Vector3.hpp>
 
 #include <array>
-#include <memory>
 #include <optional>
 #include <queue>
 
@@ -78,11 +79,11 @@ public:
     /// \return Pointer to the created window
     ///
     ////////////////////////////////////////////////////////////
-    static std::unique_ptr<WindowImpl> create(VideoMode              mode,
-                                              const String&          title,
-                                              std::uint32_t          style,
-                                              State                  state,
-                                              const ContextSettings& settings);
+    static priv::UniquePtr<WindowImpl> create(VideoMode              mode,
+                                                  const String&          title,
+                                                  std::uint32_t          style,
+                                                  State                  state,
+                                                  const ContextSettings& settings);
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new window depending on to the current OS
@@ -92,7 +93,7 @@ public:
     /// \return Pointer to the created window
     ///
     ////////////////////////////////////////////////////////////
-    static std::unique_ptr<WindowImpl> create(WindowHandle handle);
+    static priv::UniquePtr<WindowImpl> create(WindowHandle handle);
 
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
@@ -129,10 +130,10 @@ public:
     ///
     /// \param timeout Maximum time to wait (`Time::Zero` for infinite)
     ///
-    /// \return The event on success, `Event::Empty` otherwise
+    /// \return The event on success, `std::nullopt` otherwise
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Event waitEvent(Time timeout);
+    [[nodiscard]] std::optional<Event> waitEvent(Time timeout);
 
     ////////////////////////////////////////////////////////////
     /// \brief Return the next window event, if available
@@ -140,10 +141,10 @@ public:
     /// If there's no event available, this function calls the
     /// window's internal event processing function.
     ///
-    /// \return The event if available, `Event::Empty` otherwise
+    /// \return The event if available, `std::nullopt` otherwise
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Event pollEvent();
+    [[nodiscard]] std::optional<Event> pollEvent();
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the OS-specific handle of the window
@@ -334,10 +335,10 @@ private:
     struct JoystickStatesImpl;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Pop the first event of the queue if available, otherwise an empty event
+    /// \return First event of the queue if available, `std::nullopt` otherwise
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Event popEvent();
+    [[nodiscard]] std::optional<Event> popEvent();
 
     ////////////////////////////////////////////////////////////
     /// \brief Read the joysticks state and generate the appropriate events
@@ -361,7 +362,7 @@ private:
     // Member data
     ////////////////////////////////////////////////////////////
     std::queue<Event>                                m_events;             //!< Queue of available events
-    std::unique_ptr<JoystickStatesImpl>              m_joystickStatesImpl; //!< Previous state of the joysticks (PImpl)
+    priv::UniquePtr<JoystickStatesImpl>          m_joystickStatesImpl; //!< Previous state of the joysticks (PImpl)
     EnumArray<Sensor::Type, Vector3f, Sensor::Count> m_sensorValue;        //!< Previous value of the sensors
     float m_joystickThreshold{0.1f}; //!< Joystick threshold (minimum motion for "move" event to be generated)
     std::array<EnumArray<Joystick::Axis, float, Joystick::AxisCount>, Joystick::Count>

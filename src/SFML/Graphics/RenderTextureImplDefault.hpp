@@ -31,9 +31,8 @@
 
 #include <SFML/Window/GlResource.hpp>
 
+#include <SFML/System/UniquePtr.hpp>
 #include <SFML/System/Vector2.hpp>
-
-#include <memory>
 
 
 namespace sf
@@ -116,7 +115,7 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::unique_ptr<Context> m_context; //!< P-Buffer based context
+    priv::UniquePtr<Context> m_context; //!< P-Buffer based context
     Vector2u                 m_size;    //!< Width and height of the P-Buffer
 };
 

@@ -30,13 +30,13 @@
 #include <SFML/Window/GlContext.hpp>
 
 #include <SFML/System/Err.hpp>
+#include <SFML/System/UniquePtr.hpp>
 
 #include <glad/gl.h>
 
 #include <algorithm>
 #include <atomic>
 #include <iomanip>
-#include <memory>
 #include <mutex>
 #include <optional>
 #include <ostream>
@@ -553,14 +553,14 @@ void GlContext::releaseTransientContext()
 
 
 ////////////////////////////////////////////////////////////
-std::unique_ptr<GlContext> GlContext::create()
+priv::UniquePtr<GlContext> GlContext::create()
 {
     // Make sure that there's an active context (context creation may need extensions, and thus a valid context)
     const auto sharedContext = SharedContext::get();
 
     const std::lock_guard lock(sharedContext->mutex);
 
-    std::unique_ptr<GlContext> context;
+    priv::UniquePtr<GlContext> context;
 
     // We don't use acquireTransientContext here since we have
     // to ensure we have exclusive access to the shared context
@@ -568,7 +568,7 @@ std::unique_ptr<GlContext> GlContext::create()
     sharedContext->context->setActive(true);
 
     // Create the context
-    context = std::make_unique<ContextType>(&sharedContext->context.value());
+    context = priv::makeUnique<ContextType>(&sharedContext->context.value());
 
     sharedContext->context->setActive(false);
 
@@ -579,7 +579,7 @@ std::unique_ptr<GlContext> GlContext::create()
 
 
 ////////////////////////////////////////////////////////////
-std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, const WindowImpl& owner, unsigned int bitsPerPixel)
+priv::UniquePtr<GlContext> GlContext::create(const ContextSettings& settings, const WindowImpl& owner, unsigned int bitsPerPixel)
 {
     // Make sure that there's an active context (context creation may need extensions, and thus a valid context)
     const auto sharedContext = SharedContext::get();
@@ -608,7 +608,7 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, co
         sharedContext->loadExtensions();
     }
 
-    std::unique_ptr<GlContext> context;
+    priv::UniquePtr<GlContext> context;
 
     // We don't use acquireTransientContext here since we have
     // to ensure we have exclusive access to the shared context
@@ -616,7 +616,7 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, co
     sharedContext->context->setActive(true);
 
     // Create the context
-    context = std::make_unique<ContextType>(&sharedContext->context.value(), settings, owner, bitsPerPixel);
+    context = priv::makeUnique<ContextType>(&sharedContext->context.value(), settings, owner, bitsPerPixel);
 
     sharedContext->context->setActive(false);
 
@@ -628,7 +628,7 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, co
 
 
 ////////////////////////////////////////////////////////////
-std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, const Vector2u& size)
+priv::UniquePtr<GlContext> GlContext::create(const ContextSettings& settings, const Vector2u& size)
 {
     // Make sure that there's an active context (context creation may need extensions, and thus a valid context)
     const auto sharedContext = SharedContext::get();
@@ -663,7 +663,7 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, co
     sharedContext->context->setActive(true);
 
     // Create the context
-    auto context = std::make_unique<ContextType>(&sharedContext->context.value(), settings, size);
+    auto context = priv::makeUnique<ContextType>(&sharedContext->context.value(), settings, size);
 
     sharedContext->context->setActive(false);
 
@@ -807,7 +807,7 @@ bool GlContext::setActive(bool active)
 
 
 ////////////////////////////////////////////////////////////
-GlContext::GlContext() : m_impl(std::make_unique<Impl>())
+GlContext::GlContext() : m_impl(priv::makeUnique<Impl>())
 {
     // Nothing to do
 }

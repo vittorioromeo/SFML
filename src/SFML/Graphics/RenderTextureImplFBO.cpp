@@ -33,6 +33,7 @@
 #include <SFML/Window/ContextSettings.hpp>
 
 #include <SFML/System/Err.hpp>
+#include <SFML/System/UniquePtr.hpp>
 
 #include <ostream>
 #include <utility>
@@ -84,20 +85,12 @@ RenderTextureImplFBO::~RenderTextureImplFBO()
 
     // Unregister FBOs with the contexts if they haven't already been destroyed
     for (auto& entry : m_frameBuffers)
-    {
-        auto frameBuffer = entry.second.lock();
-
-        if (frameBuffer)
+        if (auto frameBuffer = entry.second.lock())
             unregisterUnsharedGlObject(std::move(frameBuffer));
-    }
 
     for (auto& entry : m_multisampleFrameBuffers)
-    {
-        auto frameBuffer = entry.second.lock();
-
-        if (frameBuffer)
+        if (auto frameBuffer = entry.second.lock())
             unregisterUnsharedGlObject(std::move(frameBuffer));
-    }
 }
 
 
@@ -526,7 +519,7 @@ bool RenderTextureImplFBO::activate(bool active)
     if (!contextId)
     {
         if (!m_context)
-            m_context = std::make_unique<Context>();
+            m_context = priv::makeUnique<Context>();
 
         if (!m_context->setActive(true))
         {

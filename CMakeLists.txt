@@ -46,6 +46,12 @@ if(SFML_OS_ANDROID)
     set(BUILD_SHARED_LIBS TRUE)
 endif()
 
+# add an option to enable lifetime tracking
+sfml_set_option(SFML_ENABLE_LIFETIME_TRACKING $<CONFIG:Debug> BOOL "TRUE to enable lifetime tracking, FALSE to disable it")
+if(SFML_ENABLE_LIFETIME_TRACKING)
+    add_definitions(-DSFML_ENABLE_LIFETIME_TRACKING)
+endif()
+
 # add options to select which modules to build
 sfml_set_option(SFML_BUILD_WINDOW TRUE BOOL "TRUE to build SFML's Window module. This setting is ignored, if the graphics module is built.")
 sfml_set_option(SFML_BUILD_GRAPHICS TRUE BOOL "TRUE to build SFML's Graphics module.")
@@ -137,8 +143,6 @@ if(SFML_USE_SYSTEM_DEPS)
     endforeach()
 
     list(REMOVE_DUPLICATES CMAKE_IGNORE_PATH)
-elseif(SFML_COMPILER_GCC AND GCC_COMPILER_VERSION MATCHES "ucrt")
-    message(FATAL_ERROR "The pre-compiled SFML dependencies for MinGW are not compatible with the UCRT. Either switch to the MSVCRT or build the dependencies yourself.")
 endif()
 
 if(SFML_COMPILER_MSVC)
@@ -210,6 +214,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # enable project folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
+
+if(SFML_BUILD_TEST_SUITE)
+    # this definition is used in the PCH file to speed up compilation of tests
+    # `add_definitions` must be called before `add_subdirectory`
+    add_definitions(-DSFML_BUILD_TEST_SUITE)
+    add_definitions(-D_GLIBCXX_ASSERTIONS=1) # TODO
+    add_definitions(-D_FORTIFY_SOURCE=2) # TODO
+endif()
 
 # add the subdirectories
 add_subdirectory(src/SFML)
@@ -297,8 +309,8 @@ else()
     # create SFML.framework
     add_library(SFML ${SFML_SOURCES})
 
-    # enable C++17 support
-    target_compile_features(SFML PUBLIC cxx_std_17)
+    # enable C++20 support
+    target_compile_features(SFML PUBLIC cxx_std_20)
 
     # set the target flags to use the appropriate C++ standard library
     sfml_set_stdlib(SFML)

@@ -1,7 +1,15 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Texture.hpp>
+
+#include <SFML/System/Angle.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
+#include <SFML/System/Vector2.hpp>
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -113,8 +121,8 @@ int main()
     // Load some textures to display
     const auto texture1 = sf::Texture::loadFromFile("resources/image1.jpg").value();
     const auto texture2 = sf::Texture::loadFromFile("resources/image2.jpg").value();
-    sf::Sprite sprite1(texture1);
-    sf::Sprite sprite2(texture2);
+    sf::Sprite sprite1(texture1.getRect());
+    sf::Sprite sprite2(texture2.getRect());
     sprite1.setOrigin(sf::Vector2f(texture1.getSize()) / 2.f);
     sprite1.setPosition(sprite1.getOrigin());
 
@@ -142,11 +150,11 @@ int main()
 
             // Draw sprite 1 on view 1
             sprite1.setRotation(sf::degrees(time * 100));
-            sfmlView1.draw(sprite1);
+            sfmlView1.draw(sprite1, texture1);
 
             // Draw sprite 2 on view 2
             sprite2.setPosition({std::cos(time) * 100.f, 0.f});
-            sfmlView2.draw(sprite2);
+            sfmlView2.draw(sprite2, texture2);
 
             // Display each view on screen
             sfmlView1.display();

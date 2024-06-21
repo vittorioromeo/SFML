@@ -237,11 +237,14 @@ private:
 /// while (window.isOpen())
 /// {
 ///    // Event processing
-///    while (const auto event = window.pollEvent())
+///    while (const std::optional event = window.pollEvent())
 ///    {
 ///        // Request for closing the window
-///        if (event.is<sf::Event::Closed>())
+///        if (event->is<sf::Event::Closed>())
+///        {
 ///            window.close();
+///            break;
+///        }
 ///    }
 ///
 ///    // Clear the whole window before rendering a new frame
@@ -267,7 +270,7 @@ private:
 ///
 /// // Create a sprite and a text to display
 /// const auto texture = sf::Texture::loadFromFile("circle.png").value();
-/// sf::Sprite sprite(texture);
+/// sf::Sprite sprite(texture.getRect());
 /// const auto font = sf::Font::loadFromFile("arial.ttf").value();
 /// sf::Text text(font);
 /// ...
@@ -284,7 +287,7 @@ private:
 ///
 ///     // Draw a background sprite
 ///     window.pushGLStates();
-///     window.draw(sprite);
+///     window.draw(sprite, texture);
 ///     window.popGLStates();
 ///
 ///     // Draw a 3D object using OpenGL

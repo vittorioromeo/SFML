@@ -27,7 +27,9 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/System/Utils.hpp>
 
+#include <filesystem>
 #include <sstream>
+#include <string>
 
 #include <cctype>
 

@@ -29,12 +29,11 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Audio/Listener.hpp>
 
-#include <SFML/System/Vector3.hpp>
+#include <SFML/System/UniquePtr.hpp>
 
 #include <miniaudio.h>
 
 #include <list>
-#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
@@ -349,15 +348,11 @@ private:
     ////////////////////////////////////////////////////////////
     static AudioDevice*& getInstance();
 
-    struct ListenerProperties
-    {
-        float          volume{100.f};
-        Vector3f       position{0, 0, 0};
-        Vector3f       direction{0, 0, -1};
-        Vector3f       velocity{0, 0, 0};
-        Listener::Cone cone{degrees(360.f), degrees(360.f), 1};
-        Vector3f       upVector{0, 1, 0};
-    };
+    ////////////////////////////////////////////////////////////
+    /// \brief Structure holding listener properties
+    ///
+    ////////////////////////////////////////////////////////////
+    struct ListenerProperties;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the listener properties
@@ -370,12 +365,8 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::optional<ma_log>     m_log;            //!< The miniaudio log
-    std::optional<ma_context> m_context;        //!< The miniaudio context
-    std::optional<ma_device>  m_playbackDevice; //!< The miniaudio playback device
-    std::optional<ma_engine>  m_engine;         //!< The miniaudio engine (used for effects and spatialisation)
-    ResourceEntryList         m_resources;      //!< Registered resources
-    std::mutex                m_resourcesMutex; //!< The mutex guarding the registered resources
+    struct Impl;
+    const priv::UniquePtr<Impl> m_impl; //!< Implementation details
 };
 
 } // namespace sf::priv

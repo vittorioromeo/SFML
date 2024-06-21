@@ -5,10 +5,13 @@ include(${CMAKE_CURRENT_LIST_DIR}/CompilerWarnings.cmake)
 
 # helper function to tweak visibility of public symbols
 function(set_public_symbols_hidden target)
-    # ensure public symbols are hidden by default (exported ones are explicitly marked)
-    set_target_properties(${target} PROPERTIES
-                          CXX_VISIBILITY_PRESET hidden
-                          VISIBILITY_INLINES_HIDDEN YES)
+    # this breaks explicit template instantiations, see GCC bug #109387
+    if (NOT MINGW)
+        # ensure public symbols are hidden by default (exported ones are explicitly marked)
+        set_target_properties(${target} PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN YES)
+    endif()
 endfunction()
 
 # This little macro lets you set any Xcode specific property
@@ -73,8 +76,8 @@ macro(sfml_add_library module)
     endif()
     add_library(SFML::${module} ALIAS ${target})
 
-    # enable C++17 support
-    target_compile_features(${target} PUBLIC cxx_std_17)
+    # enable C++20 support
+    target_compile_features(${target} PUBLIC cxx_std_20)
 
     # Add required flags for GCC if coverage reporting is enabled
     if(SFML_ENABLE_COVERAGE AND (SFML_COMPILER_GCC OR SFML_COMPILER_CLANG))

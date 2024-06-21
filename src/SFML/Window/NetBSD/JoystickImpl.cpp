@@ -177,12 +177,12 @@ void JoystickImpl::initialize()
     updatePluggedList();
 
     // Map of hat values
-    hatValueMap[0] = std::make_pair(0, 0); // center
+    hatValueMap[0] = std::make_pair(0, 0);       // center
 
-    hatValueMap[1] = std::make_pair(0, -100); // top
-    hatValueMap[3] = std::make_pair(100, 0);  // right
-    hatValueMap[5] = std::make_pair(0, 100);  // bottom
-    hatValueMap[7] = std::make_pair(-100, 0); // left
+    hatValueMap[1] = std::make_pair(0, -100);    // top
+    hatValueMap[3] = std::make_pair(100, 0);     // right
+    hatValueMap[5] = std::make_pair(0, 100);     // bottom
+    hatValueMap[7] = std::make_pair(-100, 0);    // left
 
     hatValueMap[2] = std::make_pair(100, -100);  // top-right
     hatValueMap[4] = std::make_pair(100, 100);   // bottom-right

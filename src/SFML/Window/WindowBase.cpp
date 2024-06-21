@@ -43,6 +43,7 @@
 #include <vector>
 
 #include <cassert>
+#include <cstdlib>
 
 
 namespace
@@ -71,7 +72,7 @@ WindowBase::WindowBase(VideoMode mode, const String& title, std::uint32_t style,
 ////////////////////////////////////////////////////////////
 WindowBase::WindowBase(VideoMode mode, const String& title, State state)
 {
-    WindowBase::create(mode, title, sf::Style::Default, state);
+    WindowBase::create(mode, title, Style::Default, state);
 }
 
 
@@ -146,22 +147,40 @@ bool WindowBase::isOpen() const
 
 
 ////////////////////////////////////////////////////////////
-Event WindowBase::pollEvent()
+template <typename FGet, typename FFilter>
+static std::optional<Event> pollOrWaitEventImpl(priv::WindowImpl* impl, FGet&& fGet, FFilter&& fFilter)
 {
-    Event event;
-    if (m_impl && (event = m_impl->pollEvent()))
-        filterEvent(event);
+    std::optional<Event> event; // Use a single local variable for NRVO
+
+    if (impl == nullptr)
+        return event; // Empty optional
+
+    event = fGet();
+
+    if (event.has_value())
+        fFilter(*event);
+
     return event;
 }
 
 
 ////////////////////////////////////////////////////////////
-Event WindowBase::waitEvent(Time timeout)
+std::optional<Event> WindowBase::pollEvent()
 {
-    Event event;
-    if (m_impl && (event = m_impl->waitEvent(timeout)))
-        filterEvent(event);
-    return event;
+    return pollOrWaitEventImpl(
+        m_impl.get(),
+        [this] { return m_impl->pollEvent(); },
+        [this](sf::Event& e) { filterEvent(e); });
+}
+
+
+////////////////////////////////////////////////////////////
+std::optional<Event> WindowBase::waitEvent(Time timeout)
+{
+    return pollOrWaitEventImpl(
+        m_impl.get(),
+        [this, &timeout] { return m_impl->waitEvent(timeout); },
+        [this](sf::Event& e) { filterEvent(e); });
 }
 
 

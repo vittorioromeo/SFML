@@ -29,8 +29,9 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Audio/SoundFileReader.hpp>
 
+#include <SFML/System/UniquePtr.hpp>
+
 #include <FLAC/stream_decoder.h>
-#include <memory>
 #include <optional>
 #include <vector>
 
@@ -119,8 +120,8 @@ private:
     {
         void operator()(FLAC__StreamDecoder* decoder) const;
     };
-    std::unique_ptr<FLAC__StreamDecoder, FlacStreamDecoderDeleter> m_decoder; //!< FLAC decoder
-    ClientData m_clientData; //!< Structure passed to the decoder callbacks
+    UniquePtr<FLAC__StreamDecoder, FlacStreamDecoderDeleter> m_decoder; //!< FLAC decoder
+    ClientData m_clientData;                                            //!< Structure passed to the decoder callbacks
 };
 
 } // namespace sf::priv

@@ -12,8 +12,8 @@ FetchContent_Declare(Catch2
 FetchContent_MakeAvailable(Catch2)
 include(Catch)
 
-# Build Catch2 in C++17 mode to enable C++17 features
-target_compile_features(Catch2 PRIVATE cxx_std_17)
+# Build Catch2 in C++20 mode to enable C++20 features
+target_compile_features(Catch2 PRIVATE cxx_std_20)
 
 # Ensure that Catch2 sources and headers are not analyzed by any tools
 set_target_properties(Catch2 PROPERTIES COMPILE_OPTIONS "" EXPORT_COMPILE_COMMANDS OFF)
@@ -21,9 +21,26 @@ set_target_properties(Catch2WithMain PROPERTIES EXPORT_COMPILE_COMMANDS OFF)
 get_target_property(CATCH2_INCLUDE_DIRS Catch2 INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Catch2 SYSTEM INTERFACE ${CATCH2_INCLUDE_DIRS})
 
+# enable precompiled headers
+if (SFML_ENABLE_PCH)
+    message(VERBOSE "enabling PCH for Catch2")
+    target_precompile_headers(Catch2 PRIVATE ${PROJECT_SOURCE_DIR}/src/SFML/PCH.hpp)
+
+    # necessary to find `WindowsHeader.hpp` on Windows
+    target_include_directories(Catch2 PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
+    # necessary to find SFML headers from Catch2 through the PCH header
+    target_include_directories(Catch2 PRIVATE ${PROJECT_SOURCE_DIR}/include)
+
+    # necessary to find Catch2 headers from SFML through the PCH header
+    target_include_directories(sfml-system PRIVATE ${CATCH2_INCLUDE_DIRS})
+endif()
+
 add_library(sfml-test-main STATIC
     TestUtilities/SystemUtil.hpp
     TestUtilities/SystemUtil.cpp
+    TestUtilities/LoadIntoMemory.hpp
+    TestUtilities/LoadIntoMemory.cpp
     TestUtilities/WindowUtil.hpp
     TestUtilities/WindowUtil.cpp
     TestUtilities/GraphicsUtil.hpp
