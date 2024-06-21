@@ -94,7 +94,7 @@ find_path(
 find_library(FREETYPE_LIBRARY
   NAMES
     freetype
-    libfreetype
+    libfreetypex
     freetype219
   HINTS
     ENV FREETYPE_DIR
@@ -141,6 +141,12 @@ if(FREETYPE_INCLUDE_DIR_freetype2 AND FREETYPE_H)
       endif()
     endforeach()
   endforeach()
+endif()
+
+if (MINGW AND NOT SFML_USE_SYSTEM_DEPS AND SFML_COMPILER_GCC AND "${GCC_COMPILER_VERSION}" MATCHES "ucrt")
+  string(REPLACE "freetype" "freetype-ucrt" FREETYPE_LIBRARY ${FREETYPE_LIBRARY})
+  string(REPLACE "freetype" "freetype-ucrt" FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
+  message(STATUS "FREETYPE REPLACEMENT DONE")
 endif()
 
 include(FindPackageHandleStandardArgs)
