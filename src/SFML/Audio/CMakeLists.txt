@@ -89,10 +89,6 @@ target_compile_definitions(sfml-audio PRIVATE OV_EXCLUDE_STATIC_CALLBACKS FLAC__
 target_compile_definitions(sfml-audio PRIVATE MA_NO_MP3 MA_NO_FLAC MA_NO_ENCODING MA_NO_RESOURCE_MANAGER MA_NO_GENERATION)
 
 # setup dependencies
-if (MINGW AND NOT SFML_USE_SYSTEM_DEPS AND SFML_UCRT)
-    target_link_libraries(FLAC::FLAC INTERFACE ws2_32)
-endif()
-
 target_link_libraries(sfml-audio
                       PUBLIC SFML::System
                       PRIVATE Vorbis::vorbis FLAC::FLAC)
