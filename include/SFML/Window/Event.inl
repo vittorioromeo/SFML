@@ -39,32 +39,32 @@
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-template <typename T>
-Event::Event(const T& t)
+template <typename EventSubtype>
+Event::Event(const EventSubtype& eventSubtype)
 {
-    static_assert(isEventType<T>, "T must be a subtype of sf::Event");
-    if constexpr (isEventType<T>)
-        m_data = t;
+    static_assert(isEventSubtype<EventSubtype>, "T must be a subtype of sf::Event");
+    if constexpr (isEventSubtype<EventSubtype>)
+        m_data = eventSubtype;
 }
 
 
 ////////////////////////////////////////////////////////////
-template <typename T>
+template <typename EventSubtype>
 bool Event::is() const
 {
-    static_assert(isEventType<T>, "T must be a subtype of sf::Event");
-    if constexpr (isEventType<T>)
-        return std::holds_alternative<T>(m_data);
+    static_assert(isEventSubtype<EventSubtype>, "T must be a subtype of sf::Event");
+    if constexpr (isEventSubtype<EventSubtype>)
+        return std::holds_alternative<EventSubtype>(m_data);
 }
 
 
 ////////////////////////////////////////////////////////////
-template <typename T>
-const T* Event::getIf() const
+template <typename EventSubtype>
+const EventSubtype* Event::getIf() const
 {
-    static_assert(isEventType<T>, "T must be a subtype of sf::Event");
-    if constexpr (isEventType<T>)
-        return std::get_if<T>(&m_data);
+    static_assert(isEventSubtype<EventSubtype>, "T must be a subtype of sf::Event");
+    if constexpr (isEventSubtype<EventSubtype>)
+        return std::get_if<EventSubtype>(&m_data);
 }
 
 } // namespace sf
