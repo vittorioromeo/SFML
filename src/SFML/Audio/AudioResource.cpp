@@ -34,9 +34,21 @@
 
 namespace
 {
-std::mutex                           deviceMutex;
-std::optional<sf::priv::AudioDevice> optDevice;
-unsigned int                         deviceRC{};
+////////////////////////////////////////////////////////////
+struct DeviceState
+{
+    std::mutex                           mutex;
+    std::optional<sf::priv::AudioDevice> device;
+    unsigned int                         referenceCounter{};
+};
+
+////////////////////////////////////////////////////////////
+DeviceState& getDeviceState()
+{
+    static DeviceState deviceState;
+    return deviceState;
+}
+
 } // namespace
 
 namespace sf
@@ -44,19 +56,21 @@ namespace sf
 ////////////////////////////////////////////////////////////
 AudioResource::AudioResource()
 {
-    const std::lock_guard guard{deviceMutex};
+    auto& [mutex, device, referenceCounter] = getDeviceState();
+    const std::lock_guard guard{mutex};
 
-    if (deviceRC++ == 0u)
-        optDevice.emplace();
+    if (referenceCounter++ == 0u)
+        device.emplace();
 }
 
 ////////////////////////////////////////////////////////////
 AudioResource::~AudioResource()
 {
-    const std::lock_guard guard{deviceMutex};
+    auto& [mutex, device, referenceCounter] = getDeviceState();
+    const std::lock_guard guard{mutex};
 
-    if (--deviceRC == 0u)
-        optDevice.reset();
+    if (--referenceCounter == 0u)
+        device.reset();
 }
 
 ////////////////////////////////////////////////////////////
