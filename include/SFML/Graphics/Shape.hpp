@@ -31,14 +31,15 @@
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/PrimitiveType.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/Transformable.hpp>
-#include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 
 #include <SFML/System/LifetimeTracking.hpp>
 #include <SFML/System/Vector2.hpp>
+
+#include <vector>
 
 #include <cstddef>
 
@@ -311,15 +312,15 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    const Texture* m_texture{};                  //!< Texture of the shape
-    IntRect        m_textureRect;                //!< Rectangle defining the area of the source texture to display
-    Color          m_fillColor{Color::White};    //!< Fill color
-    Color          m_outlineColor{Color::White}; //!< Outline color
-    float          m_outlineThickness{};         //!< Thickness of the shape's outline
-    VertexArray    m_vertices{PrimitiveType::TriangleFan};          //!< Vertex array containing the fill geometry
-    VertexArray    m_outlineVertices{PrimitiveType::TriangleStrip}; //!< Vertex array containing the outline geometry
-    FloatRect      m_insideBounds;                                  //!< Bounding rectangle of the inside (fill)
-    FloatRect      m_bounds; //!< Bounding rectangle of the whole shape (outline + fill)
+    const Texture*      m_texture{};                  //!< Texture of the shape
+    IntRect             m_textureRect;                //!< Rectangle defining the area of the source texture to display
+    Color               m_fillColor{Color::White};    //!< Fill color
+    Color               m_outlineColor{Color::White}; //!< Outline color
+    float               m_outlineThickness{};         //!< Thickness of the shape's outline
+    std::vector<Vertex> m_vertices;                   //!< Vertex array containing the fill geometry
+    std::vector<Vertex> m_outlineVertices;            //!< Vertex array containing the outline geometry
+    FloatRect           m_insideBounds;               //!< Bounding rectangle of the inside (fill)
+    FloatRect           m_bounds;                     //!< Bounding rectangle of the whole shape (outline + fill)
 
     ////////////////////////////////////////////////////////////
     // Lifetime tracking

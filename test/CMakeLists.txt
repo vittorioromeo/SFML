@@ -131,7 +131,6 @@ set(GRAPHICS_SRC
     Graphics/Transform.test.cpp
     Graphics/Transformable.test.cpp
     Graphics/Vertex.test.cpp
-    Graphics/VertexArray.test.cpp
     Graphics/VertexBuffer.test.cpp
     Graphics/View.test.cpp
 )
