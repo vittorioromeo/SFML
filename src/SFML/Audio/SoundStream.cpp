@@ -45,6 +45,10 @@ namespace sf
 {
 struct SoundStream::Impl : priv::MiniaudioUtils::SoundBase
 {
+    // Memory stability required for self-referential owner pointer.
+    Impl(const Impl&) = delete;
+    Impl(Impl&&)      = delete;
+
     Impl(SoundStream* ownerPtr) :
     SoundBase(vtable, [](void* ptr) { static_cast<Impl*>(ptr)->initialize(); }),
     owner(ownerPtr)
@@ -211,20 +215,20 @@ struct SoundStream::Impl : priv::MiniaudioUtils::SoundBase
     // Member data
     ////////////////////////////////////////////////////////////
     static constexpr ma_data_source_vtable vtable{read, seek, getFormat, getCursor, getLength, setLooping, /* flags */ 0};
-    SoundStream*                           owner;        //!< Owning SoundStream object
-    std::vector<std::int16_t>              sampleBuffer; //!< Our temporary sample buffer
-    std::size_t               sampleBufferCursor{};      //!< The current read position in the temporary sample buffer
-    std::uint64_t             samplesProcessed{};        //!< Number of samples processed since beginning of the stream
-    unsigned int              channelCount{};            //!< Number of channels (1 = mono, 2 = stereo, ...)
-    unsigned int              sampleRate{};              //!< Frequency (samples / second)
-    std::vector<SoundChannel> channelMap;                //!< The map of position in sample frame to sound channel
-    bool                      loop{};                    //!< Loop flag (true to loop, false to play once)
-    bool                      streaming{true};           //!< True if we are still streaming samples from the source
+    SoundStream*              owner;                //!< Owning SoundStream object
+    std::vector<std::int16_t> sampleBuffer;         //!< Our temporary sample buffer
+    std::size_t               sampleBufferCursor{}; //!< The current read position in the temporary sample buffer
+    std::uint64_t             samplesProcessed{};   //!< Number of samples processed since beginning of the stream
+    unsigned int              channelCount{};       //!< Number of channels (1 = mono, 2 = stereo, ...)
+    unsigned int              sampleRate{};         //!< Frequency (samples / second)
+    std::vector<SoundChannel> channelMap;           //!< The map of position in sample frame to sound channel
+    bool                      loop{};               //!< Loop flag (true to loop, false to play once)
+    bool                      streaming{true};      //!< True if we are still streaming samples from the source
 };
 
 
 ////////////////////////////////////////////////////////////
-SoundStream::SoundStream() : m_impl(std::make_unique<Impl>(this))
+SoundStream::SoundStream() : m_impl(priv::makeUnique<Impl>(this))
 {
 }
 

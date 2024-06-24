@@ -45,7 +45,7 @@
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-std::unique_ptr<SoundFileReader> SoundFileFactory::createReaderFromFilename(const std::filesystem::path& filename)
+priv::UniquePtr<SoundFileReader> SoundFileFactory::createReaderFromFilename(const std::filesystem::path& filename)
 {
     // Wrap the input file into a file stream
     auto stream = FileInputStream::open(filename);
@@ -75,7 +75,7 @@ std::unique_ptr<SoundFileReader> SoundFileFactory::createReaderFromFilename(cons
 
 
 ////////////////////////////////////////////////////////////
-std::unique_ptr<SoundFileReader> SoundFileFactory::createReaderFromMemory(const void* data, std::size_t sizeInBytes)
+priv::UniquePtr<SoundFileReader> SoundFileFactory::createReaderFromMemory(const void* data, std::size_t sizeInBytes)
 {
     // Wrap the memory file into a file stream
     MemoryInputStream stream(data, sizeInBytes);
@@ -100,7 +100,7 @@ std::unique_ptr<SoundFileReader> SoundFileFactory::createReaderFromMemory(const 
 
 
 ////////////////////////////////////////////////////////////
-std::unique_ptr<SoundFileReader> SoundFileFactory::createReaderFromStream(InputStream& stream)
+priv::UniquePtr<SoundFileReader> SoundFileFactory::createReaderFromStream(InputStream& stream)
 {
     // Test the stream for all the registered factories
     for (const auto& [fpCreate, fpCheck] : getReaderFactoryMap())
@@ -122,7 +122,7 @@ std::unique_ptr<SoundFileReader> SoundFileFactory::createReaderFromStream(InputS
 
 
 ////////////////////////////////////////////////////////////
-std::unique_ptr<SoundFileWriter> SoundFileFactory::createWriterFromFilename(const std::filesystem::path& filename)
+priv::UniquePtr<SoundFileWriter> SoundFileFactory::createWriterFromFilename(const std::filesystem::path& filename)
 {
     // Test the filename in all the registered factories
     for (const auto& [fpCreate, fpCheck] : getWriterFactoryMap())

@@ -6,6 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <AudioUtil.hpp>
+#include <LoadIntoMemory.hpp>
 #include <SystemUtil.hpp>
 #include <array>
 #include <type_traits>

@@ -308,13 +308,15 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
         XVisualInfo bestVisual = XVisualInfo();
         for (std::size_t i = 0; i < static_cast<std::size_t>(count); ++i)
         {
+            auto& visual = visuals.get()[i];
+
             // Filter by screen
-            if (visuals[i].screen != screen)
+            if (visual.screen != screen)
                 continue;
 
             // Check mandatory attributes
             int doubleBuffer = 0;
-            glXGetConfig(display, &visuals[i], GLX_DOUBLEBUFFER, &doubleBuffer);
+            glXGetConfig(display, &visual, GLX_DOUBLEBUFFER, &doubleBuffer);
             if (!doubleBuffer)
                 continue;
 
@@ -328,17 +330,17 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
             int multiSampling = 0;
             int samples       = 0;
             int sRgb          = 0;
-            glXGetConfig(display, &visuals[i], GLX_RED_SIZE, &red);
-            glXGetConfig(display, &visuals[i], GLX_GREEN_SIZE, &green);
-            glXGetConfig(display, &visuals[i], GLX_BLUE_SIZE, &blue);
-            glXGetConfig(display, &visuals[i], GLX_ALPHA_SIZE, &alpha);
-            glXGetConfig(display, &visuals[i], GLX_DEPTH_SIZE, &depth);
-            glXGetConfig(display, &visuals[i], GLX_STENCIL_SIZE, &stencil);
+            glXGetConfig(display, &visual, GLX_RED_SIZE, &red);
+            glXGetConfig(display, &visual, GLX_GREEN_SIZE, &green);
+            glXGetConfig(display, &visual, GLX_BLUE_SIZE, &blue);
+            glXGetConfig(display, &visual, GLX_ALPHA_SIZE, &alpha);
+            glXGetConfig(display, &visual, GLX_DEPTH_SIZE, &depth);
+            glXGetConfig(display, &visual, GLX_STENCIL_SIZE, &stencil);
 
             if (SF_GLAD_GLX_ARB_multisample)
             {
-                glXGetConfig(display, &visuals[i], GLX_SAMPLE_BUFFERS_ARB, &multiSampling);
-                glXGetConfig(display, &visuals[i], GLX_SAMPLES_ARB, &samples);
+                glXGetConfig(display, &visual, GLX_SAMPLE_BUFFERS_ARB, &multiSampling);
+                glXGetConfig(display, &visual, GLX_SAMPLES_ARB, &samples);
             }
             else
             {
@@ -348,7 +350,7 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
 
             if (SF_GLAD_GLX_EXT_framebuffer_sRGB || SF_GLAD_GLX_ARB_framebuffer_sRGB)
             {
-                glXGetConfig(display, &visuals[i], GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB, &sRgb);
+                glXGetConfig(display, &visual, GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB, &sRgb);
             }
             else
             {
@@ -373,7 +375,7 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
             if (score < bestScore)
             {
                 bestScore  = score;
-                bestVisual = visuals[i];
+                bestVisual = visual;
             }
         }
 
@@ -486,14 +488,14 @@ void GlxContext::createSurface(GlxContext* shared, const Vector2u& size, unsigne
 
             for (std::size_t i = 0; configs && (i < static_cast<std::size_t>(nbConfigs)); ++i)
             {
-                const auto visual = X11Ptr<XVisualInfo>(glXGetVisualFromFBConfig(m_display.get(), configs[i]));
+                const auto visual = X11Ptr<XVisualInfo>(glXGetVisualFromFBConfig(m_display.get(), configs.get()[i]));
 
                 if (!visual)
                     continue;
 
                 if (visual->visualid == visualInfo.visualid)
                 {
-                    config = &configs[i];
+                    config = &configs.get()[i];
                     break;
                 }
             }
@@ -626,14 +628,14 @@ void GlxContext::createContext(GlxContext* shared)
 
         for (std::size_t i = 0; configs && (i < static_cast<std::size_t>(nbConfigs)); ++i)
         {
-            const auto visual = X11Ptr<XVisualInfo>(glXGetVisualFromFBConfig(m_display.get(), configs[i]));
+            const auto visual = X11Ptr<XVisualInfo>(glXGetVisualFromFBConfig(m_display.get(), configs.get()[i]));
 
             if (!visual)
                 continue;
 
             if (visual->visualid == visualInfo->visualid)
             {
-                config = &configs[i];
+                config = &configs.get()[i];
                 break;
             }
         }

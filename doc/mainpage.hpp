@@ -22,7 +22,7 @@
 ///
 ///     // Load a sprite to display
 ///     const auto texture = sf::Texture::loadFromFile("cute_image.jpg").value();
-///     sf::Sprite sprite(texture);
+///     sf::Sprite sprite(texture.getRect());
 ///
 ///     // Create a graphical text to display
 ///     const auto font = sf::Font::loadFromFile("arial.ttf").value();
@@ -38,18 +38,21 @@
 ///     while (window.isOpen())
 ///     {
 ///         // Process events
-///         while (const auto event = window.pollEvent())
+///         while (const std::optional event = window.pollEvent())
 ///         {
 ///             // Close window: exit
-///             if (event.is<sf::Event::Closed>())
+///             if (event->is<sf::Event::Closed>())
+///             {
 ///                 window.close();
+///                 break;
+///             }
 ///         }
 ///
 ///         // Clear screen
 ///         window.clear();
 ///
 ///         // Draw the sprite
-///         window.draw(sprite);
+///         window.draw(sprite, texture);
 ///
 ///         // Draw the string
 ///         window.draw(text);

@@ -5,11 +5,7 @@
 
 #pragma once
 
-#include <filesystem>
 #include <iosfwd>
-#include <vector>
-
-#include <cstddef>
 
 // String conversions for Catch2
 namespace sf
@@ -62,5 +58,3 @@ std::ostream& operator<<(std::ostream& os, const Approx<T>& approx)
 {
     return os << approx.value;
 }
-
-[[nodiscard]] std::vector<std::byte> loadIntoMemory(const std::filesystem::path& path);

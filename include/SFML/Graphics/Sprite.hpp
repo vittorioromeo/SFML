@@ -29,9 +29,7 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Graphics/Export.hpp>
 
-#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 
@@ -40,75 +38,25 @@
 
 namespace sf
 {
-class Texture;
+class RenderTarget;
 
 ////////////////////////////////////////////////////////////
-/// \brief Drawable representation of a texture, with its
+/// \brief TODO representation of a texture, with its
 ///        own transformations, color, etc.
 ///
 ////////////////////////////////////////////////////////////
-class SFML_GRAPHICS_API Sprite : public Drawable, public Transformable
+class SFML_GRAPHICS_API Sprite : public Transformable
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief Construct the sprite from a source texture
+    /// \brief Construct the sprite from a sub-rectangle of an eventual source texture
     ///
-    /// \param texture Source texture
+    /// \param rectangle Sub-rectangle of the eventual texture (specified during drawing)
     ///
-    /// \see setTexture
-    ///
-    ////////////////////////////////////////////////////////////
-    explicit Sprite(const Texture& texture);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Disallow construction from a temporary texture
+    /// \see setTextureRect
     ///
     ////////////////////////////////////////////////////////////
-    explicit Sprite(Texture&& texture) = delete;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Construct the sprite from a sub-rectangle of a source texture
-    ///
-    /// \param texture   Source texture
-    /// \param rectangle Sub-rectangle of the texture to assign to the sprite
-    ///
-    /// \see setTexture, setTextureRect
-    ///
-    ////////////////////////////////////////////////////////////
-    Sprite(const Texture& texture, const IntRect& rectangle);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Disallow construction from a temporary texture
-    ///
-    ////////////////////////////////////////////////////////////
-    Sprite(Texture&& texture, const IntRect& rectangle) = delete;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Change the source texture of the sprite
-    ///
-    /// The \a texture argument refers to a texture that must
-    /// exist as long as the sprite uses it. Indeed, the sprite
-    /// doesn't store its own copy of the texture, but rather keeps
-    /// a pointer to the one that you passed to this function.
-    /// If the source texture is destroyed and the sprite tries to
-    /// use it, the behavior is undefined.
-    /// If \a resetRect is true, the TextureRect property of
-    /// the sprite is automatically adjusted to the size of the new
-    /// texture. If it is false, the texture rect is left unchanged.
-    ///
-    /// \param texture   New texture
-    /// \param resetRect Should the texture rect be reset to the size of the new texture?
-    ///
-    /// \see getTexture, setTextureRect
-    ///
-    ////////////////////////////////////////////////////////////
-    void setTexture(const Texture& texture, bool resetRect = false);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Disallow setting from a temporary texture
-    ///
-    ////////////////////////////////////////////////////////////
-    void setTexture(Texture&& texture, bool resetRect = false) = delete;
+    explicit Sprite(const IntRect& rectangle);
 
     ////////////////////////////////////////////////////////////
     /// \brief Set the sub-rectangle of the texture that the sprite will display
@@ -119,7 +67,7 @@ public:
     ///
     /// \param rectangle Rectangle defining the region of the texture to display
     ///
-    /// \see getTextureRect, setTexture
+    /// \see getTextureRect
     ///
     ////////////////////////////////////////////////////////////
     void setTextureRect(const IntRect& rectangle);
@@ -138,19 +86,6 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     void setColor(const Color& color);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the source texture of the sprite
-    ///
-    /// The returned reference is const, which means that you can't
-    /// modify the texture when you retrieve it with this function.
-    ///
-    /// \return Reference to the sprite's texture
-    ///
-    /// \see setTexture
-    ///
-    ////////////////////////////////////////////////////////////
-    const Texture& getTexture() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the sub-rectangle of the texture displayed by the sprite
@@ -201,14 +136,7 @@ public:
     FloatRect getGlobalBounds() const;
 
 private:
-    ////////////////////////////////////////////////////////////
-    /// \brief Draw the sprite to a render target
-    ///
-    /// \param target Render target to draw to
-    /// \param states Current render states
-    ///
-    ////////////////////////////////////////////////////////////
-    void draw(RenderTarget& target, RenderStates states) const override;
+    friend RenderTarget;
 
     ////////////////////////////////////////////////////////////
     /// \brief Update the vertices' positions and texture coordinates
@@ -220,7 +148,6 @@ private:
     // Member data
     ////////////////////////////////////////////////////////////
     std::array<Vertex, 4> m_vertices;    //!< Vertices defining the sprite's geometry
-    const Texture*        m_texture;     //!< Texture of the sprite
     IntRect               m_textureRect; //!< Rectangle defining the area of the source texture to display
 };
 
@@ -251,10 +178,8 @@ private:
 /// it with its own transformation/color/blending attributes.
 ///
 /// It is important to note that the sf::Sprite instance doesn't
-/// copy the texture that it uses, it only keeps a reference to it.
-/// Thus, a sf::Texture must not be destroyed while it is
-/// used by a sf::Sprite (i.e. never write a function that
-/// uses a local sf::Texture instance for creating a sprite).
+/// even keep a reference to the sf::Texture it uses, the texture
+/// must be provided prior to drawing the sprite via sf::RenderStates.
 ///
 /// See also the note on coordinates and undistorted rendering in sf::Transformable.
 ///
@@ -264,13 +189,12 @@ private:
 /// const auto texture = sf::Texture::loadFromFile("texture.png").value();
 ///
 /// // Create a sprite
-/// sf::Sprite sprite(texture);
 /// sprite.setTextureRect({{10, 10}, {50, 30}});
 /// sprite.setColor({255, 255, 255, 200});
 /// sprite.setPosition({100.f, 25.f});
 ///
 /// // Draw it
-/// window.draw(sprite);
+/// window.draw(sprite, texture);
 /// \endcode
 ///
 /// \see sf::Texture, sf::Transformable

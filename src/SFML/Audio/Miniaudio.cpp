@@ -31,3 +31,4 @@
 // #define MA_DEBUG_OUTPUT // Uncomment to enable miniaudio debug output to console
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
+#include <miniaudio.c>

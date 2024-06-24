@@ -160,7 +160,7 @@ struct SoundRecorder::Impl
 
 
 ////////////////////////////////////////////////////////////
-SoundRecorder::SoundRecorder() : m_impl(std::make_unique<Impl>(this))
+SoundRecorder::SoundRecorder() : m_impl(priv::makeUnique<Impl>(this))
 {
     // Create the log
     m_impl->log.emplace();

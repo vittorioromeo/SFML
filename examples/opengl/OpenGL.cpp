@@ -1,7 +1,21 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Texture.hpp>
+
+#include <SFML/Window/Context.hpp>
+#include <SFML/Window/ContextSettings.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Mouse.hpp>
+#include <SFML/Window/Touch.hpp>
+#include <SFML/Window/VideoMode.hpp>
+
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
 
 #include <array>
 #include <filesystem>
@@ -59,7 +73,7 @@ int main()
 
         // Create a sprite for the background
         const auto       backgroundTexture = sf::Texture::loadFromFile(resourcesDir() / "background.jpg", sRgb).value();
-        const sf::Sprite background(backgroundTexture);
+        const sf::Sprite background(backgroundTexture.getRect());
 
         // Create some text to draw on top of our OpenGL object
         const auto font = sf::Font::loadFromFile(resourcesDir() / "tuffy.ttf").value();
@@ -201,25 +215,20 @@ int main()
         while (window.isOpen())
         {
             // Process events
-            while (const auto event = window.pollEvent())
+            while (const std::optional event = window.pollEvent())
             {
-                // Close window: exit
-                if (event.is<sf::Event::Closed>())
+                // Window closed or escape key pressed: exit
+                if (event->is<sf::Event::Closed>() ||
+                    (event->is<sf::Event::KeyPressed>() &&
+                     event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
                 {
                     exit = true;
                     window.close();
-                }
-
-                // Escape key: exit
-                if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>();
-                    keyPressed && keyPressed->code == sf::Keyboard::Key::Escape)
-                {
-                    exit = true;
-                    window.close();
+                    break;
                 }
 
                 // Return key: toggle mipmapping
-                if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>();
+                if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>();
                     keyPressed && keyPressed->code == sf::Keyboard::Key::Enter)
                 {
                     if (mipmapEnabled)
@@ -236,15 +245,16 @@ int main()
                 }
 
                 // Space key: toggle sRGB conversion
-                if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>();
+                if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>();
                     keyPressed && keyPressed->code == sf::Keyboard::Key::Space)
                 {
                     sRgb = !sRgb;
                     window.close();
+                    break;
                 }
 
                 // Adjust the viewport when the window is resized
-                if (const auto* resized = event.getIf<sf::Event::Resized>())
+                if (const auto* resized = event->getIf<sf::Event::Resized>())
                 {
                     const sf::Vector2u textureSize = backgroundTexture.getSize();
 
@@ -282,7 +292,7 @@ int main()
 
             // Draw the background
             window.pushGLStates();
-            window.draw(background);
+            window.draw(background, backgroundTexture);
             window.popGLStates();
 
             // Make the window the active window for OpenGL calls

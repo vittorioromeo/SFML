@@ -1,7 +1,16 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window.hpp>
+#include <SFML/Window/Context.hpp>
+#include <SFML/Window/ContextSettings.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/VideoMode.hpp>
+#include <SFML/Window/Window.hpp>
+#include <SFML/Window/WindowEnums.hpp>
+
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
 
 #include <cstdlib>
 
@@ -141,19 +150,19 @@ int main()
     while (window.isOpen())
     {
         // Process events
-        while (const auto event = window.pollEvent())
+        while (const std::optional event = window.pollEvent())
         {
-            // Close window: exit
-            if (event.is<sf::Event::Closed>())
+            // Window closed or escape key pressed: exit
+            if (event->is<sf::Event::Closed>() ||
+                (event->is<sf::Event::KeyPressed>() &&
+                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
+            {
                 window.close();
-
-            // Escape key: exit
-            if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
-                if (keyPressed->code == sf::Keyboard::Key::Escape)
-                    window.close();
+                break;
+            }
 
             // Resize event: adjust the viewport
-            if (const auto* resized = event.getIf<sf::Event::Resized>())
+            if (const auto* resized = event->getIf<sf::Event::Resized>())
             {
                 const auto [width, height] = resized->size;
                 glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));

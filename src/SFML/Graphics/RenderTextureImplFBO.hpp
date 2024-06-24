@@ -31,9 +31,9 @@
 
 #include <SFML/Window/GlResource.hpp>
 
+#include <SFML/System/UniquePtr.hpp>
 #include <SFML/System/Vector2.hpp>
 
-#include <memory>
 #include <unordered_map>
 
 #include <cstdint>
@@ -150,7 +150,7 @@ private:
     unsigned int             m_depthStencilBuffer{}; //!< Optional depth/stencil buffer attached to the frame buffer
     unsigned int             m_colorBuffer{};        //!< Optional multisample color buffer attached to the frame buffer
     Vector2u                 m_size;                 //!< Width and height of the attachments
-    std::unique_ptr<Context> m_context;              //!< Backup OpenGL context, used when none already exist
+    priv::UniquePtr<Context> m_context;              //!< Backup OpenGL context, used when none already exist
     unsigned int             m_textureId{};          //!< The ID of the texture to attach to the FBO
     bool                     m_multisample{};        //!< Whether we have to create a multisample frame buffer as well
     bool                     m_depth{};              //!< Whether we have depth attachment

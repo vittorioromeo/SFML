@@ -30,6 +30,7 @@
 #include <SFML/Audio/SoundBuffer.hpp>
 
 #include <SFML/System/Err.hpp>
+#include <SFML/System/UniquePtr.hpp>
 
 #include <miniaudio.h>
 
@@ -186,21 +187,25 @@ struct Sound::Impl : priv::MiniaudioUtils::SoundBase
 
 
 ////////////////////////////////////////////////////////////
-Sound::Sound(const SoundBuffer& buffer) : m_impl(std::make_unique<Impl>())
+Sound::Sound(const SoundBuffer& buffer) : m_impl(priv::makeUnique<Impl>())
 {
     setBuffer(buffer);
+
+    SFML_UPDATE_LIFETIME_DEPENDANT(SoundBuffer, Sound, m_impl->buffer);
 }
 
 
 ////////////////////////////////////////////////////////////
 // NOLINTNEXTLINE(readability-redundant-member-init)
-Sound::Sound(const Sound& copy) : SoundSource(copy), m_impl(std::make_unique<Impl>())
+Sound::Sound(const Sound& copy) : SoundSource(copy), m_impl(priv::makeUnique<Impl>())
 {
     SoundSource::operator=(copy);
 
     if (copy.m_impl->buffer)
         setBuffer(*copy.m_impl->buffer);
     setLoop(copy.getLoop());
+
+    SFML_UPDATE_LIFETIME_DEPENDANT(SoundBuffer, Sound, m_impl->buffer);
 }
 
 
@@ -277,8 +282,12 @@ void Sound::setBuffer(const SoundBuffer& buffer)
     m_impl->buffer = &buffer;
     m_impl->buffer->attachSound(this);
 
+    SFML_UPDATE_LIFETIME_DEPENDANT(SoundBuffer, Sound, m_impl->buffer);
+
     m_impl->deinitialize();
     m_impl->initialize();
+
+    SFML_UPDATE_LIFETIME_DEPENDANT(SoundBuffer, Sound, m_impl->buffer);
 }
 
 

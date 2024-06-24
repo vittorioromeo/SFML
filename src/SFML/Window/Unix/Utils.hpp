@@ -27,14 +27,27 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <SFML/System/UniquePtr.hpp>
+
 #include <X11/Xlib.h>
-
-#include <memory>
-#include <type_traits>
-
 
 namespace sf::priv
 {
+template <typename T>
+struct RemoveArrayExtentsImpl
+{
+    using type = T;
+};
+
+template <typename T>
+struct RemoveArrayExtentsImpl<T[]>
+{
+    using type = T;
+};
+
+template <typename T>
+using RemoveArrayExtents = typename RemoveArrayExtentsImpl<T>::type;
+
 ////////////////////////////////////////////////////////////
 /// \brief Class template for freeing X11 pointers
 ///
@@ -57,5 +70,5 @@ struct XDeleter
 ///
 ////////////////////////////////////////////////////////////
 template <typename T>
-using X11Ptr = std::unique_ptr<T, XDeleter<std::remove_all_extents_t<T>>>;
+using X11Ptr = UniquePtr<RemoveArrayExtents<T>, XDeleter<RemoveArrayExtents<T>>>;
 } // namespace sf::priv

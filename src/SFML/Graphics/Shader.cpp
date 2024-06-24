@@ -31,8 +31,6 @@
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-#include <SFML/Window/GlResource.hpp>
-
 #include <SFML/System/Err.hpp>
 #include <SFML/System/InputStream.hpp>
 #include <SFML/System/Utils.hpp>
@@ -41,6 +39,7 @@
 
 #include <fstream>
 #include <iomanip>
+#include <optional>
 #include <ostream>
 #include <utility>
 #include <vector>
@@ -78,49 +77,87 @@ std::size_t getMaxTextureUnits()
     return static_cast<std::size_t>(maxUnits);
 }
 
+// Pair of indices into thread-local buffer
+struct BufferSlice
+{
+    const std::size_t beginIdx;
+    const std::size_t count;
+
+    explicit BufferSlice(std::size_t b, std::size_t c) : beginIdx(b), count(c)
+    {
+    }
+
+    [[nodiscard]] std::string_view toView(const std::vector<char>& buffer) const
+    {
+        return {buffer.data() + beginIdx, count};
+    }
+};
+
 // Read the contents of a file into an array of char
-bool getFileContents(const std::filesystem::path& filename, std::vector<char>& buffer)
+std::optional<BufferSlice> appendFileContentsToVector(const std::filesystem::path& filename, std::vector<char>& buffer)
 {
     std::ifstream file(filename, std::ios_base::binary);
-    if (file)
+
+    if (!file)
     {
-        file.seekg(0, std::ios_base::end);
-        const std::ifstream::pos_type size = file.tellg();
-        if (size > 0)
-        {
-            file.seekg(0, std::ios_base::beg);
-            buffer.resize(static_cast<std::size_t>(size));
-            file.read(buffer.data(), static_cast<std::streamsize>(size));
-        }
-        buffer.push_back('\0');
-        return true;
+        sf::err() << "Failed to open shader file" << std::endl;
+        return std::nullopt;
     }
-    else
+
+    file.seekg(0, std::ios_base::end);
+    const std::ifstream::pos_type size = file.tellg();
+
+    const std::size_t bufferSizeBeforeRead = buffer.size();
+
+    if (size > 0)
     {
-        return false;
+        file.seekg(0, std::ios_base::beg);
+        buffer.resize(static_cast<std::size_t>(size) + bufferSizeBeforeRead);
+        file.read(buffer.data() + bufferSizeBeforeRead, static_cast<std::streamsize>(size));
     }
+
+    buffer.push_back('\0');
+    return std::make_optional<BufferSlice>(bufferSizeBeforeRead, buffer.size() - bufferSizeBeforeRead);
 }
 
 // Read the contents of a stream into an array of char
-bool getStreamContents(sf::InputStream& stream, std::vector<char>& buffer)
+std::optional<BufferSlice> appendStreamContentsToVector(sf::InputStream& stream, std::vector<char>& buffer)
 {
-    bool                success = false;
-    const std::optional size    = stream.getSize();
-    if (size > std::size_t{0})
+    const std::optional<std::size_t> size = stream.getSize();
+
+    if (!size.has_value() || size.value() == 0)
     {
-        buffer.resize(*size);
-
-        if (!stream.seek(0).has_value())
-        {
-            sf::err() << "Failed to seek shader stream" << std::endl;
-            return false;
-        }
-
-        const std::optional read = stream.read(buffer.data(), *size);
-        success                  = (read == size);
+        buffer.push_back('\0');
+        return std::nullopt;
     }
+
+    const std::size_t bufferSizeBeforeRead = buffer.size();
+    buffer.resize(*size + bufferSizeBeforeRead);
+
+    if (stream.seek(0) == -1)
+    {
+        sf::err() << "Failed to seek shader stream" << std::endl;
+        return std::nullopt;
+    }
+
+    const std::optional<std::size_t> read = stream.read(buffer.data() + bufferSizeBeforeRead, *size);
+
+    if (!read.has_value() || *read != size)
+    {
+        sf::err() << "Failed to read stream contents into buffer" << std::endl;
+        return std::nullopt;
+    }
+
     buffer.push_back('\0');
-    return success;
+    return std::make_optional<BufferSlice>(bufferSizeBeforeRead, buffer.size() - bufferSizeBeforeRead);
+}
+
+// Return a thread-local vector for suitable use as a temporary buffer
+// This function is non-reentrant
+std::vector<char>& getThreadLocalCharBuffer()
+{
+    thread_local std::vector<char> result;
+    return result;
 }
 
 // Transforms an array of 2D vectors into a contiguous array of scalars
@@ -227,6 +264,59 @@ struct Shader::UniformBinder
 
 
 ////////////////////////////////////////////////////////////
+struct Shader::UnsafeUniformBinder
+{
+    ////////////////////////////////////////////////////////////
+    /// \brief Constructor: set up state before uniform is set
+    ///
+    ////////////////////////////////////////////////////////////
+    UnsafeUniformBinder(Shader& shader, const std::string& name) : currentProgram(shader.m_shaderProgram)
+    {
+        if (currentProgram)
+        {
+            // Enable program object
+            GLint temp;
+            glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &temp));
+            savedProgram = static_cast<GLuint>(temp);
+
+            if (currentProgram != savedProgram)
+                glCheck(glUseProgram(currentProgram));
+
+            // Store uniform location for further use outside constructor
+            location = shader.getUniformLocation(name);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Destructor: restore state after uniform is set
+    ///
+    ////////////////////////////////////////////////////////////
+    ~UnsafeUniformBinder()
+    {
+        // Disable program object
+        if (currentProgram && (currentProgram != savedProgram))
+            glCheck(glUseProgram(savedProgram));
+    }
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Deleted copy constructor
+    ///
+    ////////////////////////////////////////////////////////////
+    UnsafeUniformBinder(const UnsafeUniformBinder&) = delete;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Deleted copy assignment
+    ///
+    ////////////////////////////////////////////////////////////
+    UnsafeUniformBinder& operator=(const UnsafeUniformBinder&) = delete;
+
+    GLuint savedProgram{}; //!< Handle to the previously active program object
+    GLuint currentProgram; //!< Handle to the program object of the modified sf::Shader instance
+    GLint  location{-1};   //!< Uniform location, used by the surrounding sf::Shader code
+};
+
+
+////////////////////////////////////////////////////////////
 Shader::~Shader()
 {
     const TransientContextLock lock;
@@ -244,6 +334,7 @@ m_textures(std::move(source.m_textures)),
 m_uniforms(std::move(source.m_uniforms))
 {
 }
+
 
 ////////////////////////////////////////////////////////////
 Shader& Shader::operator=(Shader&& right) noexcept
@@ -269,24 +360,31 @@ Shader& Shader::operator=(Shader&& right) noexcept
     return *this;
 }
 
+
 ////////////////////////////////////////////////////////////
 std::optional<Shader> Shader::loadFromFile(const std::filesystem::path& filename, Type type)
 {
+    // Prepare thread-local buffer
+    std::vector<char>& buffer = getThreadLocalCharBuffer();
+    buffer.clear();
+
     // Read the file
-    std::vector<char> shader;
-    if (!getFileContents(filename, shader))
+    const std::optional<BufferSlice> shaderSlice = appendFileContentsToVector(filename, buffer);
+    if (!shaderSlice.has_value())
     {
         err() << "Failed to open shader file\n" << formatDebugPathInfo(filename) << std::endl;
         return std::nullopt;
     }
 
+    const std::string_view shaderView = shaderSlice->toView(buffer);
+
     // Compile the shader program
     if (type == Type::Vertex)
-        return compile(shader.data(), {}, {});
+        return compile(shaderView, {}, {});
     else if (type == Type::Geometry)
-        return compile({}, shader.data(), {});
+        return compile({}, shaderView, {});
     else
-        return compile({}, {}, shader.data());
+        return compile({}, {}, shaderView);
 }
 
 
@@ -294,24 +392,28 @@ std::optional<Shader> Shader::loadFromFile(const std::filesystem::path& filename
 std::optional<Shader> Shader::loadFromFile(const std::filesystem::path& vertexShaderFilename,
                                            const std::filesystem::path& fragmentShaderFilename)
 {
+    // Prepare thread-local buffer
+    std::vector<char>& buffer = getThreadLocalCharBuffer();
+    buffer.clear();
+
     // Read the vertex shader file
-    std::vector<char> vertexShader;
-    if (!getFileContents(vertexShaderFilename, vertexShader))
+    const std::optional<BufferSlice> vertexShaderSlice = appendFileContentsToVector(vertexShaderFilename, buffer);
+    if (!vertexShaderSlice.has_value())
     {
         err() << "Failed to open vertex shader file\n" << formatDebugPathInfo(vertexShaderFilename) << std::endl;
         return std::nullopt;
     }
 
     // Read the fragment shader file
-    std::vector<char> fragmentShader;
-    if (!getFileContents(fragmentShaderFilename, fragmentShader))
+    const std::optional<BufferSlice> fragmentShaderSlice = appendFileContentsToVector(fragmentShaderFilename, buffer);
+    if (!fragmentShaderSlice.has_value())
     {
         err() << "Failed to open fragment shader file\n" << formatDebugPathInfo(fragmentShaderFilename) << std::endl;
         return std::nullopt;
     }
 
     // Compile the shader program
-    return compile(vertexShader.data(), {}, fragmentShader.data());
+    return compile(vertexShaderSlice->toView(buffer), {}, fragmentShaderSlice->toView(buffer));
 }
 
 
@@ -320,32 +422,38 @@ std::optional<Shader> Shader::loadFromFile(const std::filesystem::path& vertexSh
                                            const std::filesystem::path& geometryShaderFilename,
                                            const std::filesystem::path& fragmentShaderFilename)
 {
+    // Prepare thread-local buffer
+    std::vector<char>& buffer = getThreadLocalCharBuffer();
+    buffer.clear();
+
     // Read the vertex shader file
-    std::vector<char> vertexShader;
-    if (!getFileContents(vertexShaderFilename, vertexShader))
+    const std::optional<BufferSlice> vertexShaderSlice = appendFileContentsToVector(vertexShaderFilename, buffer);
+    if (!vertexShaderSlice.has_value())
     {
         err() << "Failed to open vertex shader file\n" << formatDebugPathInfo(vertexShaderFilename) << std::endl;
         return std::nullopt;
     }
 
     // Read the geometry shader file
-    std::vector<char> geometryShader;
-    if (!getFileContents(geometryShaderFilename, geometryShader))
+    const std::optional<BufferSlice> geometryShaderSlice = appendFileContentsToVector(geometryShaderFilename, buffer);
+    if (!geometryShaderSlice.has_value())
     {
         err() << "Failed to open geometry shader file\n" << formatDebugPathInfo(geometryShaderFilename) << std::endl;
         return std::nullopt;
     }
 
     // Read the fragment shader file
-    std::vector<char> fragmentShader;
-    if (!getFileContents(fragmentShaderFilename, fragmentShader))
+    const std::optional<BufferSlice> fragmentShaderSlice = appendFileContentsToVector(fragmentShaderFilename, buffer);
+    if (!fragmentShaderSlice.has_value())
     {
         err() << "Failed to open fragment shader file\n" << formatDebugPathInfo(fragmentShaderFilename) << std::endl;
         return std::nullopt;
     }
 
     // Compile the shader program
-    return compile(vertexShader.data(), geometryShader.data(), fragmentShader.data());
+    return compile(vertexShaderSlice->toView(buffer),
+                   geometryShaderSlice->toView(buffer),
+                   fragmentShaderSlice->toView(buffer));
 }
 
 
@@ -383,45 +491,55 @@ std::optional<Shader> Shader::loadFromMemory(std::string_view vertexShader,
 ////////////////////////////////////////////////////////////
 std::optional<Shader> Shader::loadFromStream(InputStream& stream, Type type)
 {
+    // Prepare thread-local buffer
+    std::vector<char>& buffer = getThreadLocalCharBuffer();
+    buffer.clear();
+
     // Read the shader code from the stream
-    std::vector<char> shader;
-    if (!getStreamContents(stream, shader))
+    const std::optional<BufferSlice> shaderSlice = appendStreamContentsToVector(stream, buffer);
+    if (!shaderSlice.has_value())
     {
-        err() << "Failed to read shader from stream" << std::endl;
+        err() << "Failed to read vertex shader from stream" << std::endl;
         return std::nullopt;
     }
 
+    const std::string_view shaderView = shaderSlice->toView(buffer);
+
     // Compile the shader program
     if (type == Type::Vertex)
-        return compile(shader.data(), {}, {});
+        return compile(shaderView, {}, {});
     else if (type == Type::Geometry)
-        return compile({}, shader.data(), {});
+        return compile({}, shaderView, {});
     else
-        return compile({}, {}, shader.data());
+        return compile({}, {}, shaderView);
 }
 
 
 ////////////////////////////////////////////////////////////
 std::optional<Shader> Shader::loadFromStream(InputStream& vertexShaderStream, InputStream& fragmentShaderStream)
 {
+    // Prepare thread-local buffer
+    std::vector<char>& buffer = getThreadLocalCharBuffer();
+    buffer.clear();
+
     // Read the vertex shader code from the stream
-    std::vector<char> vertexShader;
-    if (!getStreamContents(vertexShaderStream, vertexShader))
+    const std::optional<BufferSlice> vertexShaderSlice = appendStreamContentsToVector(vertexShaderStream, buffer);
+    if (!vertexShaderSlice.has_value())
     {
         err() << "Failed to read vertex shader from stream" << std::endl;
         return std::nullopt;
     }
 
     // Read the fragment shader code from the stream
-    std::vector<char> fragmentShader;
-    if (!getStreamContents(fragmentShaderStream, fragmentShader))
+    const std::optional<BufferSlice> fragmentShaderSlice = appendStreamContentsToVector(fragmentShaderStream, buffer);
+    if (!fragmentShaderSlice.has_value())
     {
         err() << "Failed to read fragment shader from stream" << std::endl;
         return std::nullopt;
     }
 
     // Compile the shader program
-    return compile(vertexShader.data(), {}, fragmentShader.data());
+    return compile(vertexShaderSlice->toView(buffer), {}, fragmentShaderSlice->toView(buffer));
 }
 
 
@@ -430,32 +548,38 @@ std::optional<Shader> Shader::loadFromStream(InputStream& vertexShaderStream,
                                              InputStream& geometryShaderStream,
                                              InputStream& fragmentShaderStream)
 {
+    // Prepare thread-local buffer
+    std::vector<char>& buffer = getThreadLocalCharBuffer();
+    buffer.clear();
+
     // Read the vertex shader code from the stream
-    std::vector<char> vertexShader;
-    if (!getStreamContents(vertexShaderStream, vertexShader))
+    const std::optional<BufferSlice> vertexShaderSlice = appendStreamContentsToVector(vertexShaderStream, buffer);
+    if (!vertexShaderSlice.has_value())
     {
         err() << "Failed to read vertex shader from stream" << std::endl;
         return std::nullopt;
     }
 
     // Read the geometry shader code from the stream
-    std::vector<char> geometryShader;
-    if (!getStreamContents(geometryShaderStream, geometryShader))
+    const std::optional<BufferSlice> geometryShaderSlice = appendStreamContentsToVector(geometryShaderStream, buffer);
+    if (!geometryShaderSlice.has_value())
     {
         err() << "Failed to read geometry shader from stream" << std::endl;
         return std::nullopt;
     }
 
     // Read the fragment shader code from the stream
-    std::vector<char> fragmentShader;
-    if (!getStreamContents(fragmentShaderStream, fragmentShader))
+    const std::optional<BufferSlice> fragmentShaderSlice = appendStreamContentsToVector(fragmentShaderStream, buffer);
+    if (!fragmentShaderSlice.has_value())
     {
         err() << "Failed to read fragment shader from stream" << std::endl;
         return std::nullopt;
     }
 
     // Compile the shader program
-    return compile(vertexShader.data(), geometryShader.data(), fragmentShader.data());
+    return compile(vertexShaderSlice->toView(buffer),
+                   geometryShaderSlice->toView(buffer),
+                   fragmentShaderSlice->toView(buffer));
 }
 
 
@@ -696,6 +820,78 @@ void Shader::setUniformArray(const std::string& name, const Glsl::Mat4* matrixAr
 
 
 ////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, float x)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform1f(binder.location, x));
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, const Glsl::Vec2& v)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform2f(binder.location, v.x, v.y));
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, const Glsl::Vec3& v)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform3f(binder.location, v.x, v.y, v.z));
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, const Glsl::Vec4& v)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform4f(binder.location, v.x, v.y, v.z, v.w));
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, int x)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform1i(binder.location, x));
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, const Glsl::Ivec2& v)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform2i(binder.location, v.x, v.y));
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, const Glsl::Ivec3& v)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform3i(binder.location, v.x, v.y, v.z));
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setUniformUnsafe(const std::string& name, const Glsl::Ivec4& v)
+{
+    UnsafeUniformBinder binder(*this, name);
+    if (binder.location != -1)
+        glCheck(GLEXT_glUniform4i(binder.location, v.x, v.y, v.z, v.w));
+}
+
+
+////////////////////////////////////////////////////////////
 unsigned int Shader::getNativeHandle() const
 {
     return m_shaderProgram;
@@ -771,7 +967,7 @@ bool Shader::isGeometryAvailable()
 
 
 ////////////////////////////////////////////////////////////
-Shader::Shader(unsigned int shaderProgram) : m_shaderProgram(shaderProgram)
+Shader::Shader(priv::PassKey<Shader>&&, unsigned int shaderProgram) : m_shaderProgram(shaderProgram)
 {
 }
 
@@ -908,7 +1104,7 @@ std::optional<Shader> Shader::compile(std::string_view vertexShaderCode,
     // in all contexts immediately (solves problems in multi-threaded apps)
     glCheck(glFlush());
 
-    return Shader(castFromGlHandle(shaderProgram));
+    return std::make_optional<Shader>(priv::PassKey<Shader>{}, castFromGlHandle(shaderProgram));
 }
 
 
@@ -1202,7 +1398,7 @@ bool Shader::isGeometryAvailable()
 
 
 ////////////////////////////////////////////////////////////
-Shader::Shader(unsigned int shaderProgram) : m_shaderProgram(shaderProgram)
+Shader::Shader(priv::PassKey<Shader>&&, unsigned int shaderProgram) : m_shaderProgram(shaderProgram)
 {
 }
 

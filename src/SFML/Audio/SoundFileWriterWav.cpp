@@ -318,7 +318,7 @@ void SoundFileWriterWav::close()
         // Update the main chunk size and data sub-chunk size
         const std::uint32_t fileSize = static_cast<std::uint32_t>(m_file.tellp());
         m_file.seekp(4);
-        encode(m_file, fileSize - 8); // 8 bytes RIFF header
+        encode(m_file, fileSize - 8);  // 8 bytes RIFF header
         m_file.seekp(40);
         encode(m_file, fileSize - 44); // 44 bytes RIFF + WAVE headers
 

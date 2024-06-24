@@ -32,9 +32,9 @@ body:
           label: Your Environment
           description: Please provide some information about your environment
           value: |
-              - OS / distro / window manager: 
-              - SFML version: 
-              - Compiler / toolchain: 
+              - OS / distro / window manager:
+              - SFML version:
+              - Compiler / toolchain:
               - Special compiler / CMake flags:
       validations:
           required: true
@@ -44,8 +44,8 @@ body:
           label: Steps to reproduce
           description: Tell us how to reproduce this issue and provide a [minimal, complete and verifiable example](https://stackoverflow.com/help/mcve), you can use the template below
           value: |
-              1. 
-              2. 
+              1.
+              2.
 
               ```cpp
               #include <SFML/Graphics.hpp>
@@ -57,10 +57,13 @@ body:
 
                   while (window.isOpen())
                   {
-                      while (const auto event = window.pollEvent())
+                      while (const std::optional event = window.pollEvent())
                       {
-                          if (event.is<sf::Event::Closed>())
+                          if (event->is<sf::Event::Closed>())
+                          {
                               window.close();
+                              break;
+                          }
                       }
 
                       window.clear();

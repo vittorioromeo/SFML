@@ -11,6 +11,7 @@ set(SRC
     ${SRCROOT}/Cursor.cpp
     ${INCROOT}/Cursor.hpp
     ${SRCROOT}/CursorImpl.hpp
+    ${SRCROOT}/Event.cpp
     ${INCROOT}/Export.hpp
     ${SRCROOT}/GlContext.cpp
     ${SRCROOT}/GlContext.hpp
