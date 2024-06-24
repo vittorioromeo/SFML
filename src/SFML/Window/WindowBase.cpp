@@ -147,40 +147,36 @@ bool WindowBase::isOpen() const
 
 
 ////////////////////////////////////////////////////////////
-template <typename FGet, typename FFilter>
-static std::optional<Event> pollOrWaitEventImpl(priv::WindowImpl* impl, FGet&& fGet, FFilter&& fFilter)
+std::optional<Event> WindowBase::pollEvent()
 {
-    std::optional<Event> event; // Use a single local variable for NRVO
+    std::optional<sf::Event> event; // Use a single local variable for NRVO
 
-    if (impl == nullptr)
+    if (m_impl == nullptr)
         return event; // Empty optional
 
-    event = fGet();
+    event = m_impl->pollEvent();
 
     if (event.has_value())
-        fFilter(*event);
+        filterEvent(*event);
 
     return event;
 }
 
 
 ////////////////////////////////////////////////////////////
-std::optional<Event> WindowBase::pollEvent()
-{
-    return pollOrWaitEventImpl(
-        m_impl.get(),
-        [this] { return m_impl->pollEvent(); },
-        [this](sf::Event& e) { filterEvent(e); });
-}
-
-
-////////////////////////////////////////////////////////////
 std::optional<Event> WindowBase::waitEvent(Time timeout)
 {
-    return pollOrWaitEventImpl(
-        m_impl.get(),
-        [this, &timeout] { return m_impl->waitEvent(timeout); },
-        [this](sf::Event& e) { filterEvent(e); });
+    std::optional<sf::Event> event; // Use a single local variable for NRVO
+
+    if (m_impl == nullptr)
+        return event; // Empty optional
+
+    event = m_impl->waitEvent(timeout);
+
+    if (event.has_value())
+        filterEvent(*event);
+
+    return event;
 }
 
 

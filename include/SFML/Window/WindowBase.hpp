@@ -186,7 +186,7 @@ public:
     /// this function in a loop to make sure that you process every
     /// pending event.
     /// \code
-    /// while (const std::optional<sf::Event> event = window.pollEvent())
+    /// while (const std::optional event = window.pollEvent())
     /// {
     ///    // process event...
     /// }
@@ -204,13 +204,13 @@ public:
     ///
     /// This function is blocking: if there's no pending event then
     /// it will wait until an event is received or until the provided
-    /// timeout elapses. After this function returns if no error nor
-    /// timeout occurred, the returned event will not be empty.
+    /// timeout elapses. Only if an error or a timeout occurs the
+    /// returned event will be `std::nullopt`.
     /// This function is typically used when you have a thread that is
     /// dedicated to events handling: you want to make this thread sleep
     /// as long as no new event is received.
     /// \code
-    /// while (const std::optional<sf::Event> event = window.waitEvent())
+    /// while (const std::optional event = window.waitEvent())
     /// {
     ///    // process event...
     /// }
