@@ -41,14 +41,14 @@
 namespace sf::base
 {
 ////////////////////////////////////////////////////////////
-/// \brief TODO
+/// \brief Non-allocating `std::function` alternatifve with fixed storage size
 ///
 ////////////////////////////////////////////////////////////
 template <typename TSignature, SizeT TStorageSize>
 class FixedFunction;
 
 ////////////////////////////////////////////////////////////
-/// \brief TODO
+/// \brief Non-allocating `std::function` alternatifve with fixed storage size
 ///
 ////////////////////////////////////////////////////////////
 template <typename TReturn, typename... Ts, SizeT TStorageSize>
@@ -253,8 +253,6 @@ public:
 /// \class sf::base::FixedFunction
 /// \ingroup system
 ///
-/// TODO
-///
-/// \see TODO
+/// Non-allocating `std::function` alternatifve with fixed storage size
 ///
 ////////////////////////////////////////////////////////////

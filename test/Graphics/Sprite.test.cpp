@@ -1,15 +1,17 @@
-#include <SFML/Window/GraphicsContext.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+
+#include <SFML/Window/GraphicsContext.hpp>
 
 // Other 1st party headers
 #include <SFML/Graphics/Texture.hpp>
+
+#include <SFML/Base/Optional.hpp>
 
 #include <Doctest.hpp>
 
 #include <GraphicsUtil.hpp>
 #include <WindowUtil.hpp>
 
-#include <SFML/Base/Optional.hpp>
 #include <type_traits>
 
 TEST_CASE("[Graphics] sf::Sprite" * doctest::skip(skipDisplayTests))

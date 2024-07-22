@@ -2,17 +2,17 @@
 
 // NOLINTBEGIN
 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 
 #include <SFML/Base/Assert.hpp>
+#include <SFML/Base/MakeIndexSequence.hpp>
+#include <SFML/Base/OverloadSet.hpp>
 #include <SFML/Base/PlacementNew.hpp>
 #include <SFML/Base/SizeT.hpp>
 #include <SFML/Base/Traits/IsSame.hpp>
-
-
-// From:
-// https://github.com/redorav/crstl/blob/master/include/crstl/utility/placement_new.h
+#include <SFML/Base/TypePackElement.hpp>
 
 namespace sfvr::impl
 {
@@ -21,81 +21,12 @@ using SizeT = sf::base::SizeT;
 
 } // namespace sfvr::impl
 
-
-#if ((__GNUC__ >= 10) || defined(__clang__)) && !defined(_MSC_VER)
-#define TINYVARIANT_SUPPORTS_HAS_BUILTIN
-#endif
-
-#ifdef TINYVARIANT_SUPPORTS_HAS_BUILTIN
-
-// TODO: to header
-#if __has_builtin(__type_pack_element)
-#define TINYVARIANT_USE_TYPE_PACK_ELEMENT
-#endif
-
-// TODO: to header
-#if __has_builtin(__make_integer_seq)
-#define TINYVARIANT_USE_MAKE_INTEGER_SEQ
-#elif __has_builtin(__integer_pack)
-#define TINYVARIANT_USE_INTEGER_PACK
-#else
-#define TINYVARIANT_USE_STD_INDEX_SEQUENCE
-#endif
-
-#else
-#define TINYVARIANT_USE_STD_INDEX_SEQUENCE
-#endif
-
-#ifdef TINYVARIANT_USE_STD_INDEX_SEQUENCE
-#include <utility>
-#endif
-
 namespace sfvr::impl
 {
 
 template <typename T>
 T&& declval();
 
-#ifdef TINYVARIANT_USE_STD_INDEX_SEQUENCE
-
-template <SizeT... Is>
-using index_sequence = std::index_sequence<Is...>;
-
-#else
-
-template <SizeT...>
-struct index_sequence
-{
-};
-
-#endif
-
-#ifdef TINYVARIANT_USE_MAKE_INTEGER_SEQ
-
-template <typename, SizeT... X>
-struct index_sequence_helper
-{
-    using type = index_sequence<X...>;
-};
-
-template <SizeT N>
-using index_sequence_up_to = typename __make_integer_seq<index_sequence_helper, SizeT, N>::type;
-
-#elif defined(TINYVARIANT_USE_INTEGER_PACK)
-
-template <SizeT N>
-using index_sequence_up_to = index_sequence<__integer_pack(N)...>;
-
-#elif defined(TINYVARIANT_USE_STD_INDEX_SEQUENCE)
-
-template <SizeT N>
-using index_sequence_up_to = std::make_index_sequence<N>;
-
-#else
-
-#error "No integer sequence generation available."
-
-#endif
 
 template <auto X, auto... Xs>
 [[nodiscard, gnu::always_inline]] consteval auto variadic_max() noexcept
@@ -141,49 +72,6 @@ struct type_wrapper
     using type = T;
 };
 
-
-// TODO: to header
-#ifdef TINYVARIANT_USE_TYPE_PACK_ELEMENT
-
-template <SizeT N, typename... Ts>
-using type_at = __type_pack_element<N, Ts...>;
-
-#else
-
-template <SizeT N,
-          typename T0 = void,
-          typename T1 = void,
-          typename T2 = void,
-          typename T3 = void,
-          typename T4 = void,
-          typename T5 = void,
-          typename T6 = void,
-          typename T7 = void,
-          typename T8 = void,
-          typename T9 = void,
-          typename... Ts>
-[[nodiscard, gnu::always_inline]] consteval auto type_at_impl() noexcept
-{
-    // clang-format off
-    if constexpr(N == 0)      { return type_wrapper<T0>{}; }
-    else if constexpr(N == 1) { return type_wrapper<T1>{}; }
-    else if constexpr(N == 2) { return type_wrapper<T2>{}; }
-    else if constexpr(N == 3) { return type_wrapper<T3>{}; }
-    else if constexpr(N == 4) { return type_wrapper<T4>{}; }
-    else if constexpr(N == 5) { return type_wrapper<T5>{}; }
-    else if constexpr(N == 6) { return type_wrapper<T6>{}; }
-    else if constexpr(N == 7) { return type_wrapper<T7>{}; }
-    else if constexpr(N == 8) { return type_wrapper<T8>{}; }
-    else if constexpr(N == 9) { return type_wrapper<T9>{}; }
-    else                      { return type_at_impl<N - 10, Ts...>(); }
-    // clang-format on
-}
-
-template <SizeT N, typename... Ts>
-using type_at = typename decltype(type_at_impl<N, Ts...>())::type;
-
-#endif
-
 template <typename>
 struct inplace_type_t
 {
@@ -193,20 +81,6 @@ template <SizeT>
 struct inplace_index_t
 {
 };
-
-// TODO: to header
-template <typename... Fs>
-struct [[nodiscard]] overload_set : Fs...
-{
-    [[nodiscard, gnu::always_inline]] explicit overload_set(Fs&&... fs) noexcept : Fs{static_cast<Fs&&>(fs)}...
-    {
-    }
-
-    using Fs::operator()...;
-};
-
-template <typename... Fs>
-overload_set(Fs...) -> overload_set<Fs...>;
 
 template <typename T>
 struct uncvref
@@ -304,14 +178,14 @@ private:
     using index_type = unsigned char; // Support up to 255 alternatives
 
     template <impl::SizeT I>
-    using nth_type = impl::type_at<I, Alternatives...>;
+    using nth_type = SFML_BASE_TYPE_PACK_ELEMENT(I, Alternatives...);
 
 public:
     template <typename T>
     static constexpr impl::SizeT index_of = impl::index_of<T, Alternatives...>();
 
 private:
-    static constexpr impl::index_sequence_up_to<type_count> alternative_index_sequence{};
+    static constexpr sf::base::MakeIndexSequence<type_count> alternative_index_sequence{};
 
     alignas(max_alignment) byte _buffer[max_size];
     index_type _index;
@@ -350,7 +224,7 @@ private:
         }                                                                                            \
         else                                                                                         \
         {                                                                                            \
-            [&]<impl::SizeT... Is>(impl::index_sequence<Is...>) TINYVARIANT_ALWAYS_INLINE_LAMBDA     \
+            [&]<impl::SizeT... Is>(sf::base::IndexSequence<Is...>) TINYVARIANT_ALWAYS_INLINE_LAMBDA  \
             { ((((obj)._index == Is) ? ((__VA_ARGS__), 0) : 0), ...); }(alternative_index_sequence); \
         }                                                                                            \
     } while (false)
@@ -635,16 +509,16 @@ public:
 
     template <typename... Fs>
     [[nodiscard, gnu::always_inline]] auto recursive_match(
-        Fs&&... fs) & -> decltype(recursive_visit(impl::overload_set{static_cast<Fs&&>(fs)...}))
+        Fs&&... fs) & -> decltype(recursive_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...}))
     {
-        return recursive_visit(impl::overload_set{static_cast<Fs&&>(fs)...});
+        return recursive_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...});
     }
 
     template <typename... Fs>
     [[nodiscard, gnu::always_inline]] auto recursive_match(
-        Fs&&... fs) const& -> decltype(recursive_visit(impl::overload_set{static_cast<Fs&&>(fs)...}))
+        Fs&&... fs) const& -> decltype(recursive_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...}))
     {
-        return recursive_visit(impl::overload_set{static_cast<Fs&&>(fs)...});
+        return recursive_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...});
     }
 
     template <typename Visitor, typename R = decltype(impl::declval<Visitor>()(impl::declval<nth_type<0>>()))>
@@ -702,16 +576,16 @@ public:
 
     template <typename... Fs>
     [[nodiscard, gnu::always_inline]] auto linear_match(
-        Fs&&... fs) & -> decltype(linear_visit(impl::overload_set{static_cast<Fs&&>(fs)...}))
+        Fs&&... fs) & -> decltype(linear_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...}))
     {
-        return linear_visit(impl::overload_set{static_cast<Fs&&>(fs)...});
+        return linear_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...});
     }
 
     template <typename... Fs>
     [[nodiscard, gnu::always_inline]] auto linear_match(
-        Fs&&... fs) const& -> decltype(linear_visit(impl::overload_set{static_cast<Fs&&>(fs)...}))
+        Fs&&... fs) const& -> decltype(linear_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...}))
     {
-        return linear_visit(impl::overload_set{static_cast<Fs&&>(fs)...});
+        return linear_visit(sf::base::OverloadSet{static_cast<Fs&&>(fs)...});
     }
 };
 
@@ -722,7 +596,6 @@ public:
 #undef TINYVARIANT_USE_STD_INDEX_SEQUENCE
 #undef TINYVARIANT_USE_INTEGER_PACK
 #undef TINYVARIANT_USE_MAKE_INTEGER_SEQ
-#undef TINYVARIANT_USE_TYPE_PACK_ELEMENT
 
 } // namespace sfvr
 

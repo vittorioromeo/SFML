@@ -25,12 +25,12 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 
+#include <SFML/Window/GLCheck.hpp>
 #include <SFML/Window/GLExtensions.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 
@@ -214,66 +214,55 @@ bool VertexBuffer::update(const Vertex* vertices, std::size_t vertexCount, unsig
 ////////////////////////////////////////////////////////////
 bool VertexBuffer::update([[maybe_unused]] const VertexBuffer& vertexBuffer)
 {
-#ifdef SFML_OPENGL_ES
-
-    return false;
-
-#else
-
     if (!m_buffer || !vertexBuffer.m_buffer)
         return false;
 
     SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
 
-    // Make sure that extensions are initialized
-    priv::ensureExtensionsInit(*m_graphicsContext);
-
     if (GLEXT_copy_buffer)
     {
-        glCheck(GLEXT_glBindBuffer(GLEXT_GL_COPY_READ_BUFFER, vertexBuffer.m_buffer));
-        glCheck(GLEXT_glBindBuffer(GLEXT_GL_COPY_WRITE_BUFFER, m_buffer));
+        glCheck(glBindBuffer(GL_COPY_READ_BUFFER, vertexBuffer.m_buffer));
+        glCheck(glBindBuffer(GL_COPY_WRITE_BUFFER, m_buffer));
 
-        glCheck(GLEXT_glCopyBufferSubData(GLEXT_GL_COPY_READ_BUFFER,
-                                          GLEXT_GL_COPY_WRITE_BUFFER,
-                                          0,
-                                          0,
-                                          static_cast<GLsizeiptr>(sizeof(Vertex) * vertexBuffer.m_size)));
+        glCheck(glCopyBufferSubData(GL_COPY_READ_BUFFER,
+                                    GL_COPY_WRITE_BUFFER,
+                                    0,
+                                    0,
+                                    static_cast<GLsizeiptr>(sizeof(Vertex) * vertexBuffer.m_size)));
 
-        glCheck(GLEXT_glBindBuffer(GLEXT_GL_COPY_WRITE_BUFFER, 0));
-        glCheck(GLEXT_glBindBuffer(GLEXT_GL_COPY_READ_BUFFER, 0));
+        glCheck(glBindBuffer(GL_COPY_WRITE_BUFFER, 0));
+        glCheck(glBindBuffer(GL_COPY_READ_BUFFER, 0));
 
         return true;
     }
 
-    glCheck(GLEXT_glBindBuffer(GLEXT_GL_ARRAY_BUFFER, m_buffer));
-    glCheck(GLEXT_glBufferData(GLEXT_GL_ARRAY_BUFFER,
-                               static_cast<GLsizeiptrARB>(sizeof(Vertex) * vertexBuffer.m_size),
-                               nullptr,
-                               VertexBufferImpl::usageToGlEnum(m_usage)));
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_buffer));
+    glCheck(glBufferData(GL_ARRAY_BUFFER,
+                         static_cast<GLsizeiptrARB>(sizeof(Vertex) * vertexBuffer.m_size),
+                         nullptr,
+                         VertexBufferImpl::usageToGlEnum(m_usage)));
 
     void* destination = nullptr;
-    glCheck(destination = GLEXT_glMapBuffer(GLEXT_GL_ARRAY_BUFFER, GLEXT_GL_WRITE_ONLY));
+    glCheck(destination = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 
-    glCheck(GLEXT_glBindBuffer(GLEXT_GL_ARRAY_BUFFER, vertexBuffer.m_buffer));
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.m_buffer));
 
     void* source = nullptr;
-    glCheck(source = GLEXT_glMapBuffer(GLEXT_GL_ARRAY_BUFFER, GLEXT_GL_READ_ONLY));
+    glCheck(source = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY));
 
     std::memcpy(destination, source, sizeof(Vertex) * vertexBuffer.m_size);
 
     GLboolean sourceResult = GL_FALSE;
-    glCheck(sourceResult = GLEXT_glUnmapBuffer(GLEXT_GL_ARRAY_BUFFER));
+    glCheck(sourceResult = glUnmapBuffer(GL_ARRAY_BUFFER));
 
-    glCheck(GLEXT_glBindBuffer(GLEXT_GL_ARRAY_BUFFER, m_buffer));
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_buffer));
 
     GLboolean destinationResult = GL_FALSE;
-    glCheck(destinationResult = GLEXT_glUnmapBuffer(GLEXT_GL_ARRAY_BUFFER));
+    glCheck(destinationResult = glUnmapBuffer(GL_ARRAY_BUFFER));
 
-    glCheck(GLEXT_glBindBuffer(GLEXT_GL_ARRAY_BUFFER, 0));
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
     return (sourceResult == GL_TRUE) && (destinationResult == GL_TRUE);
-
-#endif // SFML_OPENGL_ES
 }
 
 
@@ -351,10 +340,6 @@ bool VertexBuffer::isAvailable(GraphicsContext& graphicsContext)
     static const bool available = [&graphicsContext]
     {
         SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
-
-        // Make sure that extensions are initialized
-        priv::ensureExtensionsInit(graphicsContext);
-
         return GLEXT_vertex_buffer_object != 0;
     }();
 

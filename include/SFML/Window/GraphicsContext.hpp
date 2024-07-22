@@ -51,6 +51,8 @@ class WindowImpl;
 
 namespace sf
 {
+class RenderTarget; // TODO
+class Shader;       // TODO
 class Window;
 struct ContextSettings;
 using GlFunctionPointer = void (*)();
@@ -137,11 +139,16 @@ public:
     [[nodiscard]] GLLoadFn getGLLoadFn() const;
 
 private:
+    ////////////////////////////////////////////////////////////
+    /// Friend declarations
+    ///
+    ////////////////////////////////////////////////////////////
     friend priv::GlContext;
     friend Window;
     friend priv::RenderTextureImplDefault;
     friend priv::RenderTextureImplFBO;
     friend TestContext;
+    friend RenderTarget; // TODO
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new context, not associated to a window
@@ -231,6 +238,7 @@ private:
     ////////////////////////////////////////////////////////////
     void onGlContextDestroyed(priv::GlContext& glContext);
 
+public:
     ////////////////////////////////////////////////////////////
     /// \brief TODO
     ///
@@ -241,8 +249,21 @@ private:
     /// \brief TODO
     ///
     ////////////////////////////////////////////////////////////
+    [[nodiscard]] bool setActiveThreadLocalGlContextToSharedContext(bool active);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief TODO
+    ///
+    ////////////////////////////////////////////////////////////
     [[nodiscard]] bool isActiveGlContextSharedContext() const;
 
+    ////////////////////////////////////////////////////////////
+    /// \brief Load OpenGL or OpenGL ES entry points using GLAD
+    ///
+    ////////////////////////////////////////////////////////////
+    void loadGLEntryPointsViaGLAD() const;
+
+private:
     ////////////////////////////////////////////////////////////
     /// \brief Get the currently active context
     ///
@@ -256,6 +277,10 @@ private:
     ////////////////////////////////////////////////////////////
     struct Impl;
     base::UniquePtr<Impl> m_impl;
+
+public: // TODO
+    int builtInShaderState{0};
+    void (*builtInShaderDestroyFn)(){};
 };
 
 } // namespace sf

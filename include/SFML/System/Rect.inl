@@ -34,7 +34,7 @@ namespace sf
 {
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr bool Rect<T>::contains(const Vector2<T>& point) const
+constexpr bool Rect<T>::contains(Vector2<T> point) const
 {
     // Rectangles with negative dimensions are allowed, so we must handle them correctly
 
@@ -58,10 +58,10 @@ constexpr Vector2<T> Rect<T>::getCenter() const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-template <typename U>
-constexpr U Rect<T>::to() const
+template <typename OtherRect>
+constexpr OtherRect Rect<T>::to() const
 {
-    using ValueType = decltype(U{}.position.x);
+    using ValueType = decltype(OtherRect{}.position.x);
     return Rect<ValueType>{position.template to<Vector2<ValueType>>(), size.template to<Vector2<ValueType>>()};
 }
 

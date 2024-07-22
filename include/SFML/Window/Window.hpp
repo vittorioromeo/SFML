@@ -240,7 +240,9 @@ public:
 
 private:
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Construct a window and a GL context, and a window base
+    ///        from either an existing handle or by creating a window
+    ///        impl
     ///
     ////////////////////////////////////////////////////////////
     template <typename TWindowBaseArg>

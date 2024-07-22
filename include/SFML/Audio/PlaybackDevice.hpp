@@ -47,10 +47,10 @@ struct SoundBase;
 namespace sf
 {
 class AudioContext;
-class Listener;
 class PlaybackDeviceHandle;
 class Sound;
 class SoundStream;
+struct Listener;
 } // namespace sf
 
 
@@ -61,7 +61,9 @@ class PlaybackDevice
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Create the default playback device from `audioContext`
+    ///
+    /// \return Playback device on success, `sf::nullOpt` otherwise
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] static base::Optional<PlaybackDevice> createDefault(AudioContext& audioContext);
@@ -91,36 +93,37 @@ public:
     PlaybackDevice& operator=(PlaybackDevice&&) noexcept;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Transfer all active audio resources to `other`
     ///
     ////////////////////////////////////////////////////////////
     void transferResourcesTo(PlaybackDevice& other);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Get the device handle
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] const PlaybackDeviceHandle& getDeviceHandle() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Update the playback device with `listener`'s parameters
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool updateListener(const Listener& listener);
 
 private:
-    // TODO
+    // Friends
     using SoundBase = priv::MiniaudioUtils::SoundBase;
     friend SoundBase;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Internal representation of a resource entry handle
     ///
     ////////////////////////////////////////////////////////////
     using ResourceEntryIndex = unsigned int;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Tracks the lifetime of an audio resource and enables
+    ///        transferring
     ///
     ////////////////////////////////////////////////////////////
     struct [[nodiscard]] ResourceEntry
@@ -137,7 +140,8 @@ private:
     };
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Registers an audio resource with the playback device
+    ///        and returns a handle to it
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] ResourceEntryIndex registerResource(void*                       resource,
@@ -146,13 +150,13 @@ private:
                                                       ResourceEntry::TransferFunc transferFunc);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Unregisters a audio resource from the playback device
     ///
     ////////////////////////////////////////////////////////////
     void unregisterResource(ResourceEntryIndex resourceEntryIndex);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Gets the internal miniaudio engine pointer
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] void* getMAEngine() const;

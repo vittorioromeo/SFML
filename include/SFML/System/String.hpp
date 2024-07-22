@@ -504,7 +504,7 @@ private:
     friend SFML_SYSTEM_API bool operator<(const String& left, const String& right);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Retrieve the string stored in the PImpl
     ///
     ////////////////////////////////////////////////////////////
     std::u32string& getImplString();

@@ -26,10 +26,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+#include <SFML/Window/GLCheck.hpp>
 #include <SFML/Window/GLExtensions.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 
@@ -52,8 +52,6 @@
 #include <vector>
 
 
-#ifndef SFML_OPENGL_ES
-
 #if defined(SFML_SYSTEM_MACOS) || defined(SFML_SYSTEM_IOS)
 
 #define castToGlHandle(x)   reinterpret_cast<GLEXT_GLhandle>(static_cast<std::ptrdiff_t>(x))
@@ -72,15 +70,8 @@ namespace
 // Retrieve the maximum number of texture units available
 [[nodiscard]] std::size_t getMaxTextureUnits()
 {
-    static const GLint maxUnits = []
-    {
-        GLint value = 0;
-        glCheck(glGetIntegerv(GLEXT_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value));
-
-        return value;
-    }();
-
-    return static_cast<std::size_t>(maxUnits);
+    static const auto maxUnits = static_cast<std::size_t>(sf::priv::getGLInteger(GLEXT_GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+    return maxUnits;
 }
 
 // Pair of indices into thread-local buffer
@@ -283,12 +274,18 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard, gnu::always_inline]] explicit UniformBinder(Shader& shader) :
-    m_currentProgram(castToGlHandle(shader.m_impl->shaderProgram))
+    m_currentProgram(static_cast<GLEXT_GLhandle>(castToGlHandle(shader.m_impl->shaderProgram)))
     {
         SFML_BASE_ASSERT(m_currentProgram != 0);
 
-        // Enable program object
+
+// Enable program object
+#ifndef SFML_OPENGL_ES
         glCheck(m_savedProgram = GLEXT_glGetHandle(GLEXT_GL_PROGRAM_OBJECT));
+#else
+        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, reinterpret_cast<GLint*>(&m_savedProgram)));
+#endif
+
         if (m_currentProgram != m_savedProgram)
             glCheck(GLEXT_glUseProgramObject(m_currentProgram));
     }
@@ -329,7 +326,7 @@ Shader::~Shader()
 
     // Destroy effect program
     if (m_impl->shaderProgram)
-        glCheck(GLEXT_glDeleteObject(castToGlHandle(m_impl->shaderProgram)));
+        glCheck(GLEXT_glDeleteProgram(castToGlHandle(m_impl->shaderProgram)));
 }
 
 
@@ -351,7 +348,7 @@ Shader& Shader::operator=(Shader&& right) noexcept
         // Destroy effect program
         SFML_BASE_ASSERT(m_impl->graphicsContext->hasActiveThreadLocalOrSharedGlContext());
         SFML_BASE_ASSERT(m_impl->shaderProgram);
-        glCheck(GLEXT_glDeleteObject(castToGlHandle(m_impl->shaderProgram)));
+        glCheck(GLEXT_glDeleteProgram(castToGlHandle(m_impl->shaderProgram)));
     }
 
     // Move the contents of right.
@@ -604,11 +601,23 @@ base::Optional<Shader> Shader::loadFromStream(GraphicsContext& graphicsContext,
 ////////////////////////////////////////////////////////////
 base::Optional<Shader::UniformLocation> Shader::getUniformLocation(std::string_view uniformName)
 {
-    const int location = getUniformLocationImpl(uniformName);
-    if (location == -1)
-        return base::nullOpt;
+    // Check the cache
+    if (const auto it = m_impl->uniforms.find(uniformName); it != m_impl->uniforms.end())
+    {
+        // Already in cache, return it
+        return it->second == -1 ? base::nullOpt : sf::base::makeOptional(UniformLocation{it->second});
+    }
 
-    return sf::base::makeOptional(UniformLocation{location});
+    // Use thread-local string buffer to get a null-terminated uniform name
+    thread_local std::string uniformNameBuffer;
+    uniformNameBuffer.clear();
+    uniformNameBuffer.assign(uniformName);
+
+    // Not in cache, request the location from OpenGL
+    const int location = GLEXT_glGetUniformLocation(castToGlHandle(m_impl->shaderProgram), uniformNameBuffer.c_str());
+    m_impl->uniforms.emplace(uniformName, location);
+
+    return location == -1 ? base::nullOpt : sf::base::makeOptional(UniformLocation{location});
 }
 
 
@@ -621,7 +630,7 @@ void Shader::setUniform(UniformLocation location, float x)
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation location, const Glsl::Vec2& v)
+void Shader::setUniform(UniformLocation location, Glsl::Vec2 v)
 {
     const UniformBinder binder{*this};
     glCheck(GLEXT_glUniform2f(location.m_value, v.x, v.y));
@@ -653,7 +662,7 @@ void Shader::setUniform(UniformLocation location, int x)
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation location, const Glsl::Ivec2& v)
+void Shader::setUniform(UniformLocation location, Glsl::Ivec2 v)
 {
     const UniformBinder binder{*this};
     glCheck(GLEXT_glUniform2i(location.m_value, v.x, v.y));
@@ -684,7 +693,7 @@ void Shader::setUniform(UniformLocation location, bool x)
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation location, const Glsl::Bvec2& v)
+void Shader::setUniform(UniformLocation location, Glsl::Bvec2 v)
 {
     return setUniform(location, v.to<Glsl::Ivec2>());
 }
@@ -837,13 +846,7 @@ void Shader::bind() const
     SFML_BASE_ASSERT(m_impl->graphicsContext->hasActiveThreadLocalOrSharedGlContext());
 
     // Make sure that we can use shaders
-    if (!isAvailable(*m_impl->graphicsContext))
-    {
-        priv::err() << "Failed to bind or unbind shader: your system doesn't support shaders "
-                    << "(you should test Shader::isAvailable(graphicsContext) before trying to use the Shader class)";
-
-        return;
-    }
+    ensureIsAvailable(*m_impl->graphicsContext);
 
     if (m_impl->shaderProgram == 0)
     {
@@ -853,6 +856,7 @@ void Shader::bind() const
     }
 
     // Enable the program
+    SFML_BASE_ASSERT(glIsProgram(castToGlHandle(m_impl->shaderProgram)));
     glCheck(GLEXT_glUseProgramObject(castToGlHandle(m_impl->shaderProgram)));
 
     // Bind the textures
@@ -864,7 +868,7 @@ void Shader::bind() const
 }
 
 
-void Shader::unbind(GraphicsContext& graphicsContext)
+void Shader::unbind([[maybe_unused]] GraphicsContext& graphicsContext)
 {
     SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
 
@@ -874,30 +878,35 @@ void Shader::unbind(GraphicsContext& graphicsContext)
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::isAvailable(GraphicsContext& graphicsContext)
+void Shader::ensureIsAvailable([[maybe_unused]] GraphicsContext& graphicsContext)
 {
+#ifndef SFML_OPENGL_ES
+
     static const bool available = [&graphicsContext]
     {
         SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
-        priv::ensureExtensionsInit(graphicsContext);
-
-        return GLEXT_multitexture && GLEXT_shading_language_100 && GLEXT_shader_objects && GLEXT_vertex_shader &&
-               GLEXT_fragment_shader;
+        return GLEXT_multitexture && GLEXT_shader_objects && GLEXT_vertex_shader && GLEXT_fragment_shader;
     }();
 
-    return available;
+    if (!available)
+    {
+        priv::err() << "[[SFML FATAL ERROR]]: your system doesn't support shaders";
+        std::abort();
+    }
+
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::isGeometryAvailable(GraphicsContext& graphicsContext)
+bool Shader::isGeometryAvailable([[maybe_unused]] GraphicsContext& graphicsContext)
 {
+    ensureIsAvailable(graphicsContext);
+
     static const bool available = [&graphicsContext]
     {
         SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
-        priv::ensureExtensionsInit(graphicsContext);
-
-        return isAvailable(graphicsContext) && (GLEXT_geometry_shader4 || GLEXT_GL_VERSION_3_2);
+        return GLEXT_geometry_shader4 || GLAD_GL_ES_VERSION_3_2 || GLEXT_GL_VERSION_3_2;
     }();
 
     return available;
@@ -920,16 +929,10 @@ base::Optional<Shader> Shader::compile(GraphicsContext& graphicsContext,
     SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
 
     // First make sure that we can use shaders
-    if (!isAvailable(graphicsContext))
-    {
-        priv::err() << "Failed to create a shader: your system doesn't support shaders "
-                    << "(you should test Shader::isAvailable() before trying to use the Shader class)";
-
-        return base::nullOpt;
-    }
+    ensureIsAvailable(graphicsContext);
 
     // Make sure we can use geometry shaders
-    if (geometryShaderCode.data() && !isGeometryAvailable(graphicsContext))
+    if (geometryShaderCode.data() != nullptr && !isGeometryAvailable(graphicsContext))
     {
         priv::err() << "Failed to create a shader: your system doesn't support geometry shaders "
                     << "(you should test Shader::isGeometryAvailable() before trying to use geometry shaders)";
@@ -939,7 +942,35 @@ base::Optional<Shader> Shader::compile(GraphicsContext& graphicsContext,
 
     // Create the program
     GLEXT_GLhandle shaderProgram{};
-    glCheck(shaderProgram = GLEXT_glCreateProgramObject());
+    glCheck(shaderProgram = glCreateProgram());
+    SFML_BASE_ASSERT(glIsProgram(shaderProgram));
+
+#ifdef SFML_OPENGL_ES
+    if (vertexShaderCode.data() == nullptr)
+    {
+        vertexShaderCode = R"glsl(
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform mat4 sf_u_projectionMatrix;
+uniform mat4 sf_u_modelViewMatrix;
+
+attribute vec2 sf_a_position;
+attribute vec4 sf_a_color;
+
+varying vec4 sf_v_color;
+
+void main()
+{
+    gl_Position = sf_u_projectionMatrix * sf_u_modelViewMatrix * vec4(sf_a_position, 0.0, 1.0);
+    sf_v_color = sf_a_color;
+}
+
+        )glsl";
+    }
+#endif
 
     // Create the vertex shader if needed
     if (vertexShaderCode.data())
@@ -951,52 +982,77 @@ base::Optional<Shader> Shader::compile(GraphicsContext& graphicsContext,
         const auto       sourceCodeLength = static_cast<GLint>(vertexShaderCode.length());
         glCheck(GLEXT_glShaderSource(vertexShader, 1, &sourceCode, &sourceCodeLength));
         glCheck(GLEXT_glCompileShader(vertexShader));
+        SFML_BASE_ASSERT(glIsShader(vertexShader));
 
         // Check the compile log
         GLint success = 0;
-        glCheck(GLEXT_glGetObjectParameteriv(vertexShader, GLEXT_GL_OBJECT_COMPILE_STATUS, &success));
+        glCheck(GLEXT_glGetShaderParameteriv(vertexShader, GLEXT_GL_OBJECT_COMPILE_STATUS, &success));
         if (success == GL_FALSE)
         {
             char log[1024];
-            glCheck(GLEXT_glGetInfoLog(vertexShader, sizeof(log), nullptr, log));
+            glCheck(GLEXT_glGetShaderInfoLog(vertexShader, sizeof(log), nullptr, log));
             priv::err() << "Failed to compile vertex shader:" << '\n' << static_cast<const char*>(log);
-            glCheck(GLEXT_glDeleteObject(vertexShader));
-            glCheck(GLEXT_glDeleteObject(shaderProgram));
+            glCheck(GLEXT_glDeleteShader(vertexShader));
+            glCheck(GLEXT_glDeleteProgram(shaderProgram));
             return base::nullOpt;
         }
 
         // Attach the shader to the program, and delete it (not needed anymore)
-        glCheck(GLEXT_glAttachObject(shaderProgram, vertexShader));
-        glCheck(GLEXT_glDeleteObject(vertexShader));
+        glCheck(GLEXT_glAttachShader(shaderProgram, vertexShader));
+        glCheck(GLEXT_glDeleteShader(vertexShader));
     }
 
     // Create the geometry shader if needed
     if (geometryShaderCode.data())
     {
         // Create and compile the shader
-        const GLEXT_GLhandle geometryShader   = GLEXT_glCreateShaderObject(GLEXT_GL_GEOMETRY_SHADER);
+        const GLEXT_GLhandle geometryShader   = GLEXT_glCreateShaderObject(GL_GEOMETRY_SHADER);
         const GLcharARB*     sourceCode       = geometryShaderCode.data();
         const auto           sourceCodeLength = static_cast<GLint>(geometryShaderCode.length());
         glCheck(GLEXT_glShaderSource(geometryShader, 1, &sourceCode, &sourceCodeLength));
         glCheck(GLEXT_glCompileShader(geometryShader));
+        SFML_BASE_ASSERT(glIsShader(geometryShader));
 
         // Check the compile log
         GLint success = 0;
-        glCheck(GLEXT_glGetObjectParameteriv(geometryShader, GLEXT_GL_OBJECT_COMPILE_STATUS, &success));
+        glCheck(GLEXT_glGetShaderParameteriv(geometryShader, GLEXT_GL_OBJECT_COMPILE_STATUS, &success));
         if (success == GL_FALSE)
         {
             char log[1024];
-            glCheck(GLEXT_glGetInfoLog(geometryShader, sizeof(log), nullptr, log));
+            glCheck(GLEXT_glGetShaderInfoLog(geometryShader, sizeof(log), nullptr, log));
             priv::err() << "Failed to compile geometry shader:" << '\n' << static_cast<const char*>(log);
-            glCheck(GLEXT_glDeleteObject(geometryShader));
-            glCheck(GLEXT_glDeleteObject(shaderProgram));
+            glCheck(GLEXT_glDeleteShader(geometryShader));
+            glCheck(GLEXT_glDeleteProgram(shaderProgram));
             return base::nullOpt;
         }
 
         // Attach the shader to the program, and delete it (not needed anymore)
-        glCheck(GLEXT_glAttachObject(shaderProgram, geometryShader));
-        glCheck(GLEXT_glDeleteObject(geometryShader));
+        glCheck(GLEXT_glAttachShader(shaderProgram, geometryShader));
+        glCheck(GLEXT_glDeleteShader(geometryShader));
     }
+
+#ifdef SFML_OPENGL_ES
+    if (fragmentShaderCode.data() == nullptr)
+    {
+        fragmentShaderCode = R"glsl(
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform sampler2D sf_u_texture;
+
+varying vec4 sf_v_color;
+varying vec2 sf_v_texCoord;
+
+void main()
+{
+    gl_FragColor = sf_v_color * texture2D(sf_u_texture, sf_v_texCoord.st);
+}
+
+        )glsl";
+    }
+#endif
 
     // Create the fragment shader if needed
     if (fragmentShaderCode.data())
@@ -1008,23 +1064,24 @@ base::Optional<Shader> Shader::compile(GraphicsContext& graphicsContext,
         const auto       sourceCodeLength = static_cast<GLint>(fragmentShaderCode.length());
         glCheck(GLEXT_glShaderSource(fragmentShader, 1, &sourceCode, &sourceCodeLength));
         glCheck(GLEXT_glCompileShader(fragmentShader));
+        SFML_BASE_ASSERT(glIsShader(fragmentShader));
 
         // Check the compile log
         GLint success = 0;
-        glCheck(GLEXT_glGetObjectParameteriv(fragmentShader, GLEXT_GL_OBJECT_COMPILE_STATUS, &success));
+        glCheck(GLEXT_glGetShaderParameteriv(fragmentShader, GLEXT_GL_OBJECT_COMPILE_STATUS, &success));
         if (success == GL_FALSE)
         {
             char log[1024];
-            glCheck(GLEXT_glGetInfoLog(fragmentShader, sizeof(log), nullptr, log));
+            glCheck(GLEXT_glGetShaderInfoLog(fragmentShader, sizeof(log), nullptr, log));
             priv::err() << "Failed to compile fragment shader:" << '\n' << static_cast<const char*>(log);
-            glCheck(GLEXT_glDeleteObject(fragmentShader));
-            glCheck(GLEXT_glDeleteObject(shaderProgram));
+            glCheck(GLEXT_glDeleteShader(fragmentShader));
+            glCheck(GLEXT_glDeleteProgram(shaderProgram));
             return base::nullOpt;
         }
 
         // Attach the shader to the program, and delete it (not needed anymore)
-        glCheck(GLEXT_glAttachObject(shaderProgram, fragmentShader));
-        glCheck(GLEXT_glDeleteObject(fragmentShader));
+        glCheck(GLEXT_glAttachShader(shaderProgram, fragmentShader));
+        glCheck(GLEXT_glDeleteShader(fragmentShader));
     }
 
     // Link the program
@@ -1032,13 +1089,13 @@ base::Optional<Shader> Shader::compile(GraphicsContext& graphicsContext,
 
     // Check the link log
     GLint success = 0;
-    glCheck(GLEXT_glGetObjectParameteriv(shaderProgram, GLEXT_GL_OBJECT_LINK_STATUS, &success));
+    glCheck(GLEXT_glGetProgramParameteriv(shaderProgram, GLEXT_GL_OBJECT_LINK_STATUS, &success));
     if (success == GL_FALSE)
     {
         char log[1024];
-        glCheck(GLEXT_glGetInfoLog(shaderProgram, sizeof(log), nullptr, log));
+        glCheck(GLEXT_glGetProgramInfoLog(shaderProgram, sizeof(log), nullptr, log));
         priv::err() << "Failed to link shader:" << '\n' << static_cast<const char*>(log);
-        glCheck(GLEXT_glDeleteObject(shaderProgram));
+        glCheck(GLEXT_glDeleteProgram(shaderProgram));
         return base::nullOpt;
     }
 
@@ -1067,301 +1124,4 @@ void Shader::bindTextures() const
     glCheck(GLEXT_glActiveTexture(GLEXT_GL_TEXTURE0));
 }
 
-
-////////////////////////////////////////////////////////////
-int Shader::getUniformLocationImpl(std::string_view uniformName)
-{
-    // Check the cache
-    if (const auto it = m_impl->uniforms.find(uniformName); it != m_impl->uniforms.end())
-    {
-        // Already in cache, return it
-        return it->second;
-    }
-
-    // Use thread-local string buffer to get a null-terminated uniform name
-    thread_local std::string uniformNameBuffer;
-    uniformNameBuffer.clear();
-    uniformNameBuffer.assign(uniformName);
-
-    // Not in cache, request the location from OpenGL
-    const int location = GLEXT_glGetUniformLocation(castToGlHandle(m_impl->shaderProgram), uniformNameBuffer.c_str());
-    m_impl->uniforms.emplace(uniformName, location);
-
-    if (location == -1)
-        priv::err() << "Uniform \"" << uniformName << "\" not found in shader";
-
-    return location;
-}
-
 } // namespace sf
-
-#else // SFML_OPENGL_ES
-
-// OpenGL ES 1 doesn't support GLSL shaders at all, we have to provide an empty implementation
-
-namespace sf
-{
-////////////////////////////////////////////////////////////
-Shader::~Shader() = default;
-
-
-////////////////////////////////////////////////////////////
-Shader::Shader(Shader&& source) noexcept = default;
-
-
-////////////////////////////////////////////////////////////
-Shader& Shader::operator=(Shader&& right) noexcept = default;
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromFile(const Path& /* filename */, Type /* type */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromFile(const Path& /* vertexShaderFilename */, const Path& /* fragmentShaderFilename */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromFile(const Path& /* vertexShaderFilename */,
-                                            const Path& /* geometryShaderFilename */,
-                                            const Path& /* fragmentShaderFilename */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromMemory(std::string_view /* shader */, Type /* type */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromMemory(std::string_view /* vertexShader */, std::string_view /* fragmentShader */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromMemory(std::string_view /* vertexShader */,
-                                              std::string_view /* geometryShader */,
-                                              std::string_view /* fragmentShader */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromStream(InputStream& /* stream */, Type /* type */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromStream(InputStream& /* vertexShaderStream */, InputStream& /* fragmentShaderStream */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::loadFromStream(InputStream& /* vertexShaderStream */,
-                                              InputStream& /* geometryShaderStream */,
-                                              InputStream& /* fragmentShaderStream */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, float)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Vec2&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Vec3&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Vec4&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, int)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Ivec2&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Ivec3&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Ivec4&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, bool)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Bvec2&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Bvec3&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Bvec4&)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Mat3& /* matrix */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, const Glsl::Mat4& /* matrix */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-bool Shader::setUniform(UniformLocation /* uniformLocation */, const Texture& /* texture */)
-{
-    return false;
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniform(UniformLocation /* uniformLocation */, CurrentTextureType)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniformArray(UniformLocation /* uniformLocation */, const float* /* scalarArray */, std::size_t /* length */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniformArray(UniformLocation /* uniformLocation */, const Glsl::Vec2* /* vectorArray */, std::size_t /* length */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniformArray(UniformLocation /* uniformLocation */, const Glsl::Vec3* /* vectorArray */, std::size_t /* length */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniformArray(UniformLocation /* uniformLocation */, const Glsl::Vec4* /* vectorArray */, std::size_t /* length */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniformArray(UniformLocation /* uniformLocation */, const Glsl::Mat3* /* matrixArray */, std::size_t /* length */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::setUniformArray(UniformLocation /* uniformLocation */, const Glsl::Mat4* /* matrixArray */, std::size_t /* length */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-unsigned int Shader::getNativeHandle() const
-{
-    return 0;
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::bind(const Shader* /* shader */)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-bool Shader::isAvailable(graphicsContext)
-{
-    return false;
-}
-
-
-////////////////////////////////////////////////////////////
-bool Shader::isGeometryAvailable()
-{
-    return false;
-}
-
-
-////////////////////////////////////////////////////////////
-Shader::Shader(base::PassKey<Shader>&&, unsigned int shaderProgram) : m_impl->shaderProgram(shaderProgram)
-{
-}
-
-
-////////////////////////////////////////////////////////////
-base::Optional<Shader> Shader::compile(std::string_view /* vertexShaderCode */,
-                                       std::string_view /* geometryShaderCode */,
-                                       std::string_view /* fragmentShaderCode */)
-{
-    return base::nullOpt;
-}
-
-
-////////////////////////////////////////////////////////////
-void Shader::bindTextures() const
-{
-}
-
-} // namespace sf
-
-#endif // SFML_OPENGL_ES

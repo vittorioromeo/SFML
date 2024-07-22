@@ -32,7 +32,6 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 
 #include <SFML/Window/ContextSettings.hpp>
-#include <SFML/Window/VideoMode.hpp>
 #include <SFML/Window/Window.hpp>
 #include <SFML/Window/WindowEnums.hpp>
 #include <SFML/Window/WindowHandle.hpp>
@@ -191,19 +190,19 @@ public:
     [[nodiscard]] bool setActive(bool active = true) override;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief TODO P0: ? needed to forward to base
     ///
     ////////////////////////////////////////////////////////////
     void setSize(const Vector2u& size);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief TODO P0: ? needed to forward to base
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] base::Optional<Event> pollEvent();
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief TODO P0: ? needed to forward to base
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] base::Optional<Event> waitEvent(Time timeout = Time::Zero);

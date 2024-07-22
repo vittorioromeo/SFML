@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/ContextSettings.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/EventUtils.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -22,7 +23,6 @@
 #endif
 
 #include <array>
-#include <iostream>
 
 #include <cstdlib>
 
@@ -48,11 +48,7 @@ int main()
                       contextSettings);
 
     // Load OpenGL or OpenGL ES entry points using glad
-#ifdef SFML_OPENGL_ES
-    gladLoadGLES1(graphicsContext.getGLLoadFn());
-#else
-    gladLoadGL(graphicsContext.getGLLoadFn());
-#endif
+    graphicsContext.loadGLEntryPointsViaGLAD();
 
     // Set the color and depth clear values
 #ifdef SFML_OPENGL_ES
@@ -77,11 +73,7 @@ int main()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     const GLfloat ratio = static_cast<float>(window.getSize().x) / static_cast<float>(window.getSize().y);
-#ifdef SFML_OPENGL_ES
-    glFrustumf(-ratio, ratio, -1.f, 1.f, 1.f, 500.f);
-#else
     glFrustum(-ratio, ratio, -1.f, 1.f, 1.f, 500.f);
-#endif
 
     // Define a 3D cube (6 faces made of 2 triangles composed by 3 vertices)
     // clang-format off
@@ -151,13 +143,8 @@ int main()
         // Process events
         while (const sf::base::Optional event = window.pollEvent())
         {
-            // Window closed or escape key pressed: exit
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
 
             // Resize event: adjust the viewport
             if (const auto* resized = event->getIf<sf::Event::Resized>())
@@ -167,11 +154,7 @@ int main()
                 glMatrixMode(GL_PROJECTION);
                 glLoadIdentity();
                 const GLfloat newRatio = static_cast<float>(width) / static_cast<float>(height);
-#ifdef SFML_OPENGL_ES
-                glFrustumf(-newRatio, newRatio, -1.f, 1.f, 1.f, 500.f);
-#else
                 glFrustum(-newRatio, newRatio, -1.f, 1.f, 1.f, 500.f);
-#endif
             }
         }
 

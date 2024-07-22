@@ -645,7 +645,7 @@ protected:
     [[nodiscard]] SoundSource();
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Apply the stored settings onto `sound`
     ///
     ////////////////////////////////////////////////////////////
     void applyStoredSettings(ma_sound& sound) const;

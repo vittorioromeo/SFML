@@ -32,7 +32,27 @@
         "SFML_ENABLE_PCH": "OFF",
         "SFML_ENABLE_STACK_TRACES": "ON",
         "SFML_ENABLE_STDLIB_ASSERTIONS": "ON",
-        "SFML_WARNINGS_AS_ERRORS": "ON"
+        "SFML_WARNINGS_AS_ERRORS": "OFF"
+      }
+    },
+    {
+      "name": "vrdevgcc",
+      "binaryDir": "build",
+      "installDir": "${sourceDir}/build/install",
+      "cacheVariables": {
+        "CMAKE_COLOR_DIAGNOSTICS": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_CXX_EXTENSIONS": "OFF",
+        "CMAKE_CXX_FLAGS": "-fuse-ld=lld -Wnrvo -Wall -Wextra -Wpedantic -Wno-ignored-attributes -Wno-unused-command-line-argument",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "SFML_BUILD_EXAMPLES": "ON",
+        "SFML_BUILD_TEST_SUITE": "ON",
+        "SFML_ENABLE_LIFETIME_TRACKING": "ON",
+        "SFML_ENABLE_PCH": "OFF",
+        "SFML_ENABLE_STACK_TRACES": "ON",
+        "SFML_ENABLE_STDLIB_ASSERTIONS": "ON",
+        "SFML_WARNINGS_AS_ERRORS": "OFF"
       }
     }
   ]

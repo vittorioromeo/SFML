@@ -50,7 +50,7 @@ public:
     /// \param shared Context to share the new one with (can be a null pointer)
     ///
     ////////////////////////////////////////////////////////////
-    EglContext(EglContext* shared);
+    EglContext(GraphicsContext& graphicsContext, std::uint64_t id, EglContext* shared);
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new context attached to a window
@@ -61,7 +61,12 @@ public:
     /// \param bitsPerPixel Pixel depth, in bits per pixel
     ///
     ////////////////////////////////////////////////////////////
-    EglContext(EglContext* shared, const ContextSettings& settings, const WindowImpl& owner, unsigned int bitsPerPixel);
+    EglContext(GraphicsContext&       graphicsContext,
+               std::uint64_t          id,
+               EglContext*            shared,
+               const ContextSettings& settings,
+               const WindowImpl&      owner,
+               unsigned int           bitsPerPixel);
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new context that embeds its own rendering target
@@ -72,7 +77,11 @@ public:
     /// \param size     Back buffer width and height, in pixels
     ///
     ////////////////////////////////////////////////////////////
-    EglContext(EglContext* shared, const ContextSettings& settings, const Vector2u& size);
+    EglContext(GraphicsContext&       graphicsContext,
+               std::uint64_t          id,
+               EglContext*            shared,
+               const ContextSettings& settings,
+               Vector2u               size);
 
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
@@ -88,7 +97,7 @@ public:
     /// \return Address of the OpenGL function, 0 on failure
     ///
     ////////////////////////////////////////////////////////////
-    GlFunctionPointer getFunction(const char* name);
+    GlFunctionPointer getFunction(const char* name) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Activate the context as the current target

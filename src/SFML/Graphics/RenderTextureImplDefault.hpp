@@ -82,7 +82,7 @@ private:
     /// \return True if creation has been successful
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] bool create(const Vector2u& size, unsigned int textureId, const ContextSettings& settings) override;
+    [[nodiscard]] bool create(Vector2u size, unsigned int textureId, const ContextSettings& settings) override;
 
     ////////////////////////////////////////////////////////////
     /// \brief Activate or deactivate the render texture for rendering
@@ -116,7 +116,7 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    GraphicsContext*                 m_graphicsContext; //!< TODO
+    GraphicsContext*                 m_graphicsContext; //!< The graphics context
     base::UniquePtr<priv::GlContext> m_glContext;       //!< P-Buffer based context
     Vector2u                         m_size;            //!< Width and height of the P-Buffer
 };

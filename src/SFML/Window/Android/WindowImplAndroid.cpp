@@ -130,7 +130,7 @@ Vector2i WindowImplAndroid::getPosition() const
 
 
 ////////////////////////////////////////////////////////////
-void WindowImplAndroid::setPosition(const Vector2i& /* position */)
+void WindowImplAndroid::setPosition(Vector2i /* position */)
 {
     // Not applicable
 }
@@ -144,7 +144,7 @@ Vector2u WindowImplAndroid::getSize() const
 
 
 ////////////////////////////////////////////////////////////
-void WindowImplAndroid::setSize(const Vector2u& /* size */)
+void WindowImplAndroid::setSize(Vector2u /* size */)
 {
 }
 
@@ -171,7 +171,7 @@ void WindowImplAndroid::setTitle(const String& /* title */)
 
 
 ////////////////////////////////////////////////////////////
-void WindowImplAndroid::setIcon(const Vector2u& /* size */, const std::uint8_t* /* pixels */)
+void WindowImplAndroid::setIcon(Vector2u /* size */, const std::uint8_t* /* pixels */)
 {
     // Not applicable
 }
@@ -291,7 +291,7 @@ int WindowImplAndroid::processEvent(int /* fd */, int /* events */, void* /* dat
                     break;
                 }
 
-                // TODO: should hover_move indeed trigger the event?
+                // TODO P2: should hover_move indeed trigger the event?
                 // case AMOTION_EVENT_ACTION_HOVER_MOVE:
                 case AMOTION_EVENT_ACTION_MOVE:
                 {
@@ -299,7 +299,7 @@ int WindowImplAndroid::processEvent(int /* fd */, int /* events */, void* /* dat
                     break;
                 }
 
-                // TODO: investigate AMOTION_EVENT_OUTSIDE
+                // TODO P2: investigate AMOTION_EVENT_OUTSIDE
                 case AMOTION_EVENT_ACTION_POINTER_DOWN:
                 case AMOTION_EVENT_ACTION_DOWN:
                 {

@@ -98,11 +98,13 @@ public:
     [[nodiscard, gnu::always_inline, gnu::pure]] SFML_API_EXPORT constexpr Vector3 cwiseDiv(const Vector3& rhs) const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Convert to another `Vector3` of type `OtherVector3`
+    ///
+    /// `OtherVector3` must be a `Vector3<...>` type.
     ///
     ////////////////////////////////////////////////////////////
-    template <typename U>
-    [[nodiscard, gnu::always_inline, gnu::pure]] inline constexpr U to() const;
+    template <typename OtherVector3>
+    [[nodiscard, gnu::always_inline, gnu::pure]] inline constexpr OtherVector3 to() const;
 
     ////////////////////////////////////////////////////////////
     // Member data

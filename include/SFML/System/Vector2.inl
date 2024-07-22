@@ -53,7 +53,7 @@ constexpr Vector2<T> Vector2<T>::perpendicular() const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr T Vector2<T>::dot(const Vector2<T>& rhs) const
+constexpr T Vector2<T>::dot(Vector2<T> rhs) const
 {
     return x * rhs.x + y * rhs.y;
 }
@@ -61,7 +61,7 @@ constexpr T Vector2<T>::dot(const Vector2<T>& rhs) const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr T Vector2<T>::cross(const Vector2<T>& rhs) const
+constexpr T Vector2<T>::cross(Vector2<T> rhs) const
 {
     return x * rhs.y - y * rhs.x;
 }
@@ -69,7 +69,7 @@ constexpr T Vector2<T>::cross(const Vector2<T>& rhs) const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> Vector2<T>::cwiseMul(const Vector2<T>& rhs) const
+constexpr Vector2<T> Vector2<T>::cwiseMul(Vector2<T> rhs) const
 {
     return Vector2<T>(x * rhs.x, y * rhs.y);
 }
@@ -77,7 +77,7 @@ constexpr Vector2<T> Vector2<T>::cwiseMul(const Vector2<T>& rhs) const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> Vector2<T>::cwiseDiv(const Vector2<T>& rhs) const
+constexpr Vector2<T> Vector2<T>::cwiseDiv(Vector2<T> rhs) const
 {
     SFML_BASE_ASSERT(rhs.x != 0 && "Vector2::cwiseDiv() cannot divide by 0 (x coordinate)");
     SFML_BASE_ASSERT(rhs.y != 0 && "Vector2::cwiseDiv() cannot divide by 0 (y coordinate)");
@@ -88,7 +88,7 @@ constexpr Vector2<T> Vector2<T>::cwiseDiv(const Vector2<T>& rhs) const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> operator-(const Vector2<T>& right)
+constexpr Vector2<T> operator-(Vector2<T> right)
 {
     return Vector2<T>(-right.x, -right.y);
 }
@@ -96,7 +96,7 @@ constexpr Vector2<T> operator-(const Vector2<T>& right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T>& operator+=(Vector2<T>& left, const Vector2<T>& right)
+constexpr Vector2<T>& operator+=(Vector2<T>& left, Vector2<T> right)
 {
     left.x += right.x;
     left.y += right.y;
@@ -107,7 +107,7 @@ constexpr Vector2<T>& operator+=(Vector2<T>& left, const Vector2<T>& right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T>& operator-=(Vector2<T>& left, const Vector2<T>& right)
+constexpr Vector2<T>& operator-=(Vector2<T>& left, Vector2<T> right)
 {
     left.x -= right.x;
     left.y -= right.y;
@@ -118,7 +118,7 @@ constexpr Vector2<T>& operator-=(Vector2<T>& left, const Vector2<T>& right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> operator+(const Vector2<T>& left, const Vector2<T>& right)
+constexpr Vector2<T> operator+(Vector2<T> left, Vector2<T> right)
 {
     return Vector2<T>(left.x + right.x, left.y + right.y);
 }
@@ -126,7 +126,7 @@ constexpr Vector2<T> operator+(const Vector2<T>& left, const Vector2<T>& right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> operator-(const Vector2<T>& left, const Vector2<T>& right)
+constexpr Vector2<T> operator-(Vector2<T> left, Vector2<T> right)
 {
     return Vector2<T>(left.x - right.x, left.y - right.y);
 }
@@ -134,7 +134,7 @@ constexpr Vector2<T> operator-(const Vector2<T>& left, const Vector2<T>& right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> operator*(const Vector2<T>& left, T right)
+constexpr Vector2<T> operator*(Vector2<T> left, T right)
 {
     return Vector2<T>(left.x * right, left.y * right);
 }
@@ -142,7 +142,7 @@ constexpr Vector2<T> operator*(const Vector2<T>& left, T right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> operator*(T left, const Vector2<T>& right)
+constexpr Vector2<T> operator*(T left, Vector2<T> right)
 {
     return Vector2<T>(right.x * left, right.y * left);
 }
@@ -161,7 +161,7 @@ constexpr Vector2<T>& operator*=(Vector2<T>& left, T right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> operator/(const Vector2<T>& left, T right)
+constexpr Vector2<T> operator/(Vector2<T> left, T right)
 {
     SFML_BASE_ASSERT(right != 0 && "Vector2::operator/ cannot divide by 0");
 
@@ -184,7 +184,7 @@ constexpr Vector2<T>& operator/=(Vector2<T>& left, T right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr bool operator==(const Vector2<T>& left, const Vector2<T>& right)
+constexpr bool operator==(Vector2<T> left, Vector2<T> right)
 {
     return (left.x == right.x) && (left.y == right.y);
 }
@@ -192,7 +192,7 @@ constexpr bool operator==(const Vector2<T>& left, const Vector2<T>& right)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr bool operator!=(const Vector2<T>& left, const Vector2<T>& right)
+constexpr bool operator!=(Vector2<T> left, Vector2<T> right)
 {
     return (left.x != right.x) || (left.y != right.y);
 }
@@ -212,7 +212,7 @@ constexpr Vector2<T> Vector2<T>::normalized() const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Angle Vector2<T>::angleTo(const Vector2<T>& rhs) const
+constexpr Angle Vector2<T>::angleTo(Vector2<T> rhs) const
 {
     static_assert(base::isFloatingPoint<T>, "Vector2::angleTo() is only supported for floating point types");
 
@@ -261,7 +261,7 @@ constexpr Vector2<T> Vector2<T>::movedTowards(T r, Angle phi) const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-constexpr Vector2<T> Vector2<T>::projectedOnto(const Vector2<T>& axis) const
+constexpr Vector2<T> Vector2<T>::projectedOnto(Vector2<T> axis) const
 {
     static_assert(base::isFloatingPoint<T>, "Vector2::projectedOnto() is only supported for floating point types");
 
@@ -292,10 +292,10 @@ constexpr T Vector2<T>::length() const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-template <typename U>
-constexpr U Vector2<T>::to() const
+template <typename OtherVector2>
+constexpr OtherVector2 Vector2<T>::to() const
 {
-    using ValueType = decltype(U{}.x);
+    using ValueType = decltype(OtherVector2{}.x);
     return Vector2<ValueType>{static_cast<ValueType>(x), static_cast<ValueType>(y)};
 }
 

@@ -9,11 +9,13 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
-#include <SFML/Base/Optional.hpp>
 #include <SFML/System/Path.hpp>
 #include <SFML/System/String.hpp>
 #include <SFML/System/Vector2.hpp>
+
+#include <SFML/Base/Optional.hpp>
 
 #include <string>
 #include <vector>

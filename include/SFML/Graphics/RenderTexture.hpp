@@ -105,7 +105,7 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] static base::Optional<RenderTexture> create(GraphicsContext&       graphicsContext,
-                                                              const Vector2u&        size,
+                                                              Vector2u               size,
                                                               const ContextSettings& settings = {});
 
     ////////////////////////////////////////////////////////////

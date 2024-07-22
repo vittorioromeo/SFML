@@ -42,6 +42,14 @@
 #include <SFML/Base/Traits/RemoveCVRef.hpp>
 
 
+namespace sf::base::priv
+{
+////////////////////////////////////////////////////////////
+[[gnu::cold]] void throwIfNotEngaged();
+
+} // namespace sf::base::priv
+
+
 namespace sf::base
 {
 ////////////////////////////////////////////////////////////
@@ -280,7 +288,7 @@ public:
     [[nodiscard, gnu::always_inline]] constexpr T& value() &
     {
         if (!m_engaged) [[unlikely]]
-            throw BadOptionalAccess{};
+            priv::throwIfNotEngaged();
 
         return *SFML_BASE_LAUNDER_CAST(T*, m_buffer);
     }
@@ -290,7 +298,7 @@ public:
     [[nodiscard, gnu::always_inline]] constexpr const T& value() const&
     {
         if (!m_engaged) [[unlikely]]
-            throw BadOptionalAccess{};
+            priv::throwIfNotEngaged();
 
         return *SFML_BASE_LAUNDER_CAST(const T*, m_buffer);
     }
@@ -300,7 +308,7 @@ public:
     [[nodiscard, gnu::always_inline]] constexpr T&& value() &&
     {
         if (!m_engaged) [[unlikely]]
-            throw BadOptionalAccess{};
+            priv::throwIfNotEngaged();
 
         return SFML_BASE_MOVE(*SFML_BASE_LAUNDER_CAST(T*, m_buffer));
     }

@@ -63,9 +63,9 @@ using VulkanFunctionPointer = void (*)();
 namespace Vulkan
 {
 ////////////////////////////////////////////////////////////
-/// \brief TODO
+/// \brief Data associated with a Vulkan surface
 ///
-///
+////////////////////////////////////////////////////////////
 struct VulkanSurfaceData
 {
     explicit VulkanSurfaceData(const VkInstance&            theInstance,

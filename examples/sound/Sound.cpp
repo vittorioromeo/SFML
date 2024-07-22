@@ -8,11 +8,11 @@
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 
+#include <SFML/System/Path.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <SFML/System/Time.hpp>
 
 #include <iostream>
-#include <SFML/System/Path.hpp>
 
 
 ////////////////////////////////////////////////////////////

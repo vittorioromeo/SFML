@@ -25,12 +25,12 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/RenderTextureImplFBO.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/GLCheck.hpp>
 #include <SFML/Window/GLExtensions.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Window/WindowBase.hpp>
@@ -47,7 +47,7 @@ void retrieveWindowFrameBufferId(sf::GraphicsContext& graphicsContext, unsigned 
     {
         // Retrieve the framebuffer ID we have to bind when targeting the window for rendering
         // We assume that this window's context is still active at this point
-        glCheck(glGetIntegerv(GLEXT_GL_FRAMEBUFFER_BINDING, reinterpret_cast<GLint*>(&defaultFrameBuffer)));
+        glCheck(glGetIntegerv(GLEXT_GL_DRAW_FRAMEBUFFER_BINDING, reinterpret_cast<GLint*>(&defaultFrameBuffer)));
     }
 }
 

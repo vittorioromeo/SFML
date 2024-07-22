@@ -31,8 +31,6 @@
 
 #include <SFML/Window/JoystickAxis.hpp>
 
-#include <SFML/System/String.hpp>
-
 
 ////////////////////////////////////////////////////////////
 /// \brief Give access to the real-time state of the joysticks
@@ -49,17 +47,6 @@ static constexpr unsigned int Count{8};        //!< Maximum number of supported 
 static constexpr unsigned int ButtonCount{32}; //!< Maximum number of supported buttons
 static constexpr unsigned int AxisCount{8};    //!< Maximum number of supported axes
 // NOLINTEND(readability-identifier-naming)
-
-////////////////////////////////////////////////////////////
-/// \brief Structure holding a joystick's identification
-///
-////////////////////////////////////////////////////////////
-struct SFML_WINDOW_API Identification
-{
-    String       name{"No Joystick"}; //!< Name of the joystick
-    unsigned int vendorId{};          //!< Manufacturer identifier
-    unsigned int productId{};         //!< Product identifier
-};
 
 ////////////////////////////////////////////////////////////
 /// \brief Check if a joystick is connected
@@ -121,16 +108,6 @@ struct SFML_WINDOW_API Identification
 ///
 ////////////////////////////////////////////////////////////
 [[nodiscard]] SFML_WINDOW_API float getAxisPosition(unsigned int joystick, Axis axis);
-
-////////////////////////////////////////////////////////////
-/// \brief Get the joystick information
-///
-/// \param joystick Index of the joystick
-///
-/// \return Structure containing joystick information.
-///
-////////////////////////////////////////////////////////////
-[[nodiscard]] SFML_WINDOW_API Identification getIdentification(unsigned int joystick);
 
 ////////////////////////////////////////////////////////////
 /// \brief Update the states of all joysticks

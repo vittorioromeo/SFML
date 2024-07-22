@@ -103,7 +103,7 @@ using StbPtr = sf::base::UniquePtr<stbi_uc, StbDeleter>;
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-base::Optional<Image> Image::create(const Vector2u& size, const Color& color)
+base::Optional<Image> Image::create(Vector2u size, const Color& color)
 {
     if (size.x == 0 || size.y == 0)
     {
@@ -131,7 +131,7 @@ base::Optional<Image> Image::create(const Vector2u& size, const Color& color)
 
 
 ////////////////////////////////////////////////////////////
-base::Optional<Image> Image::create(const Vector2u& size, const std::uint8_t* pixels)
+base::Optional<Image> Image::create(Vector2u size, const std::uint8_t* pixels)
 {
     if (size.x == 0 || size.y == 0)
     {
@@ -377,7 +377,7 @@ void Image::createMaskFromColor(const Color& color, std::uint8_t alpha)
 
 
 ////////////////////////////////////////////////////////////
-[[nodiscard]] bool Image::copy(const Image& source, const Vector2u& dest, const IntRect& sourceRect, bool applyAlpha)
+bool Image::copy(const Image& source, Vector2u dest, const IntRect& sourceRect, bool applyAlpha)
 {
     // Make sure that both images are valid
     SFML_BASE_ASSERT(source.m_size.x > 0 && source.m_size.y > 0 && m_size.x > 0 && m_size.y > 0);
@@ -464,7 +464,7 @@ void Image::createMaskFromColor(const Color& color, std::uint8_t alpha)
 
 
 ////////////////////////////////////////////////////////////
-void Image::setPixel(const Vector2u& coords, const Color& color)
+void Image::setPixel(Vector2u coords, const Color& color)
 {
     SFML_BASE_ASSERT(coords.x < m_size.x && "Image::setPixel() x coordinate is out of bounds");
     SFML_BASE_ASSERT(coords.y < m_size.y && "Image::setPixel() y coordinate is out of bounds");
@@ -480,7 +480,7 @@ void Image::setPixel(const Vector2u& coords, const Color& color)
 
 
 ////////////////////////////////////////////////////////////
-Color Image::getPixel(const Vector2u& coords) const
+Color Image::getPixel(Vector2u coords) const
 {
     SFML_BASE_ASSERT(coords.x < m_size.x && "Image::getPixel() x coordinate is out of bounds");
     SFML_BASE_ASSERT(coords.y < m_size.y && "Image::getPixel() y coordinate is out of bounds");

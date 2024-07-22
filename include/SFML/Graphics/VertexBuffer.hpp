@@ -334,7 +334,7 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    GraphicsContext* m_graphicsContext;                      //!< TODO
+    GraphicsContext* m_graphicsContext;                      //!< The graphics context
     unsigned int     m_buffer{};                             //!< Internal buffer identifier
     std::size_t      m_size{};                               //!< Size in Vertices of the currently allocated buffer
     PrimitiveType    m_primitiveType{PrimitiveType::Points}; //!< Type of primitives to draw

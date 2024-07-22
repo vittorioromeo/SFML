@@ -16,7 +16,7 @@
 class TriangleShape : public sf::Shape
 {
 public:
-    explicit TriangleShape(const sf::Vector2f& size) : m_size(size)
+    explicit TriangleShape(sf::Vector2f size) : m_size(size)
     {
         m_points[0] = {m_size.x / 2, 0};
         m_points[1] = {0, m_size.y};

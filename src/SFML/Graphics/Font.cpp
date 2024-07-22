@@ -168,7 +168,7 @@ struct Font::Impl
 
     using PageTable = std::unordered_map<unsigned int, Page>; //!< Table mapping a character size to its page (texture)
 
-    GraphicsContext*             graphicsContext; //!< TODO
+    GraphicsContext*             graphicsContext; //!< The graphics context
     std::shared_ptr<FontHandles> fontHandles;     //!< Shared information about the internal font instance
     bool                         isSmooth{true};  //!< Status of the smooth filter
     FontInfo                     info;            //!< Information about the font
@@ -685,7 +685,7 @@ Glyph Font::loadGlyph(std::uint32_t codePoint, unsigned int characterSize, bool 
         }
         else
         {
-            // Pixels are 8 bits gray levels
+            // Pixels are 8 bit gray levels
             for (unsigned int y = padding; y < size.y - padding; ++y)
             {
                 for (unsigned int x = padding; x < size.x - padding; ++x)
@@ -713,7 +713,7 @@ Glyph Font::loadGlyph(std::uint32_t codePoint, unsigned int characterSize, bool 
 
 
 ////////////////////////////////////////////////////////////
-IntRect Font::findGlyphRect(GraphicsContext& graphicsContext, Page& page, const Vector2u& size) const
+IntRect Font::findGlyphRect(GraphicsContext& graphicsContext, Page& page, Vector2u size) const
 {
     // Find the line that fits well the glyph
     Page::Row* row       = nullptr;

@@ -21,8 +21,10 @@
 #include <SFML/Audio/SoundStream.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/EventUtils.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Path.hpp>
@@ -130,7 +132,7 @@ public:
     void start(sf::PlaybackDevice& playbackDevice) override
     {
         // Synchronize listener audio position with graphical position
-        m_listener.setPosition({m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f});
+        m_listener.position = {m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f};
 
         if (!playbackDevice.updateListener(m_listener))
             std::cerr << "Failed to update listener\n";
@@ -203,7 +205,7 @@ public:
     {
         // We set the listener position back to the default
         // so that the music is right on top of the listener
-        m_listener.setPosition({0.f, 0.f, 0.f});
+        m_listener.position = {0.f, 0.f, 0.f};
 
         if (!playbackDevice.updateListener(m_listener))
             std::cerr << "Failed to update listener\n";
@@ -314,7 +316,7 @@ public:
     void start(sf::PlaybackDevice& playbackDevice) override
     {
         // Synchronize listener audio position with graphical position
-        m_listener.setPosition({m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f});
+        m_listener.position = {m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f};
 
         if (!playbackDevice.updateListener(m_listener))
             std::cerr << "Failed to update listener\n";
@@ -384,7 +386,7 @@ public:
     {
         // We set the listener position back to the default
         // so that the tone is right on top of the listener
-        m_listener.setPosition({0.f, 0.f, 0.f});
+        m_listener.position = {0.f, 0.f, 0.f};
 
         if (!playbackDevice.updateListener(m_listener))
             std::cerr << "Failed to update listener\n";
@@ -565,7 +567,7 @@ public:
     void start(sf::PlaybackDevice& playbackDevice) override
     {
         // Synchronize listener audio position with graphical position
-        m_listener.setPosition({m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f});
+        m_listener.position = {m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f};
 
         if (!playbackDevice.updateListener(m_listener))
             std::cerr << "Failed to update listener\n";
@@ -650,7 +652,7 @@ public:
     void start(sf::PlaybackDevice& playbackDevice) override
     {
         // Synchronize listener audio position with graphical position
-        m_listener.setPosition({m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f});
+        m_listener.position = {m_listenerShape.getPosition().x, m_listenerShape.getPosition().y, 0.f};
 
         if (!playbackDevice.updateListener(m_listener))
             std::cerr << "Failed to update listener\n";
@@ -1168,13 +1170,8 @@ int main()
         // Process events
         while (const sf::base::Optional event = window.pollEvent())
         {
-            // Window closed or escape key pressed: exit
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
 
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {

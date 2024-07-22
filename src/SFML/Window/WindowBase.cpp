@@ -138,7 +138,7 @@ Vector2i WindowBase::getPosition() const
 
 
 ////////////////////////////////////////////////////////////
-void WindowBase::setPosition(const Vector2i& position)
+void WindowBase::setPosition(Vector2i position)
 {
     m_impl->setPosition(position);
 }
@@ -152,7 +152,7 @@ Vector2u WindowBase::getSize() const
 
 
 ////////////////////////////////////////////////////////////
-void WindowBase::setSize(const Vector2u& size)
+void WindowBase::setSize(Vector2u size)
 {
     // Constrain requested size within minimum and maximum bounds
     const auto minimumSize = m_impl->getMinimumSize().valueOr(Vector2u());
@@ -250,7 +250,7 @@ void WindowBase::setTitle(const char* title)
 
 
 ////////////////////////////////////////////////////////////
-void WindowBase::setIcon(const Vector2u& size, const std::uint8_t* pixels)
+void WindowBase::setIcon(Vector2u size, const std::uint8_t* pixels)
 {
     m_impl->setIcon(size, pixels);
 }

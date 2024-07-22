@@ -6,8 +6,9 @@
 #include <SFML/Network/TcpListener.hpp>
 #include <SFML/Network/TcpSocket.hpp>
 
-#include <iostream>
 #include <SFML/Base/Optional.hpp>
+
+#include <iostream>
 
 #include <cstddef>
 

@@ -26,6 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/GLExtensions.hpp>
 #include <SFML/Window/Joystick.hpp>
 #include <SFML/Window/JoystickImpl.hpp>
 #include <SFML/Window/JoystickManager.hpp>
@@ -394,7 +395,7 @@ void WindowImpl::processSensorEvents()
         m_impl->sensorValue[sensor]  = SensorManager::getInstance().getValue(sensor);
 
         // If the value has changed, trigger an event
-        if (m_impl->sensorValue[sensor] != previousValue) // TODO use a threshold?
+        if (m_impl->sensorValue[sensor] != previousValue) // TODO P2: use a threshold?
             pushEvent(Event::SensorChanged{sensor, m_impl->sensorValue[sensor]});
     }
 }

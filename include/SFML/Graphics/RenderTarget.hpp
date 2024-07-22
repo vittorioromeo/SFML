@@ -221,7 +221,7 @@ public:
     /// \see mapCoordsToPixel
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Vector2f mapPixelToCoords(const Vector2i& point) const;
+    [[nodiscard]] Vector2f mapPixelToCoords(Vector2i point) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Convert a point from target coordinates to world coordinates
@@ -252,7 +252,7 @@ public:
     /// \see mapCoordsToPixel
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Vector2f mapPixelToCoords(const Vector2i& point, const View& view) const;
+    [[nodiscard]] Vector2f mapPixelToCoords(Vector2i point, const View& view) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Convert a point from world coordinates to target
@@ -272,7 +272,7 @@ public:
     /// \see mapPixelToCoords
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Vector2i mapCoordsToPixel(const Vector2f& point) const;
+    [[nodiscard]] Vector2i mapCoordsToPixel(Vector2f point) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Convert a point from world coordinates to target coordinates
@@ -299,7 +299,7 @@ public:
     /// \see mapPixelToCoords
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Vector2i mapCoordsToPixel(const Vector2f& point, const View& view) const;
+    [[nodiscard]] Vector2i mapCoordsToPixel(Vector2f point, const View& view) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Draw a drawable object to the render target
@@ -540,14 +540,20 @@ protected:
     void initialize();
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Get the graphics context (used by derived types)
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] GraphicsContext& getGraphicsContext();
 
 private:
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Perform common cleaning operations prior to GL calls
+    ///
+    ////////////////////////////////////////////////////////////
+    [[nodiscard]] bool clearImpl();
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Return the default render states (used to avoid header dependency)
     ///
     ////////////////////////////////////////////////////////////
     static const RenderStates& getDefaultRenderStates();
@@ -556,7 +562,7 @@ private:
     /// \brief Apply the current view
     ///
     ////////////////////////////////////////////////////////////
-    void applyCurrentView();
+    void applyCurrentView(const Shader* statesShader, const Texture* statesTexture);
 
     ////////////////////////////////////////////////////////////
     /// \brief Apply a new blending mode
@@ -573,14 +579,6 @@ private:
     ///
     ////////////////////////////////////////////////////////////
     void applyStencilMode(const StencilMode& mode);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Apply a new transform
-    ///
-    /// \param transform Transform to apply
-    ///
-    ////////////////////////////////////////////////////////////
-    void applyTransform(const Transform& transform);
 
     ////////////////////////////////////////////////////////////
     /// \brief Apply a new texture

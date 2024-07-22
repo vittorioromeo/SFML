@@ -55,7 +55,7 @@ public:
     /// \see findIntersection
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] constexpr bool contains(const Vector2<T>& point) const;
+    [[nodiscard]] constexpr bool contains(Vector2<T> point) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the position of the center of the rectangle
@@ -66,7 +66,9 @@ public:
     [[nodiscard, gnu::always_inline, gnu::pure]] inline constexpr Vector2<T> getCenter() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Convert to another `Rect` of type `OtherRect`
+    ///
+    /// `OtherRect` must be a `Rect<...>` type.
     ///
     ////////////////////////////////////////////////////////////
     template <typename U>

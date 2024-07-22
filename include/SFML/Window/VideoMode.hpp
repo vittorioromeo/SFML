@@ -58,7 +58,7 @@ public:
     /// \param modeBitsPerPixel Pixel depths in bits per pixel
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] explicit VideoMode(const Vector2u& modeSize, unsigned int modeBitsPerPixel = 32);
+    [[nodiscard]] explicit VideoMode(Vector2u modeSize, unsigned int modeBitsPerPixel = 32);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the current desktop video mode

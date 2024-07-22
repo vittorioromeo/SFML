@@ -13,7 +13,7 @@ namespace sf
 {
 struct BlendMode;
 struct StencilMode;
-class Color;
+struct Color;
 class Transform;
 
 template <typename>

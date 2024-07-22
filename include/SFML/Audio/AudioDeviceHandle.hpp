@@ -83,25 +83,25 @@ public:
     AudioDeviceHandle& operator=(AudioDeviceHandle&& rhs) noexcept;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Get the name of the device
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] const char* getName() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Returns `true` if the device is a default one
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool isDefault() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Compare equality between device handles
     ///
     ////////////////////////////////////////////////////////////
     friend bool operator==(const AudioDeviceHandle& lhs, const AudioDeviceHandle& rhs);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Compare inequality between device handles
     ///
     ////////////////////////////////////////////////////////////
     friend bool operator!=(const AudioDeviceHandle& lhs, const AudioDeviceHandle& rhs);
@@ -113,13 +113,13 @@ protected:
     friend CaptureDeviceHandle;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Create a device handle from miniaudio device info
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] explicit AudioDeviceHandle(const void* maDeviceInfo);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Return a pointer to the stored miniaudio device info
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] const void* getMADeviceInfo() const;
@@ -128,7 +128,7 @@ public:
     ////////////////////////////////////////////////////////////
     /// \private
     ///
-    /// \brief TODO
+    /// \brief Create a device handle from miniaudio device info (passkey)
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] explicit AudioDeviceHandle(base::PassKey<AudioContext>&&, const void* maDeviceInfo);
@@ -136,7 +136,7 @@ public:
     ////////////////////////////////////////////////////////////
     /// \private
     ///
-    /// \brief TODO
+    /// \brief Create a device handle from miniaudio device info (passkey)
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] explicit AudioDeviceHandle(base::PassKey<PlaybackDevice>&&, const void* maDeviceInfo);
@@ -144,7 +144,7 @@ public:
     ////////////////////////////////////////////////////////////
     /// \private
     ///
-    /// \brief TODO
+    /// \brief Create a device handle from miniaudio device info (passkey)
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] explicit AudioDeviceHandle(base::PassKey<CaptureDevice>&&, const void* maDeviceInfo);
@@ -155,13 +155,13 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
-/// \brief TODO
+/// \brief Compare equality between device handles
 ///
 ////////////////////////////////////////////////////////////
 [[nodiscard]] bool operator==(const AudioDeviceHandle& lhs, const AudioDeviceHandle& rhs);
 
 ////////////////////////////////////////////////////////////
-/// \brief TODO
+/// \brief Compare inequality between device handles
 ///
 ////////////////////////////////////////////////////////////
 [[nodiscard]] bool operator!=(const AudioDeviceHandle& lhs, const AudioDeviceHandle& rhs);

@@ -22,29 +22,32 @@
 //
 ////////////////////////////////////////////////////////////
 
-#pragma once
-
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Network/Ftp.hpp>
-#include <SFML/Network/Http.hpp>
-#include <SFML/Network/IpAddress.hpp>
-#include <SFML/Network/Packet.hpp>
-#include <SFML/Network/Socket.hpp>
-#include <SFML/Network/SocketHandle.hpp>
-#include <SFML/Network/SocketSelector.hpp>
-#include <SFML/Network/TcpListener.hpp>
-#include <SFML/Network/TcpSocket.hpp>
-#include <SFML/Network/UdpSocket.hpp>
+#include <SFML/Base/Optional.hpp>
 
-#include <SFML/System.hpp>
+#ifdef SFML_ENABLE_STACK_TRACES
+#include <cpptrace/cpptrace.hpp>
+#endif
+
+#include <cstdio>
+#include <cstdlib>
 
 
+namespace sf::base::priv
+{
 ////////////////////////////////////////////////////////////
-/// \defgroup network Network module
-///
-/// Socket-based communication, utilities and higher-level
-/// network protocols (HTTP, FTP).
-///
-////////////////////////////////////////////////////////////
+void throwIfNotEngaged()
+{
+    std::printf("\n[[SFML OPTIONAL FAILURE]]: not engaged!\n");
+
+#ifdef SFML_ENABLE_STACK_TRACES
+    std::puts("");
+    cpptrace::generate_trace().print();
+#endif
+
+    throw BadOptionalAccess{};
+}
+
+} // namespace sf::base::priv

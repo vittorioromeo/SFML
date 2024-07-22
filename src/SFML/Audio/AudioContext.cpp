@@ -98,7 +98,7 @@ void maLogCallback(void*, ma_uint32 level, const char* message)
         if (backendList == nullptr)
             sf::priv::err() << "No audio playback devices available on the system";
 
-        // Clean up the context if we didn't find any devices (TODO: why?)
+        // Clean up the context if we didn't find any devices (TODO P1: why?)
         ma_context_uninit(&maContext);
     }
 

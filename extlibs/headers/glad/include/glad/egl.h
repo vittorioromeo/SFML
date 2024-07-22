@@ -25,11 +25,11 @@
  *
  */
 
-#ifndef SF_GLAD_EGL_H_
-#define SF_GLAD_EGL_H_
+#ifndef GLAD_EGL_H_
+#define GLAD_EGL_H_
 
 
-#define SF_GLAD_EGL
+#define GLAD_EGL
 #define GLAD_OPTION_EGL_ALIAS
 #define GLAD_OPTION_EGL_HEADER_ONLY
 #define GLAD_OPTION_EGL_LOADER
@@ -879,27 +879,27 @@ typedef void (GLAD_API_PTR *EGLDEBUGPROCKHR)(EGLenum error,const char *command,E
 
 
 #define EGL_VERSION_1_0 1
-GLAD_API_CALL int SF_GLAD_EGL_VERSION_1_0;
+GLAD_API_CALL int GLAD_EGL_VERSION_1_0;
 #define EGL_VERSION_1_1 1
-GLAD_API_CALL int SF_GLAD_EGL_VERSION_1_1;
+GLAD_API_CALL int GLAD_EGL_VERSION_1_1;
 #define EGL_VERSION_1_2 1
-GLAD_API_CALL int SF_GLAD_EGL_VERSION_1_2;
+GLAD_API_CALL int GLAD_EGL_VERSION_1_2;
 #define EGL_VERSION_1_3 1
-GLAD_API_CALL int SF_GLAD_EGL_VERSION_1_3;
+GLAD_API_CALL int GLAD_EGL_VERSION_1_3;
 #define EGL_VERSION_1_4 1
-GLAD_API_CALL int SF_GLAD_EGL_VERSION_1_4;
+GLAD_API_CALL int GLAD_EGL_VERSION_1_4;
 #define EGL_VERSION_1_5 1
-GLAD_API_CALL int SF_GLAD_EGL_VERSION_1_5;
+GLAD_API_CALL int GLAD_EGL_VERSION_1_5;
 #define EGL_KHR_cl_event2 1
-GLAD_API_CALL int SF_GLAD_EGL_KHR_cl_event2;
+GLAD_API_CALL int GLAD_EGL_KHR_cl_event2;
 #define EGL_KHR_fence_sync 1
-GLAD_API_CALL int SF_GLAD_EGL_KHR_fence_sync;
+GLAD_API_CALL int GLAD_EGL_KHR_fence_sync;
 #define EGL_KHR_image 1
-GLAD_API_CALL int SF_GLAD_EGL_KHR_image;
+GLAD_API_CALL int GLAD_EGL_KHR_image;
 #define EGL_KHR_image_base 1
-GLAD_API_CALL int SF_GLAD_EGL_KHR_image_base;
+GLAD_API_CALL int GLAD_EGL_KHR_image_base;
 #define EGL_KHR_reusable_sync 1
-GLAD_API_CALL int SF_GLAD_EGL_KHR_reusable_sync;
+GLAD_API_CALL int GLAD_EGL_KHR_reusable_sync;
 
 
 typedef EGLBoolean (GLAD_API_PTR *PFNEGLBINDAPIPROC)(EGLenum api);
@@ -1070,7 +1070,7 @@ GLAD_API_CALL PFNEGLWAITSYNCPROC sf_glad_eglWaitSync;
 #endif
 
 /* Source */
-#ifdef SF_GLAD_EGL_IMPLEMENTATION
+#ifdef GLAD_EGL_IMPLEMENTATION
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1092,17 +1092,17 @@ extern "C" {
 
 
 
-int SF_GLAD_EGL_VERSION_1_0 = 0;
-int SF_GLAD_EGL_VERSION_1_1 = 0;
-int SF_GLAD_EGL_VERSION_1_2 = 0;
-int SF_GLAD_EGL_VERSION_1_3 = 0;
-int SF_GLAD_EGL_VERSION_1_4 = 0;
-int SF_GLAD_EGL_VERSION_1_5 = 0;
-int SF_GLAD_EGL_KHR_cl_event2 = 0;
-int SF_GLAD_EGL_KHR_fence_sync = 0;
-int SF_GLAD_EGL_KHR_image = 0;
-int SF_GLAD_EGL_KHR_image_base = 0;
-int SF_GLAD_EGL_KHR_reusable_sync = 0;
+int GLAD_EGL_VERSION_1_0 = 0;
+int GLAD_EGL_VERSION_1_1 = 0;
+int GLAD_EGL_VERSION_1_2 = 0;
+int GLAD_EGL_VERSION_1_3 = 0;
+int GLAD_EGL_VERSION_1_4 = 0;
+int GLAD_EGL_VERSION_1_5 = 0;
+int GLAD_EGL_KHR_cl_event2 = 0;
+int GLAD_EGL_KHR_fence_sync = 0;
+int GLAD_EGL_KHR_image = 0;
+int GLAD_EGL_KHR_image_base = 0;
+int GLAD_EGL_KHR_reusable_sync = 0;
 
 
 
@@ -1161,7 +1161,7 @@ PFNEGLWAITSYNCPROC sf_glad_eglWaitSync = NULL;
 
 
 static void sf_glad_egl_load_EGL_VERSION_1_0( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_VERSION_1_0) return;
+    if(!GLAD_EGL_VERSION_1_0) return;
     sf_glad_eglChooseConfig = (PFNEGLCHOOSECONFIGPROC) load(userptr, "eglChooseConfig");
     sf_glad_eglCopyBuffers = (PFNEGLCOPYBUFFERSPROC) load(userptr, "eglCopyBuffers");
     sf_glad_eglCreateContext = (PFNEGLCREATECONTEXTPROC) load(userptr, "eglCreateContext");
@@ -1188,14 +1188,14 @@ static void sf_glad_egl_load_EGL_VERSION_1_0( GLADuserptrloadfunc load, void* us
     sf_glad_eglWaitNative = (PFNEGLWAITNATIVEPROC) load(userptr, "eglWaitNative");
 }
 static void sf_glad_egl_load_EGL_VERSION_1_1( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_VERSION_1_1) return;
+    if(!GLAD_EGL_VERSION_1_1) return;
     sf_glad_eglBindTexImage = (PFNEGLBINDTEXIMAGEPROC) load(userptr, "eglBindTexImage");
     sf_glad_eglReleaseTexImage = (PFNEGLRELEASETEXIMAGEPROC) load(userptr, "eglReleaseTexImage");
     sf_glad_eglSurfaceAttrib = (PFNEGLSURFACEATTRIBPROC) load(userptr, "eglSurfaceAttrib");
     sf_glad_eglSwapInterval = (PFNEGLSWAPINTERVALPROC) load(userptr, "eglSwapInterval");
 }
 static void sf_glad_egl_load_EGL_VERSION_1_2( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_VERSION_1_2) return;
+    if(!GLAD_EGL_VERSION_1_2) return;
     sf_glad_eglBindAPI = (PFNEGLBINDAPIPROC) load(userptr, "eglBindAPI");
     sf_glad_eglCreatePbufferFromClientBuffer = (PFNEGLCREATEPBUFFERFROMCLIENTBUFFERPROC) load(userptr, "eglCreatePbufferFromClientBuffer");
     sf_glad_eglQueryAPI = (PFNEGLQUERYAPIPROC) load(userptr, "eglQueryAPI");
@@ -1203,11 +1203,11 @@ static void sf_glad_egl_load_EGL_VERSION_1_2( GLADuserptrloadfunc load, void* us
     sf_glad_eglWaitClient = (PFNEGLWAITCLIENTPROC) load(userptr, "eglWaitClient");
 }
 static void sf_glad_egl_load_EGL_VERSION_1_4( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_VERSION_1_4) return;
+    if(!GLAD_EGL_VERSION_1_4) return;
     sf_glad_eglGetCurrentContext = (PFNEGLGETCURRENTCONTEXTPROC) load(userptr, "eglGetCurrentContext");
 }
 static void sf_glad_egl_load_EGL_VERSION_1_5( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_VERSION_1_5) return;
+    if(!GLAD_EGL_VERSION_1_5) return;
     sf_glad_eglClientWaitSync = (PFNEGLCLIENTWAITSYNCPROC) load(userptr, "eglClientWaitSync");
     sf_glad_eglCreateImage = (PFNEGLCREATEIMAGEPROC) load(userptr, "eglCreateImage");
     sf_glad_eglCreatePlatformPixmapSurface = (PFNEGLCREATEPLATFORMPIXMAPSURFACEPROC) load(userptr, "eglCreatePlatformPixmapSurface");
@@ -1220,28 +1220,28 @@ static void sf_glad_egl_load_EGL_VERSION_1_5( GLADuserptrloadfunc load, void* us
     sf_glad_eglWaitSync = (PFNEGLWAITSYNCPROC) load(userptr, "eglWaitSync");
 }
 static void sf_glad_egl_load_EGL_KHR_cl_event2( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_KHR_cl_event2) return;
+    if(!GLAD_EGL_KHR_cl_event2) return;
     sf_glad_eglCreateSync64KHR = (PFNEGLCREATESYNC64KHRPROC) load(userptr, "eglCreateSync64KHR");
 }
 static void sf_glad_egl_load_EGL_KHR_fence_sync( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_KHR_fence_sync) return;
+    if(!GLAD_EGL_KHR_fence_sync) return;
     sf_glad_eglClientWaitSyncKHR = (PFNEGLCLIENTWAITSYNCKHRPROC) load(userptr, "eglClientWaitSyncKHR");
     sf_glad_eglCreateSyncKHR = (PFNEGLCREATESYNCKHRPROC) load(userptr, "eglCreateSyncKHR");
     sf_glad_eglDestroySyncKHR = (PFNEGLDESTROYSYNCKHRPROC) load(userptr, "eglDestroySyncKHR");
     sf_glad_eglGetSyncAttribKHR = (PFNEGLGETSYNCATTRIBKHRPROC) load(userptr, "eglGetSyncAttribKHR");
 }
 static void sf_glad_egl_load_EGL_KHR_image( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_KHR_image) return;
+    if(!GLAD_EGL_KHR_image) return;
     sf_glad_eglCreateImageKHR = (PFNEGLCREATEIMAGEKHRPROC) load(userptr, "eglCreateImageKHR");
     sf_glad_eglDestroyImageKHR = (PFNEGLDESTROYIMAGEKHRPROC) load(userptr, "eglDestroyImageKHR");
 }
 static void sf_glad_egl_load_EGL_KHR_image_base( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_KHR_image_base) return;
+    if(!GLAD_EGL_KHR_image_base) return;
     sf_glad_eglCreateImageKHR = (PFNEGLCREATEIMAGEKHRPROC) load(userptr, "eglCreateImageKHR");
     sf_glad_eglDestroyImageKHR = (PFNEGLDESTROYIMAGEKHRPROC) load(userptr, "eglDestroyImageKHR");
 }
 static void sf_glad_egl_load_EGL_KHR_reusable_sync( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_EGL_KHR_reusable_sync) return;
+    if(!GLAD_EGL_KHR_reusable_sync) return;
     sf_glad_eglClientWaitSyncKHR = (PFNEGLCLIENTWAITSYNCKHRPROC) load(userptr, "eglClientWaitSyncKHR");
     sf_glad_eglCreateSyncKHR = (PFNEGLCREATESYNCKHRPROC) load(userptr, "eglCreateSyncKHR");
     sf_glad_eglDestroySyncKHR = (PFNEGLDESTROYSYNCKHRPROC) load(userptr, "eglDestroySyncKHR");
@@ -1295,11 +1295,11 @@ static int sf_glad_egl_find_extensions_egl(EGLDisplay display) {
     const char *extensions;
     if (!sf_glad_egl_get_extensions(display, &extensions)) return 0;
 
-    SF_GLAD_EGL_KHR_cl_event2 = sf_glad_egl_has_extension(extensions, "EGL_KHR_cl_event2");
-    SF_GLAD_EGL_KHR_fence_sync = sf_glad_egl_has_extension(extensions, "EGL_KHR_fence_sync");
-    SF_GLAD_EGL_KHR_image = sf_glad_egl_has_extension(extensions, "EGL_KHR_image");
-    SF_GLAD_EGL_KHR_image_base = sf_glad_egl_has_extension(extensions, "EGL_KHR_image_base");
-    SF_GLAD_EGL_KHR_reusable_sync = sf_glad_egl_has_extension(extensions, "EGL_KHR_reusable_sync");
+    GLAD_EGL_KHR_cl_event2 = sf_glad_egl_has_extension(extensions, "EGL_KHR_cl_event2");
+    GLAD_EGL_KHR_fence_sync = sf_glad_egl_has_extension(extensions, "EGL_KHR_fence_sync");
+    GLAD_EGL_KHR_image = sf_glad_egl_has_extension(extensions, "EGL_KHR_image");
+    GLAD_EGL_KHR_image_base = sf_glad_egl_has_extension(extensions, "EGL_KHR_image_base");
+    GLAD_EGL_KHR_reusable_sync = sf_glad_egl_has_extension(extensions, "EGL_KHR_reusable_sync");
 
     return 1;
 }
@@ -1335,12 +1335,12 @@ static int sf_glad_egl_find_core_egl(EGLDisplay display) {
         GLAD_IMPL_UTIL_SSCANF(version, "%d.%d", &major, &minor);
     }
 
-    SF_GLAD_EGL_VERSION_1_0 = (major == 1 && minor >= 0) || major > 1;
-    SF_GLAD_EGL_VERSION_1_1 = (major == 1 && minor >= 1) || major > 1;
-    SF_GLAD_EGL_VERSION_1_2 = (major == 1 && minor >= 2) || major > 1;
-    SF_GLAD_EGL_VERSION_1_3 = (major == 1 && minor >= 3) || major > 1;
-    SF_GLAD_EGL_VERSION_1_4 = (major == 1 && minor >= 4) || major > 1;
-    SF_GLAD_EGL_VERSION_1_5 = (major == 1 && minor >= 5) || major > 1;
+    GLAD_EGL_VERSION_1_0 = (major == 1 && minor >= 0) || major > 1;
+    GLAD_EGL_VERSION_1_1 = (major == 1 && minor >= 1) || major > 1;
+    GLAD_EGL_VERSION_1_2 = (major == 1 && minor >= 2) || major > 1;
+    GLAD_EGL_VERSION_1_3 = (major == 1 && minor >= 3) || major > 1;
+    GLAD_EGL_VERSION_1_4 = (major == 1 && minor >= 4) || major > 1;
+    GLAD_EGL_VERSION_1_5 = (major == 1 && minor >= 5) || major > 1;
 
     return GLAD_MAKE_VERSION(major, minor);
 }
@@ -1379,7 +1379,7 @@ static int gladLoadEGL(EGLDisplay display, GLADloadfunc load) {
 
 
 
-#ifdef SF_GLAD_EGL
+#ifdef GLAD_EGL
 
 #ifndef GLAD_LOADER_LIBRARY_C_
 #define GLAD_LOADER_LIBRARY_C_
@@ -1520,11 +1520,10 @@ static int gladLoaderLoadEGL(EGLDisplay display) {
     return version;
 }
 
-#endif /* SF_GLAD_EGL */
+#endif /* GLAD_EGL */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SF_GLAD_EGL_IMPLEMENTATION */
-
+#endif /* GLAD_EGL_IMPLEMENTATION */

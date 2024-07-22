@@ -12,7 +12,7 @@ struct StringMaker<std::array<T, N>>
 {
     static doctest::String convert(const std::array<T, N>&)
     {
-        return ""; // TODO
+        return ""; // TODO P2:
     }
 };
 

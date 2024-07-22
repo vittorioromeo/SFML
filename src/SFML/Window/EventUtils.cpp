@@ -22,33 +22,20 @@
 //
 ////////////////////////////////////////////////////////////
 
-#pragma once
-
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Config.hpp>
-
-#include <SFML/System/Angle.hpp>
-#include <SFML/System/Clock.hpp>
-#include <SFML/System/Err.hpp>
-#include <SFML/System/FileInputStream.hpp>
-#include <SFML/System/InputStream.hpp>
-#include <SFML/System/MemoryInputStream.hpp>
-#include <SFML/System/Sleep.hpp>
-#include <SFML/System/String.hpp>
-#include <SFML/System/Time.hpp>
-#include <SFML/System/TimeChronoUtil.hpp>
-#include <SFML/System/Utf.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/System/Vector3.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/EventUtils.hpp>
 
 
+namespace sf::EventUtils
+{
 ////////////////////////////////////////////////////////////
-/// \defgroup system System module
-///
-/// Base module of SFML, defining various utilities. It provides
-/// vector classes, Unicode strings and conversion functions,
-/// threads and mutexes, timing classes.
-///
-////////////////////////////////////////////////////////////
+bool isClosedOrEscapeKeyPressed(const Event& event)
+{
+    return event.is<sf::Event::Closed>() ||
+           (event.is<sf::Event::KeyPressed>() && event.getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape);
+}
+
+} // namespace sf::EventUtils

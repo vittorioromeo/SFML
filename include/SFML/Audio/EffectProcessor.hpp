@@ -132,7 +132,7 @@ public:
 /// \class sf::EffectProcessor
 /// \ingroup audio
 ///
-/// TODO
+/// Function object representing an audio effect processing step.
 ///
 /// \see sf::Sound, sf::SoundStream
 ///

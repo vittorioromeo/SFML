@@ -33,7 +33,7 @@ TEST_CASE("[Window] sf::Window" * doctest::skip(skipDisplayTests))
             const sf::Window window(graphicsContext, sf::VideoMode({360, 240}), "Window Tests");
             CHECK(window.getSize() == sf::Vector2u{360, 240});
             CHECK(window.getNativeHandle() != sf::WindowHandle());
-            CHECK(window.getSettings().attributeFlags == sf::ContextSettings::Attribute::Default);
+            CHECK(window.getSettings().attributeFlags == sf::ContextSettings{}.attributeFlags);
         }
 
         SECTION("Mode, title, and style constructor")
@@ -41,7 +41,7 @@ TEST_CASE("[Window] sf::Window" * doctest::skip(skipDisplayTests))
             const sf::Window window(graphicsContext, sf::VideoMode({360, 240}), "Window Tests", sf::Style::Resize);
             CHECK(window.getSize() == sf::Vector2u{360, 240});
             CHECK(window.getNativeHandle() != sf::WindowHandle());
-            CHECK(window.getSettings().attributeFlags == sf::ContextSettings::Attribute::Default);
+            CHECK(window.getSettings().attributeFlags == sf::ContextSettings{}.attributeFlags);
         }
 
         SECTION("Mode, title, style, and state constructor")
@@ -50,7 +50,7 @@ TEST_CASE("[Window] sf::Window" * doctest::skip(skipDisplayTests))
                 window(graphicsContext, sf::VideoMode({360, 240}), "Window Tests", sf::Style::Resize, sf::State::Windowed);
             CHECK(window.getSize() == sf::Vector2u{360, 240});
             CHECK(window.getNativeHandle() != sf::WindowHandle());
-            CHECK(window.getSettings().attributeFlags == sf::ContextSettings::Attribute::Default);
+            CHECK(window.getSettings().attributeFlags == sf::ContextSettings{}.attributeFlags);
         }
 
         SECTION("Mode, title, style, state, and context settings constructor")
@@ -73,7 +73,7 @@ TEST_CASE("[Window] sf::Window" * doctest::skip(skipDisplayTests))
             const sf::Window window(graphicsContext, sf::VideoMode({360, 240}), "Window Tests", sf::State::Windowed);
             CHECK(window.getSize() == sf::Vector2u{360, 240});
             CHECK(window.getNativeHandle() != sf::WindowHandle());
-            CHECK(window.getSettings().attributeFlags == sf::ContextSettings::Attribute::Default);
+            CHECK(window.getSettings().attributeFlags == sf::ContextSettings{}.attributeFlags);
         }
 
         SECTION("Mode, title, state, and context settings constructor")

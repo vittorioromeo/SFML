@@ -27,40 +27,40 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Config.hpp>
+#include <SFML/Window/Export.hpp>
 
 
-namespace sf::priv
+////////////////////////////////////////////////////////////
+// Forward declarations
+////////////////////////////////////////////////////////////
+namespace sf
+{
+class Event;
+} // namespace sf
+
+
+////////////////////////////////////////////////////////////
+/// \brief Event handling utilities
+///
+////////////////////////////////////////////////////////////
+namespace sf::EventUtils
 {
 ////////////////////////////////////////////////////////////
-/// Let's define a macro to quickly check every OpenGL API call
-////////////////////////////////////////////////////////////
-#ifdef SFML_DEBUG
-
-// In debug mode, perform a test on every OpenGL call
-// The do-while loop is needed so that glCheck can be used as a single statement in if/else branches
-#define glCheck(expr)                                        \
-    do                                                       \
-    {                                                        \
-        expr;                                                \
-        ::sf::priv::glCheckError(__FILE__, __LINE__, #expr); \
-    } while (false)
-
-#else
-
-// Else, we don't add any overhead
-#define glCheck(expr) (expr)
-
-#endif
-
-////////////////////////////////////////////////////////////
-/// \brief Check the last OpenGL error
-///
-/// \param file Source file where the call is located
-/// \param line Line number of the source file where the call is located
-/// \param expression The evaluated expression as a string
+/// \brief Check if the event is `Event::Closed` or `Event::KeyPressed`
+///        with escape key
 ///
 ////////////////////////////////////////////////////////////
-void glCheckError(const char* file, unsigned int line, const char* expression);
+[[nodiscard]] SFML_WINDOW_API bool isClosedOrEscapeKeyPressed(const Event& event);
 
-} // namespace sf::priv
+} // namespace sf::EventUtils
+
+
+////////////////////////////////////////////////////////////
+/// \namespace sf::EventUtils
+/// \ingroup window
+///
+/// Provides event handling utilities
+///
+/// \see sf::Event
+///
+////////////////////////////////////////////////////////////

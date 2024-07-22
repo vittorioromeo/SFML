@@ -7,16 +7,17 @@
 #include <SFML/Graphics/Font.hpp>
 
 #include <SFML/System/LifetimeDependee.hpp>
-#include <SFML/Base/Macros.hpp>
 #include <SFML/System/Path.hpp>
 #include <SFML/System/String.hpp>
+
+#include <SFML/Base/Macros.hpp>
+#include <SFML/Base/Optional.hpp>
 
 #include <Doctest.hpp>
 
 #include <GraphicsUtil.hpp>
 #include <WindowUtil.hpp>
 
-#include <SFML/Base/Optional.hpp>
 #include <type_traits>
 
 TEST_CASE("[Graphics] sf::Text" * doctest::skip(skipDisplayTests))

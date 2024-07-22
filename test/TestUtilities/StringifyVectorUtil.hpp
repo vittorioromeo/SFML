@@ -12,7 +12,7 @@ struct StringMaker<std::vector<T>>
 {
     static doctest::String convert(const std::vector<T>&)
     {
-        return ""; // TODO
+        return ""; // TODO P2:
     }
 };
 

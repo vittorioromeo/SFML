@@ -12,8 +12,17 @@
 ///
 /// \code
 ///
-/// #include <SFML/Audio.hpp>
-/// #include <SFML/Graphics.hpp>
+/// #include <SFML/Audio/Music.hpp>
+///
+/// #include <SFML/Graphics/RenderWindow.hpp>
+/// #include <SFML/Graphics/Text.hpp>
+/// #include <SFML/Graphics/Texture.hpp>
+/// #include <SFML/Graphics/Sprite.hpp>
+///
+/// #include <SFML/Window/Event.hpp>
+/// #include <SFML/Window/VideoMode.hpp>
+///
+/// #include <SFML/Base/Optional.hpp>
 ///
 /// int main()
 /// {

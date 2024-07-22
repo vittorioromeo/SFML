@@ -43,7 +43,7 @@
 
 namespace sf
 {
-class Color;
+struct Color;
 class Font;
 class RenderTarget;
 class String;

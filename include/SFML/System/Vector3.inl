@@ -102,10 +102,10 @@ constexpr Vector3<T> Vector3<T>::cwiseDiv(const Vector3<T>& rhs) const
 
 ////////////////////////////////////////////////////////////
 template <typename T>
-template <typename U>
-constexpr U Vector3<T>::to() const
+template <typename OtherVector3>
+constexpr OtherVector3 Vector3<T>::to() const
 {
-    using ValueType = decltype(U{}.x);
+    using ValueType = decltype(OtherVector3{}.x);
     return Vector3<ValueType>{static_cast<ValueType>(x), static_cast<ValueType>(y), static_cast<ValueType>(z)};
 }
 

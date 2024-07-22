@@ -24,7 +24,11 @@ TEST_CASE("[Window] sf::ContextSettings")
             STATIC_CHECK(contextSettings.antialiasingLevel == 0);
             STATIC_CHECK(contextSettings.majorVersion == 1);
             STATIC_CHECK(contextSettings.minorVersion == 1);
+#ifndef SFML_OPENGL_ES
             STATIC_CHECK(contextSettings.attributeFlags == sf::ContextSettings::Attribute::Default);
+#else
+            STATIC_CHECK(contextSettings.attributeFlags == sf::ContextSettings::Attribute::Core);
+#endif
             STATIC_CHECK(contextSettings.sRgbCapable == false);
         }
 

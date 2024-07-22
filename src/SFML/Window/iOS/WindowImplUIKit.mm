@@ -115,7 +115,7 @@ Vector2i WindowImplUIKit::getPosition() const
 
 
 ////////////////////////////////////////////////////////////
-void WindowImplUIKit::setPosition(const Vector2i& /* position */)
+void WindowImplUIKit::setPosition(Vector2i /* position */)
 {
 }
 
@@ -130,9 +130,9 @@ Vector2u WindowImplUIKit::getSize() const
 
 
 ////////////////////////////////////////////////////////////
-void WindowImplUIKit::setSize(const Vector2u& size)
+void WindowImplUIKit::setSize(Vector2u size)
 {
-    // TODO ...
+    // TODO P2: ...
 
     // if these sizes are required one day, don't forget to scale them!
     // size.x /= m_backingScale;
@@ -168,7 +168,7 @@ void WindowImplUIKit::setTitle(const String& /* title */)
 
 
 ////////////////////////////////////////////////////////////
-void WindowImplUIKit::setIcon(const Vector2u& /* size */, const std::uint8_t* /* pixels */)
+void WindowImplUIKit::setIcon(Vector2u /* size */, const std::uint8_t* /* pixels */)
 {
     // Not applicable
 }

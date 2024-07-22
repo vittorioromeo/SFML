@@ -1,8 +1,8 @@
 #pragma once
 
-#include <doctest/parts/doctest_fwd.h>
-
 #include <SFML/Base/Optional.hpp>
+
+#include <doctest/parts/doctest_fwd.h>
 
 namespace doctest
 {
@@ -12,7 +12,7 @@ struct StringMaker<sf::base::Optional<T>>
 {
     static doctest::String convert(const sf::base::Optional<T>&)
     {
-        return ""; // TODO
+        return ""; // TODO P2:
     }
 };
 

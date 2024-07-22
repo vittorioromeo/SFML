@@ -86,7 +86,7 @@ public:
     static inline CurrentTextureType CurrentTexture;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Type-safe wrapper over a non-null shader uniform location
     ///
     ////////////////////////////////////////////////////////////
     class [[nodiscard]] UniformLocation
@@ -336,7 +336,11 @@ public:
         InputStream&     fragmentShaderStream);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Get the location ID of a shader uniform
+    ///
+    /// \param name Name of the uniform variable to search
+    ///
+    /// \return Location ID of the uniform, or `sf::base::nullOpt` if not found
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] base::Optional<UniformLocation> getUniformLocation(std::string_view uniformName);
@@ -357,7 +361,7 @@ public:
     /// \param vector Value of the vec2 vector
     ///
     ////////////////////////////////////////////////////////////
-    void setUniform(UniformLocation location, const Glsl::Vec2& vector);
+    void setUniform(UniformLocation location, Glsl::Vec2 vector);
 
     ////////////////////////////////////////////////////////////
     /// \brief Specify value for \p vec3 uniform
@@ -402,7 +406,7 @@ public:
     /// \param vector Value of the ivec2 vector
     ///
     ////////////////////////////////////////////////////////////
-    void setUniform(UniformLocation location, const Glsl::Ivec2& vector);
+    void setUniform(UniformLocation location, Glsl::Ivec2 vector);
 
     ////////////////////////////////////////////////////////////
     /// \brief Specify value for \p ivec3 uniform
@@ -446,7 +450,7 @@ public:
     /// \param vector Value of the bvec2 vector
     ///
     ////////////////////////////////////////////////////////////
-    void setUniform(UniformLocation location, const Glsl::Bvec2& vector);
+    void setUniform(UniformLocation location, Glsl::Bvec2 vector);
 
     ////////////////////////////////////////////////////////////
     /// \brief Specify value for \p bvec3 uniform
@@ -643,18 +647,6 @@ public:
     static void unbind(GraphicsContext& graphicsContext);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Tell whether or not the system supports shaders
-    ///
-    /// This function should always be called before using
-    /// the shader features. If it returns false, then
-    /// any attempt to use sf::Shader will fail.
-    ///
-    /// \return True if shaders are supported, false otherwise
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] static bool isAvailable(GraphicsContext& graphicsContext);
-
-    ////////////////////////////////////////////////////////////
     /// \brief Tell whether or not the system supports geometry shaders
     ///
     /// This function should always be called before using
@@ -683,6 +675,16 @@ public:
 
 private:
     ////////////////////////////////////////////////////////////
+    /// \brief Ensures that the system supports shaders
+    ///
+    /// This function should always be called before using
+    /// the shader features. If it fails the application is
+    /// aborted.
+    ///
+    ////////////////////////////////////////////////////////////
+    static void ensureIsAvailable(GraphicsContext& graphicsContext);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Compile the shader(s) and create the program
     ///
     /// If one of the arguments is a null pointer, the corresponding shader
@@ -708,16 +710,6 @@ private:
     ///
     ////////////////////////////////////////////////////////////
     void bindTextures() const;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the location ID of a shader uniform
-    ///
-    /// \param name Name of the uniform variable to search
-    ///
-    /// \return Location ID of the uniform, or -1 if not found
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] int getUniformLocationImpl(std::string_view uniformName);
 
     ////////////////////////////////////////////////////////////
     /// \brief RAII object to save and restore the program

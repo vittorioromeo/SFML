@@ -37,21 +37,21 @@
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-/// \brief TODO
+/// \brief Interoperability utilities between `sf::Time` and `<chrono>`
 ///
 ////////////////////////////////////////////////////////////
 class TimeChronoUtil
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief TODO Construct from std::chrono::duration
+    /// \brief Create a `Time` from a `std::chrono::duration`
     ///
     ////////////////////////////////////////////////////////////
     template <typename Rep, typename Period>
     [[nodiscard]] static constexpr Time fromDuration(const std::chrono::duration<Rep, Period>& duration);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO Return the time value as a std::chorono::duration
+    /// \brief Convert `time` to a `std::chrono::microseconds` duration
     ///
     /// \return Time in microseconds
     ///
@@ -59,7 +59,7 @@ public:
     [[nodiscard]] static constexpr std::chrono::microseconds toDuration(Time time);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO Conversion to std::chrono::duration
+    /// \brief Convert `time` to a custom `std::chrono::duration`
     ///
     /// \return Duration in microseconds
     ///
@@ -77,7 +77,7 @@ public:
 /// \class sf::TimeChronoUtil
 /// \ingroup system
 ///
-/// TODO
+/// Interoperability utilities between `sf::Time` and `<chrono>`
 ///
 /// \see sf::Time, sf::Clock
 ///

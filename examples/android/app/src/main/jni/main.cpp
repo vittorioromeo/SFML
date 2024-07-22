@@ -1,13 +1,21 @@
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/View.hpp>
 
-#include <SFML/Audio.hpp>
-
-#include <SFML/Network.hpp>
-
-#include <SFML/Window.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/EventUtils.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
-#include <SFML/System.hpp>
+#include <SFML/System/Path.hpp>
+#include <SFML/System/Sleep.hpp>
+
+#include <SFML/Base/Optional.hpp>
+
+#include <cstdlib>
 
 // Do we want to showcase direct JNI/NDK interaction?
 // Undefine this to get real cross-platform code.
@@ -80,7 +88,7 @@ int vibrate(sf::Time duration)
 // This is the actual Android example. You don't have to write any platform
 // specific code, unless you want to use things not directly exposed.
 // ('vibrate()' in this example; undefine 'USE_JNI' above to disable it)
-int main(int argc, char* argv[])
+int main(int, char**)
 {
     // Create the graphics context
     sf::GraphicsContext graphicsContext;
@@ -115,13 +123,8 @@ int main(int argc, char* argv[])
     {
         while (const sf::base::Optional event = active ? window.pollEvent() : window.waitEvent())
         {
-            // Window closed or escape key pressed: exit
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
 
             if (const auto* resized = event->getIf<sf::Event::Resized>())
             {

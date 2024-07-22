@@ -24,30 +24,23 @@
 
 #pragma once
 
-////////////////////////////////////////////////////////////
-// Headers
-////////////////////////////////////////////////////////////
-#include <SFML/Window/Clipboard.hpp>
-#include <SFML/Window/ContextSettings.hpp>
-#include <SFML/Window/Cursor.hpp>
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Joystick.hpp>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/Sensor.hpp>
-#include <SFML/Window/Touch.hpp>
-#include <SFML/Window/VideoMode.hpp>
-#include <SFML/Window/Window.hpp>
-#include <SFML/Window/WindowEnums.hpp>
-#include <SFML/Window/WindowHandle.hpp>
 
-#include <SFML/System.hpp>
+namespace sf::base
+{
+////////////////////////////////////////////////////////////
+template <typename... Fs>
+struct [[nodiscard]] OverloadSet : Fs...
+{
+    [[nodiscard, gnu::always_inline]] explicit OverloadSet(Fs&&... fs) noexcept : Fs{static_cast<Fs&&>(fs)}...
+    {
+    }
+
+    using Fs::operator()...;
+};
 
 
 ////////////////////////////////////////////////////////////
-/// \defgroup window Window module
-///
-/// Provides OpenGL-based windows, and abstractions for
-/// events and input handling.
-///
-////////////////////////////////////////////////////////////
+template <typename... Fs>
+OverloadSet(Fs...) -> OverloadSet<Fs...>;
+
+} // namespace sf::base

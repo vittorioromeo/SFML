@@ -25,11 +25,11 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/RenderTextureImplDefault.hpp>
 #include <SFML/Graphics/TextureSaver.hpp>
 
 #include <SFML/Window/ContextSettings.hpp>
+#include <SFML/Window/GLCheck.hpp>
 #include <SFML/Window/GLExtensions.hpp>
 #include <SFML/Window/GlContext.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
@@ -61,7 +61,7 @@ unsigned int RenderTextureImplDefault::getMaximumAntialiasingLevel()
 
 
 ////////////////////////////////////////////////////////////
-bool RenderTextureImplDefault::create(const Vector2u& size, unsigned int, const ContextSettings& settings)
+bool RenderTextureImplDefault::create(Vector2u size, unsigned int, const ContextSettings& settings)
 {
     // Store the dimensions
     m_size = size;

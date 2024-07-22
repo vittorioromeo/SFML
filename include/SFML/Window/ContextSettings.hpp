@@ -57,13 +57,19 @@ struct ContextSettings
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    unsigned int depthBits{};                        //!< Bits of the depth buffer
-    unsigned int stencilBits{};                      //!< Bits of the stencil buffer
-    unsigned int antialiasingLevel{};                //!< Level of antialiasing
-    unsigned int majorVersion{1};                    //!< Major number of the context version to create
-    unsigned int minorVersion{1};                    //!< Minor number of the context version to create
-    Attribute    attributeFlags{Attribute::Default}; //!< The attribute flags to create the context with
-    bool         sRgbCapable{};                      //!< Whether the context framebuffer is sRGB capable
+    unsigned int depthBits{};         //!< Bits of the depth buffer
+    unsigned int stencilBits{};       //!< Bits of the stencil buffer
+    unsigned int antialiasingLevel{}; //!< Level of antialiasing
+    unsigned int majorVersion{1};     //!< Major number of the context version to create
+    unsigned int minorVersion{1};     //!< Minor number of the context version to create
+    Attribute    attributeFlags{
+#ifndef SFML_OPENGL_ES
+        Attribute::Default
+#else
+        Attribute::Core
+#endif
+    }; //!< The attribute flags to create the context with
+    bool sRgbCapable{}; //!< Whether the context framebuffer is sRGB capable
 };
 
 SFML_BASE_DEFINE_ENUM_CLASS_BITWISE_OPS(ContextSettings::Attribute);

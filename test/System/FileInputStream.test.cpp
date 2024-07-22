@@ -1,6 +1,8 @@
 #include <SFML/System/FileInputStream.hpp>
-#include <SFML/Base/Macros.hpp>
 #include <SFML/System/Path.hpp>
+
+#include <SFML/Base/Assert.hpp>
+#include <SFML/Base/Macros.hpp>
 
 #include <Doctest.hpp>
 
@@ -11,8 +13,6 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
-
-#include <SFML/Base/Assert.hpp>
 
 namespace
 {

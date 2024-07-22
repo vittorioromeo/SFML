@@ -56,7 +56,7 @@ class SFML_GRAPHICS_API Image
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Supported image saving formats
     ///
     ////////////////////////////////////////////////////////////
     enum class [[nodiscard]] SaveFormat
@@ -76,7 +76,7 @@ public:
     /// \param color Fill color
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] static base::Optional<Image> create(const Vector2u& size, const Color& color = Color::Black);
+    [[nodiscard]] static base::Optional<Image> create(Vector2u size, const Color& color = Color::Black);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct the image from an array of pixels
@@ -90,7 +90,7 @@ public:
     /// \param pixels Array of pixels to copy to the image
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] static base::Optional<Image> create(const Vector2u& size, const std::uint8_t* pixels);
+    [[nodiscard]] static base::Optional<Image> create(Vector2u size, const std::uint8_t* pixels);
 
     ////////////////////////////////////////////////////////////
     /// \brief Load the image from a file on disk
@@ -232,7 +232,7 @@ public:
     /// \return True if the operation was successful, false otherwise
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] bool copy(const Image& source, const Vector2u& dest, const IntRect& sourceRect = {}, bool applyAlpha = false);
+    [[nodiscard]] bool copy(const Image& source, Vector2u dest, const IntRect& sourceRect = {}, bool applyAlpha = false);
 
     ////////////////////////////////////////////////////////////
     /// \brief Change the color of a pixel
@@ -247,7 +247,7 @@ public:
     /// \see getPixel
     ///
     ////////////////////////////////////////////////////////////
-    void setPixel(const Vector2u& coords, const Color& color);
+    void setPixel(Vector2u coords, const Color& color);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the color of a pixel
@@ -263,13 +263,13 @@ public:
     /// \see setPixel
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Color getPixel(const Vector2u& coords) const;
+    [[nodiscard]] Color getPixel(Vector2u coords) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get a read-only pointer to the array of pixels
     ///
     /// The returned value points to an array of RGBA pixels made of
-    /// 8 bits integers components. The size of the array is
+    /// 8 bit integer components. The size of the array is
     /// width * height * 4 (getSize().x * getSize().y * 4).
     /// Warning: the returned pointer may become invalid if you
     /// modify the image, so you should never store it for too long.
@@ -322,7 +322,7 @@ private:
 ///
 /// sf::Image can handle a unique internal representation of
 /// pixels, which is RGBA 32 bits. This means that a pixel
-/// must be composed of 8 bits red, green, blue and alpha
+/// must be composed of 8 bit red, green, blue and alpha
 /// channels -- just like a sf::Color.
 /// All the functions that return an array of pixels follow
 /// this rule, and all parameters that you pass to sf::Image

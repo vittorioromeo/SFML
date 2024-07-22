@@ -1,18 +1,22 @@
-#include "SFML/Graphics/Image.hpp"
-#include "SFML/Graphics/PrimitiveType.hpp"
-#include "SFML/Graphics/RenderStates.hpp"
-#include "SFML/Window/ContextSettings.hpp"
+#include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/PrimitiveType.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+
+#include <SFML/Window/ContextSettings.hpp>
+#include <SFML/Window/EventUtils.hpp>
 #if 1
 
-#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 
-#include <SFML/Window.hpp>
+#include <SFML/Window/Event.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
-#include <SFML/System.hpp>
 #include <SFML/System/Path.hpp>
 #include <SFML/System/String.hpp>
 
@@ -59,12 +63,8 @@ int main()
     {
         while (auto event = window.pollEvent())
         {
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
         }
 
         window.clear();
@@ -127,7 +127,6 @@ int main()
 
 #elif defined(BARABARAR)
 
-#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -170,12 +169,8 @@ int main()
     {
         while (auto event = window.pollEvent())
         {
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
         }
 
         for (int i = 0; i < 20; ++i)

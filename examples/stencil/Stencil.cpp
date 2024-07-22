@@ -6,7 +6,9 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/EventUtils.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
 #include <cstdlib>
 
@@ -50,11 +52,8 @@ int main()
         // Handle events
         while (const sf::base::Optional event = window.pollEvent())
         {
-            // Window closed: exit
-            if (event->is<sf::Event::Closed>())
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
         }
 
         // When drawing using a 2D API, we normally resort to what is known as the "painter's algorithm".

@@ -15,8 +15,6 @@ set(SRC
     ${INCROOT}/Glsl.hpp
     ${INCROOT}/Glsl.inl
     ${INCROOT}/Glyph.hpp
-    ${SRCROOT}/GLCheck.cpp
-    ${SRCROOT}/GLCheck.hpp
     ${SRCROOT}/Image.cpp
     ${INCROOT}/Image.hpp
     ${INCROOT}/PrimitiveType.hpp

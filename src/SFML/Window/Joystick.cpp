@@ -26,6 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Joystick.hpp>
+#include <SFML/Window/JoystickImpl.hpp>
 #include <SFML/Window/JoystickManager.hpp>
 
 #include <SFML/Base/Assert.hpp>
@@ -66,13 +67,6 @@ bool Joystick::isButtonPressed(unsigned int joystick, unsigned int button)
 float Joystick::getAxisPosition(unsigned int joystick, Axis axis)
 {
     return priv::JoystickManager::getInstance().getState(joystick).axes[axis];
-}
-
-
-////////////////////////////////////////////////////////////
-Joystick::Identification Joystick::getIdentification(unsigned int joystick)
-{
-    return priv::JoystickManager::getInstance().getIdentification(joystick);
 }
 
 

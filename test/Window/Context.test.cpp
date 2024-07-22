@@ -5,6 +5,7 @@
 #include <SFML/Window/ContextSettings.hpp>
 
 #include <SFML/System/Err.hpp>
+
 #include <SFML/Base/Macros.hpp>
 #include <SFML/Base/UniquePtr.hpp>
 
@@ -39,13 +40,13 @@ struct TestContext
     glContext(theGraphicsContext.createGlContext())
     {
         if (!setActive(true))
-            sf::priv::err() << "Failed to set context as active during construction" ;
+            sf::priv::err() << "Failed to set context as active during construction";
     }
 
     ~TestContext()
     {
         if (glContext != nullptr && !setActive(false))
-            sf::priv::err() << "Failed to set context as inactive during destruction" ;
+            sf::priv::err() << "Failed to set context as inactive during destruction";
     }
 
     [[nodiscard]] bool setActive(bool active) const

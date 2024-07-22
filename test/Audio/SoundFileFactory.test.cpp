@@ -7,8 +7,9 @@
 
 #include <SFML/System/FileInputStream.hpp>
 #include <SFML/System/InputStream.hpp>
-#include <SFML/Base/Optional.hpp>
 #include <SFML/System/Path.hpp>
+
+#include <SFML/Base/Optional.hpp>
 
 #include <Doctest.hpp>
 

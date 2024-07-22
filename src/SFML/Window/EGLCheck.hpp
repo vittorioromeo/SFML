@@ -29,6 +29,8 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Config.hpp>
 
+#include <SFML/Base/Assert.hpp>
+
 
 namespace sf::priv
 {
@@ -42,6 +44,8 @@ namespace sf::priv
 #define eglCheck(expr)                                        \
     do                                                        \
     {                                                         \
+        SFML_BASE_ASSERT(eglGetError() == EGL_SUCCESS);       \
+                                                              \
         expr;                                                 \
         ::sf::priv::eglCheckError(__FILE__, __LINE__, #expr); \
     } while (false)
@@ -49,7 +53,7 @@ namespace sf::priv
 #else
 
 // Else, we don't add any overhead
-#define eglCheck(x) (x)
+#define eglCheck(expr) (expr)
 
 #endif
 

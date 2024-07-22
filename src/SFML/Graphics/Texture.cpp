@@ -25,11 +25,11 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/TextureSaver.hpp>
 
+#include <SFML/Window/GLCheck.hpp>
 #include <SFML/Window/GLExtensions.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 #include <SFML/Window/Window.hpp>
@@ -68,8 +68,8 @@ namespace sf
 ////////////////////////////////////////////////////////////
 Texture::Texture(base::PassKey<Texture>&&,
                  GraphicsContext& graphicsContext,
-                 const Vector2u&  size,
-                 const Vector2u&  actualSize,
+                 Vector2u         size,
+                 Vector2u         actualSize,
                  unsigned int     texture,
                  bool             sRgb) :
 m_graphicsContext(&graphicsContext),
@@ -167,7 +167,7 @@ Texture& Texture::operator=(Texture&& right) noexcept
 
 
 ////////////////////////////////////////////////////////////
-base::Optional<Texture> Texture::create(GraphicsContext& graphicsContext, const Vector2u& size, bool sRgb)
+base::Optional<Texture> Texture::create(GraphicsContext& graphicsContext, Vector2u size, bool sRgb)
 {
     base::Optional<Texture> result; // Use a single local variable for NRVO
 
@@ -179,9 +179,6 @@ base::Optional<Texture> Texture::create(GraphicsContext& graphicsContext, const 
     }
 
     SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
-
-    // Make sure that extensions are initialized
-    priv::ensureExtensionsInit(graphicsContext);
 
     // Compute the internal texture dimensions depending on NPOT textures support
     const Vector2u actualSize(getValidSize(size.x), getValidSize(size.y));
@@ -196,6 +193,7 @@ base::Optional<Texture> Texture::create(GraphicsContext& graphicsContext, const 
 
         return result; // Empty optional
     }
+
 
     // Create the OpenGL texture
     GLuint glTexture = 0;
@@ -405,8 +403,7 @@ Image Texture::copyToImage() const
     glCheck(GLEXT_glGenFramebuffers(1, &frameBuffer));
     if (frameBuffer)
     {
-        GLint previousFrameBuffer = 0;
-        glCheck(glGetIntegerv(GLEXT_GL_FRAMEBUFFER_BINDING, &previousFrameBuffer));
+        const auto previousFrameBuffer = priv::getGLInteger(GLEXT_GL_DRAW_FRAMEBUFFER_BINDING);
 
         glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_FRAMEBUFFER, frameBuffer));
         glCheck(GLEXT_glFramebufferTexture2D(GLEXT_GL_FRAMEBUFFER, GLEXT_GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0));
@@ -493,13 +490,15 @@ void Texture::update(const std::uint8_t* pixels)
 
 
 ////////////////////////////////////////////////////////////
-void Texture::update(const std::uint8_t* pixels, const Vector2u& size, const Vector2u& dest)
+void Texture::update(const std::uint8_t* pixels, Vector2u size, Vector2u dest)
 {
     SFML_BASE_ASSERT(dest.x + size.x <= m_size.x && "Destination x coordinate is outside of texture");
     SFML_BASE_ASSERT(dest.y + size.y <= m_size.y && "Destination y coordinate is outside of texture");
 
     SFML_BASE_ASSERT(pixels != nullptr);
+
     SFML_BASE_ASSERT(m_texture);
+    SFML_BASE_ASSERT(glIsTexture(m_texture));
 
     SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
 
@@ -537,33 +536,28 @@ void Texture::update(const Texture& texture)
 
 
 ////////////////////////////////////////////////////////////
-void Texture::update(const Texture& texture, const Vector2u& dest)
+void Texture::update(const Texture& texture, Vector2u dest)
 {
     SFML_BASE_ASSERT(dest.x + texture.m_size.x <= m_size.x && "Destination x coordinate is outside of texture");
     SFML_BASE_ASSERT(dest.y + texture.m_size.y <= m_size.y && "Destination y coordinate is outside of texture");
 
     SFML_BASE_ASSERT(m_texture);
+    SFML_BASE_ASSERT(glIsTexture(m_texture));
+
     SFML_BASE_ASSERT(texture.m_texture);
+    SFML_BASE_ASSERT(glIsTexture(texture.m_texture));
 
-#ifndef SFML_OPENGL_ES
+#ifndef SFML_OPENGL_ES // TODO P0: I think this can be removed now
 
-    {
-        SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
-
-        // Make sure that extensions are initialized
-        priv::ensureExtensionsInit(*m_graphicsContext);
-    }
+    SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
 
     if (GLEXT_framebuffer_object && GLEXT_framebuffer_blit)
     {
         SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
 
         // Save the current bindings so we can restore them after we are done
-        GLint readFramebuffer = 0;
-        GLint drawFramebuffer = 0;
-
-        glCheck(glGetIntegerv(GLEXT_GL_READ_FRAMEBUFFER_BINDING, &readFramebuffer));
-        glCheck(glGetIntegerv(GLEXT_GL_DRAW_FRAMEBUFFER_BINDING, &drawFramebuffer));
+        const auto readFramebuffer = priv::getGLInteger(GLEXT_GL_READ_FRAMEBUFFER_BINDING);
+        const auto drawFramebuffer = priv::getGLInteger(GLEXT_GL_DRAW_FRAMEBUFFER_BINDING);
 
         // Create the framebuffers
         GLuint sourceFrameBuffer = 0;
@@ -663,39 +657,130 @@ void Texture::update(const Texture& texture, const Vector2u& dest)
 void Texture::update(const Image& image)
 {
     // Update the whole texture
-    update(image.getPixelsPtr(), image.getSize(), {0, 0});
+    update(image.getPixelsPtr(), image.getSize(), {0u, 0u});
 }
 
 
 ////////////////////////////////////////////////////////////
-void Texture::update(const Image& image, const Vector2u& dest)
+void Texture::update(const Image& image, Vector2u dest)
 {
     update(image.getPixelsPtr(), image.getSize(), dest);
 }
 
 
 ////////////////////////////////////////////////////////////
-void Texture::update(const Window& window)
+[[nodiscard]] bool Texture::update(const Window& window)
 {
-    update(window, {0, 0});
+    return update(window, {0u, 0u});
 }
 
 
 ////////////////////////////////////////////////////////////
-void Texture::update(const Window& window, const Vector2u& dest)
+bool Texture::update(const Window& window, Vector2u dest)
 {
     SFML_BASE_ASSERT(dest.x + window.getSize().x <= m_size.x && "Destination x coordinate is outside of texture");
     SFML_BASE_ASSERT(dest.y + window.getSize().y <= m_size.y && "Destination y coordinate is outside of texture");
 
-    if (m_texture && window.setActive(true))
-    {
-        SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
+    SFML_BASE_ASSERT(m_texture);
+    SFML_BASE_ASSERT(glIsTexture(m_texture));
 
+    if (!window.setActive(true))
+    {
+        priv::err() << "Failed to activate window in `Texture::update`";
+        return false;
+    }
+
+    SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
+
+    if (GLEXT_framebuffer_object && GLEXT_framebuffer_blit)
+    {
+        // Save the current bindings so we can restore them after we are done
+        const auto readFramebuffer = priv::getGLInteger(GLEXT_GL_READ_FRAMEBUFFER_BINDING);
+        const auto drawFramebuffer = priv::getGLInteger(GLEXT_GL_DRAW_FRAMEBUFFER_BINDING);
+
+        // Create the destination framebuffers
+        GLuint destFrameBuffer = 0;
+        glCheck(GLEXT_glGenFramebuffers(1, &destFrameBuffer));
+
+        GLuint sourceFrameBuffer = 0; // default fbo
+
+        if (!destFrameBuffer)
+        {
+            priv::err() << "Cannot copy texture, failed to create a frame buffer object";
+            return false;
+        }
+
+        // Link the source texture to the source frame buffer
+        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_READ_FRAMEBUFFER, sourceFrameBuffer));
+
+        // Link the destination texture to the destination frame buffer
+        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_DRAW_FRAMEBUFFER, destFrameBuffer));
+        glCheck(
+            GLEXT_glFramebufferTexture2D(GLEXT_GL_DRAW_FRAMEBUFFER, GLEXT_GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0));
+
+        // A final check, just to be sure...
+        GLenum sourceStatus = 0;
+        glCheck(sourceStatus = GLEXT_glCheckFramebufferStatus(GLEXT_GL_READ_FRAMEBUFFER));
+
+        GLenum destStatus = 0;
+        glCheck(destStatus = GLEXT_glCheckFramebufferStatus(GLEXT_GL_DRAW_FRAMEBUFFER));
+
+        if ((sourceStatus == GLEXT_GL_FRAMEBUFFER_COMPLETE) && (destStatus == GLEXT_GL_FRAMEBUFFER_COMPLETE))
+        {
+            // Scissor testing affects framebuffer blits as well
+            // Since we don't want scissor testing to interfere with our copying, we temporarily disable it for the blit if it is enabled
+            GLboolean scissorEnabled = GL_FALSE;
+            glCheck(glGetBooleanv(GL_SCISSOR_TEST, &scissorEnabled));
+
+            if (scissorEnabled == GL_TRUE)
+                glCheck(glDisable(GL_SCISSOR_TEST));
+
+            // Blit the texture contents from the source to the destination texture
+            glCheck(GLEXT_glBlitFramebuffer(0,
+                                            0,
+                                            static_cast<GLsizei>(window.getSize().x),
+                                            static_cast<GLsizei>(window.getSize().y), // Source rectangle, flip y if source is flipped
+                                            static_cast<GLint>(dest.x),
+                                            static_cast<GLint>(dest.y),
+                                            static_cast<GLint>(dest.x + window.getSize().x),
+                                            static_cast<GLint>(dest.y + window.getSize().y), // Destination rectangle
+                                            GL_COLOR_BUFFER_BIT,
+                                            GL_NEAREST));
+
+            // Re-enable scissor testing if it was previously enabled
+            if (scissorEnabled == GL_TRUE)
+                glCheck(glEnable(GL_SCISSOR_TEST));
+        }
+        else
+        {
+            priv::err() << "Cannot copy texture, failed to link texture to frame buffer";
+        }
+
+        // Restore previously bound framebuffers
+        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_READ_FRAMEBUFFER, static_cast<GLuint>(readFramebuffer)));
+        glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(drawFramebuffer)));
+
+        // Delete the framebuffers
+        glCheck(GLEXT_glDeleteFramebuffers(1, &destFrameBuffer));
+
+        // Make sure that the current texture binding will be preserved
+        const priv::TextureSaver save;
+
+        // Set the parameters of this texture
+        glCheck(glBindTexture(GL_TEXTURE_2D, m_texture));
+        glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_isSmooth ? GL_LINEAR : GL_NEAREST));
+        m_hasMipmap     = false;
+        m_pixelsFlipped = true;
+        m_cacheId       = TextureImpl::getUniqueId();
+    }
+    else
+    {
         // Make sure that the current texture binding will be preserved
         const priv::TextureSaver save;
 
         // Copy pixels from the back-buffer to the texture
         glCheck(glBindTexture(GL_TEXTURE_2D, m_texture));
+        glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0u));
         glCheck(glCopyTexSubImage2D(GL_TEXTURE_2D,
                                     0,
                                     static_cast<GLint>(dest.x),
@@ -708,11 +793,13 @@ void Texture::update(const Window& window, const Vector2u& dest)
         m_hasMipmap     = false;
         m_pixelsFlipped = true;
         m_cacheId       = TextureImpl::getUniqueId();
-
-        // Force an OpenGL flush, so that the texture will appear updated
-        // in all contexts immediately (solves problems in multi-threaded apps)
-        glCheck(glFlush());
     }
+
+    // Force an OpenGL flush, so that the texture will appear updated
+    // in all contexts immediately (solves problems in multi-threaded apps)
+    glCheck(glFlush());
+
+    return true;
 }
 
 
@@ -818,10 +905,9 @@ bool Texture::isRepeated() const
 bool Texture::generateMipmap()
 {
     SFML_BASE_ASSERT(m_texture);
-    SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
+    SFML_BASE_ASSERT(glIsTexture(m_texture));
 
-    // Make sure that extensions are initialized
-    priv::ensureExtensionsInit(*m_graphicsContext);
+    SFML_BASE_ASSERT(m_graphicsContext->hasActiveThreadLocalOrSharedGlContext());
 
     if (!GLEXT_framebuffer_object)
     {
@@ -863,7 +949,7 @@ void Texture::invalidateMipmap()
 
 
 ////////////////////////////////////////////////////////////
-void Texture::bind(GraphicsContext& graphicsContext, const Texture* texture, CoordinateType coordinateType)
+void Texture::bind([[maybe_unused]] GraphicsContext& graphicsContext, const Texture* texture)
 {
     SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
 
@@ -873,57 +959,11 @@ void Texture::bind(GraphicsContext& graphicsContext, const Texture* texture, Coo
 
         // Bind the texture
         glCheck(glBindTexture(GL_TEXTURE_2D, texture->m_texture));
-
-        // Check if we need to define a special texture matrix
-        if ((coordinateType == CoordinateType::Pixels) || texture->m_pixelsFlipped)
-        {
-            // clang-format off
-            float matrix[] = {1.f, 0.f, 0.f, 0.f,
-                              0.f, 1.f, 0.f, 0.f,
-                              0.f, 0.f, 1.f, 0.f,
-                              0.f, 0.f, 0.f, 1.f};
-            // clang-format on
-
-            // If non-normalized coordinates (= pixels) are requested, we need to
-            // setup scale factors that convert the range [0 .. size] to [0 .. 1]
-            if (coordinateType == CoordinateType::Pixels)
-            {
-                matrix[0] = 1.f / static_cast<float>(texture->m_actualSize.x);
-                matrix[5] = 1.f / static_cast<float>(texture->m_actualSize.y);
-            }
-
-            // If pixels are flipped we must invert the Y axis
-            if (texture->m_pixelsFlipped)
-            {
-                matrix[5]  = -matrix[5];
-                matrix[13] = static_cast<float>(texture->m_size.y) / static_cast<float>(texture->m_actualSize.y);
-            }
-
-            // Load the matrix
-            glCheck(glMatrixMode(GL_TEXTURE));
-            glCheck(glLoadMatrixf(matrix));
-        }
-        else
-        {
-            // Reset the texture matrix
-            glCheck(glMatrixMode(GL_TEXTURE));
-            glCheck(glLoadIdentity());
-        }
-
-        // Go back to model-view mode (sf::RenderTarget relies on it)
-        glCheck(glMatrixMode(GL_MODELVIEW));
     }
     else
     {
         // Bind no texture
         glCheck(glBindTexture(GL_TEXTURE_2D, 0));
-
-        // Reset the texture matrix
-        glCheck(glMatrixMode(GL_TEXTURE));
-        glCheck(glLoadIdentity());
-
-        // Go back to model-view mode (sf::RenderTarget relies on it)
-        glCheck(glMatrixMode(GL_MODELVIEW));
     }
 }
 
@@ -931,21 +971,46 @@ void Texture::bind(GraphicsContext& graphicsContext, const Texture* texture, Coo
 ////////////////////////////////////////////////////////////
 unsigned int Texture::getMaximumSize(GraphicsContext& graphicsContext)
 {
-    static const unsigned int size = [&graphicsContext]
-    {
-        SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
+    SFML_BASE_ASSERT(graphicsContext.hasActiveThreadLocalOrSharedGlContext());
 
-        GLint value = 0;
-
-        // Make sure that extensions are initialized
-        priv::ensureExtensionsInit(graphicsContext);
-
-        glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value));
-
-        return static_cast<unsigned int>(value);
-    }();
-
+    static const auto size = static_cast<unsigned int>(priv::getGLInteger(GL_MAX_TEXTURE_SIZE));
     return size;
+}
+
+
+////////////////////////////////////////////////////////////
+Glsl::Mat4 Texture::getMatrix(CoordinateType coordinateType) const
+{
+    SFML_BASE_ASSERT(m_texture);
+    SFML_BASE_ASSERT(glIsTexture(m_texture));
+
+    // clang-format off
+    float matrix[] = {1.f, 0.f, 0.f, 0.f,
+                      0.f, 1.f, 0.f, 0.f,
+                      0.f, 0.f, 1.f, 0.f,
+                      0.f, 0.f, 0.f, 1.f};
+    // clang-format on
+
+    // Check if we need to define a special texture matrix
+    if ((coordinateType == CoordinateType::Pixels) || m_pixelsFlipped)
+    {
+        // If non-normalized coordinates (= pixels) are requested, we need to
+        // setup scale factors that convert the range [0 .. size] to [0 .. 1]
+        if (coordinateType == CoordinateType::Pixels)
+        {
+            matrix[0] = 1.f / static_cast<float>(m_actualSize.x);
+            matrix[5] = 1.f / static_cast<float>(m_actualSize.y);
+        }
+
+        // If pixels are flipped we must invert the Y axis
+        if (m_pixelsFlipped)
+        {
+            matrix[5]  = -matrix[5];
+            matrix[13] = static_cast<float>(m_size.y) / static_cast<float>(m_actualSize.y);
+        }
+    }
+
+    return Glsl::Mat4(matrix);
 }
 
 

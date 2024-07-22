@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <SFML/Window/EventUtils.hpp>
 #define GLAD_VULKAN_IMPLEMENTATION
 #include <vulkan.h>
 
@@ -2557,13 +2558,8 @@ public:
             // Process events
             while (const sf::base::Optional event = window.pollEvent())
             {
-                // Window closed or escape key pressed: exit
-                if (event->is<sf::Event::Closed>() ||
-                    (event->is<sf::Event::KeyPressed>() &&
-                     event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-                {
+                if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                     return;
-                }
 
                 // Re-create the swapchain when the window is resized
                 if (event->is<sf::Event::Resized>())
@@ -2591,47 +2587,47 @@ private:
     unsigned int       currentFrame{};
     bool               swapchainOutOfDate{};
 
-    VkInstance                      instance{};
-    VkDebugReportCallbackEXT        debugReportCallback{};
-    VkSurfaceKHR                    surface{};
-    VkPhysicalDevice                gpu{};
-    sf::base::Optional<std::uint32_t>     queueFamilyIndex;
-    VkDevice                        device{};
-    VkQueue                         queue{};
-    VkSurfaceFormatKHR              swapchainFormat{};
-    VkExtent2D                      swapchainExtent{};
-    VkSwapchainKHR                  swapchain{};
-    std::vector<VkImage>            swapchainImages;
-    std::vector<VkImageView>        swapchainImageViews;
-    VkFormat                        depthFormat{VK_FORMAT_UNDEFINED};
-    VkImage                         depthImage{};
-    VkDeviceMemory                  depthImageMemory{};
-    VkImageView                     depthImageView{};
-    VkShaderModule                  vertexShaderModule{};
-    VkShaderModule                  fragmentShaderModule{};
-    VkPipelineShaderStageCreateInfo shaderStages[2]{};
-    VkDescriptorSetLayout           descriptorSetLayout{};
-    VkPipelineLayout                pipelineLayout{};
-    VkRenderPass                    renderPass{};
-    VkPipeline                      graphicsPipeline{};
-    std::vector<VkFramebuffer>      swapchainFramebuffers;
-    VkCommandPool                   commandPool{};
-    VkBuffer                        vertexBuffer{};
-    VkDeviceMemory                  vertexBufferMemory{};
-    VkBuffer                        indexBuffer{};
-    VkDeviceMemory                  indexBufferMemory{};
-    std::vector<VkBuffer>           uniformBuffers;
-    std::vector<VkDeviceMemory>     uniformBuffersMemory;
-    VkImage                         textureImage{};
-    VkDeviceMemory                  textureImageMemory{};
-    VkImageView                     textureImageView{};
-    VkSampler                       textureSampler{};
-    VkDescriptorPool                descriptorPool{};
-    std::vector<VkDescriptorSet>    descriptorSets;
-    std::vector<VkCommandBuffer>    commandBuffers;
-    std::vector<VkSemaphore>        imageAvailableSemaphores;
-    std::vector<VkSemaphore>        renderFinishedSemaphores;
-    std::vector<VkFence>            fences;
+    VkInstance                        instance{};
+    VkDebugReportCallbackEXT          debugReportCallback{};
+    VkSurfaceKHR                      surface{};
+    VkPhysicalDevice                  gpu{};
+    sf::base::Optional<std::uint32_t> queueFamilyIndex;
+    VkDevice                          device{};
+    VkQueue                           queue{};
+    VkSurfaceFormatKHR                swapchainFormat{};
+    VkExtent2D                        swapchainExtent{};
+    VkSwapchainKHR                    swapchain{};
+    std::vector<VkImage>              swapchainImages;
+    std::vector<VkImageView>          swapchainImageViews;
+    VkFormat                          depthFormat{VK_FORMAT_UNDEFINED};
+    VkImage                           depthImage{};
+    VkDeviceMemory                    depthImageMemory{};
+    VkImageView                       depthImageView{};
+    VkShaderModule                    vertexShaderModule{};
+    VkShaderModule                    fragmentShaderModule{};
+    VkPipelineShaderStageCreateInfo   shaderStages[2]{};
+    VkDescriptorSetLayout             descriptorSetLayout{};
+    VkPipelineLayout                  pipelineLayout{};
+    VkRenderPass                      renderPass{};
+    VkPipeline                        graphicsPipeline{};
+    std::vector<VkFramebuffer>        swapchainFramebuffers;
+    VkCommandPool                     commandPool{};
+    VkBuffer                          vertexBuffer{};
+    VkDeviceMemory                    vertexBufferMemory{};
+    VkBuffer                          indexBuffer{};
+    VkDeviceMemory                    indexBufferMemory{};
+    std::vector<VkBuffer>             uniformBuffers;
+    std::vector<VkDeviceMemory>       uniformBuffersMemory;
+    VkImage                           textureImage{};
+    VkDeviceMemory                    textureImageMemory{};
+    VkImageView                       textureImageView{};
+    VkSampler                         textureSampler{};
+    VkDescriptorPool                  descriptorPool{};
+    std::vector<VkDescriptorSet>      descriptorSets;
+    std::vector<VkCommandBuffer>      commandBuffers;
+    std::vector<VkSemaphore>          imageAvailableSemaphores;
+    std::vector<VkSemaphore>          renderFinishedSemaphores;
+    std::vector<VkFence>              fences;
     // NOLINTEND(readability-identifier-naming)
 };
 

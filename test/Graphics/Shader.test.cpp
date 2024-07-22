@@ -15,29 +15,49 @@
 
 namespace
 {
-constexpr auto vertexSource = R"(
-uniform vec2 storm_position;
+constexpr auto vertexSource = R"glsl(
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform vec2  storm_position;
 uniform float storm_total_radius;
 uniform float storm_inner_radius;
 
+uniform mat4 sf_u_projectionMatrix;
+uniform mat4 sf_u_textureMatrix;
+uniform mat4 sf_u_modelViewMatrix;
+
+attribute vec4 sf_a_color;
+attribute vec2 sf_a_position;
+attribute vec2 sf_a_texCoord;
+
+varying vec4 sf_v_color;
+varying vec2 sf_v_texCoord;
+
 void main()
 {
-    vec4 vertex = gl_ModelViewMatrix * gl_Vertex;
-    vec2 offset = vertex.xy - storm_position;
+    vec2 newPosition = sf_a_position;
+
+    vec2 offset = newPosition.xy - storm_position;
+
     float len = length(offset);
     if (len < storm_total_radius)
     {
         float push_distance = storm_inner_radius + len / storm_total_radius * (storm_total_radius - storm_inner_radius);
-        vertex.xy = storm_position + normalize(offset) * push_distance;
+        newPosition.xy      = storm_position + normalize(offset) * push_distance;
     }
 
-    gl_Position = gl_ProjectionMatrix * vertex;
-    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
-    gl_FrontColor = gl_Color;
+    gl_Position   = sf_u_projectionMatrix * sf_u_modelViewMatrix * vec4(newPosition, 0.0, 1.0);
+    sf_v_texCoord = (sf_u_textureMatrix * vec4(sf_a_texCoord, 0.0, 1.0)).xy;
+    sf_v_color    = sf_a_color;
 }
-)";
 
-constexpr auto geometrySource = R"(
+)glsl";
+
+constexpr auto geometrySource = R"glsl(
+
 #version 150
 
 // The render target's resolution (used for scaling)
@@ -47,13 +67,21 @@ uniform vec2 resolution;
 uniform vec2 size;
 
 // Input is the passed point cloud
-layout (points) in;
+layout(points) in;
 
 // The output will consist of triangle strips with four vertices each
-layout (triangle_strip, max_vertices = 4) out;
+layout(triangle_strip, max_vertices = 4) out;
 
 // Output texture coordinates
-out vec2 tex_coord;
+varying vec2 sf_v_texCoord;
+
+in gl_PerVertex
+{
+    vec4 gl_Position;
+}
+gl_in[];
+
+uniform mat4 sf_u_textureMatrix;
 
 // Main entry point
 void main()
@@ -71,77 +99,61 @@ void main()
         vec2 pos = gl_in[i].gl_Position.xy;
 
         // Bottom left vertex
-        gl_Position = vec4(pos - half_size, 0.f, 1.f);
-        tex_coord = vec2(1.f, 1.f);
+        gl_Position   = vec4(pos - half_size, 0.f, 1.f);
+        sf_v_texCoord = vec2(1.f, 1.f);
         EmitVertex();
 
         // Bottom right vertex
-        gl_Position = vec4(pos.x + half_size.x, pos.y - half_size.y, 0.f, 1.f);
-        tex_coord = vec2(0.f, 1.f);
+        gl_Position   = vec4(pos.x + half_size.x, pos.y - half_size.y, 0.f, 1.f);
+        sf_v_texCoord = vec2(0.f, 1.f);
         EmitVertex();
 
         // Top left vertex
-        gl_Position = vec4(pos.x - half_size.x, pos.y + half_size.y, 0.f, 1.f);
-        tex_coord = vec2(1.f, 0.f);
+        gl_Position   = vec4(pos.x - half_size.x, pos.y + half_size.y, 0.f, 1.f);
+        sf_v_texCoord = vec2(1.f, 0.f);
         EmitVertex();
 
         // Top right vertex
-        gl_Position = vec4(pos + half_size, 0.f, 1.f);
-        tex_coord = vec2(0.f, 0.f);
+        gl_Position   = vec4(pos + half_size, 0.f, 1.f);
+        sf_v_texCoord = vec2(0.f, 0.f);
         EmitVertex();
 
         // And finalize the primitive
         EndPrimitive();
     }
 }
-)";
 
-constexpr auto fragmentSource = R"(
-uniform sampler2D texture;
-uniform float blink_alpha;
+)glsl";
+
+constexpr auto fragmentSource = R"glsl(
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform sampler2D sf_u_texture;
+uniform float     blink_alpha;
+
+varying vec4 sf_v_color;
+varying vec2 sf_v_texCoord;
 
 void main()
 {
-    vec4 pixel = gl_Color;
-    pixel.a = blink_alpha;
+    vec4 pixel = sf_v_color;
+    pixel.a    = blink_alpha;
+
     gl_FragColor = pixel;
 }
-)";
+
+)glsl";
 
 #ifdef SFML_RUN_DISPLAY_TESTS
-#ifdef SFML_OPENGL_ES
-constexpr bool skipShaderDummyTest = false;
-constexpr bool skipShaderFullTest  = true;
+constexpr bool skipShaderFullTest = false;
 #else
-constexpr bool skipShaderDummyTest = true;
-constexpr bool skipShaderFullTest  = false;
-#endif
-#else
-constexpr bool skipShaderDummyTest = true;
-constexpr bool skipShaderFullTest  = true;
+constexpr bool skipShaderFullTest = true;
 #endif
 
 } // namespace
-
-TEST_CASE("[Graphics] sf::Shader (Dummy Implementation)" * doctest::skip(skipShaderDummyTest))
-{
-    sf::GraphicsContext graphicsContext;
-
-    SECTION("Available")
-    {
-        CHECK_FALSE(sf::Shader::isAvailable(graphicsContext));
-        CHECK_FALSE(sf::Shader::isGeometryAvailable(graphicsContext));
-    }
-
-    SECTION("loadFromMemory()")
-    {
-        CHECK_FALSE(sf::Shader::loadFromMemory(graphicsContext, vertexSource, sf::Shader::Type::Vertex).hasValue());
-        CHECK_FALSE(sf::Shader::loadFromMemory(graphicsContext, geometrySource, sf::Shader::Type::Geometry).hasValue());
-        CHECK_FALSE(sf::Shader::loadFromMemory(graphicsContext, fragmentSource, sf::Shader::Type::Fragment).hasValue());
-        CHECK_FALSE(sf::Shader::loadFromMemory(graphicsContext, vertexSource, fragmentSource).hasValue());
-        CHECK_FALSE(sf::Shader::loadFromMemory(graphicsContext, vertexSource, geometrySource, fragmentSource).hasValue());
-    }
-}
 
 TEST_CASE("[Graphics] sf::Shader" * doctest::skip(skipShaderFullTest))
 {
@@ -184,16 +196,16 @@ TEST_CASE("[Graphics] sf::Shader" * doctest::skip(skipShaderFullTest))
             CHECK(!sf::Shader::loadFromFile(graphicsContext, "does-not-exist.vert", sf::Shader::Type::Vertex));
 
             const auto vertexShader = sf::Shader::loadFromFile(graphicsContext, "Graphics/shader.vert", sf::Shader::Type::Vertex);
-            CHECK(vertexShader.hasValue() == sf::Shader::isAvailable(graphicsContext));
+            CHECK(vertexShader.hasValue());
             if (vertexShader)
-                CHECK(static_cast<bool>(vertexShader->getNativeHandle()) == sf::Shader::isAvailable(graphicsContext));
+                CHECK(static_cast<bool>(vertexShader->getNativeHandle()));
 
             const auto fragmentShader = sf::Shader::loadFromFile(graphicsContext,
                                                                  "Graphics/shader.frag",
                                                                  sf::Shader::Type::Fragment);
-            CHECK(fragmentShader.hasValue() == sf::Shader::isAvailable(graphicsContext));
+            CHECK(fragmentShader.hasValue());
             if (fragmentShader)
-                CHECK(static_cast<bool>(fragmentShader->getNativeHandle()) == sf::Shader::isAvailable(graphicsContext));
+                CHECK(static_cast<bool>(fragmentShader->getNativeHandle()));
         }
 
         SECTION("Two shaders")
@@ -204,9 +216,9 @@ TEST_CASE("[Graphics] sf::Shader" * doctest::skip(skipShaderFullTest))
             const auto shader = sf::Shader::loadFromFile(graphicsContext,
                                                          "Graphics/shader.vert",
                                                          "Graphics/shader.frag");
-            CHECK(shader.hasValue() == sf::Shader::isAvailable(graphicsContext));
+            CHECK(shader.hasValue());
             if (shader)
-                CHECK(static_cast<bool>(shader->getNativeHandle()) == sf::Shader::isAvailable(graphicsContext));
+                CHECK(static_cast<bool>(shader->getNativeHandle()));
         }
 
         SECTION("Three shaders")
@@ -236,18 +248,15 @@ TEST_CASE("[Graphics] sf::Shader" * doctest::skip(skipShaderFullTest))
 
     SECTION("loadFromMemory()")
     {
-        CHECK(sf::Shader::loadFromMemory(graphicsContext, vertexSource, sf::Shader::Type::Vertex).hasValue() ==
-              sf::Shader::isAvailable(graphicsContext));
+        CHECK(sf::Shader::loadFromMemory(graphicsContext, vertexSource, sf::Shader::Type::Vertex).hasValue());
         CHECK(!sf::Shader::loadFromMemory(graphicsContext, geometrySource, sf::Shader::Type::Geometry));
-        CHECK(sf::Shader::loadFromMemory(graphicsContext, fragmentSource, sf::Shader::Type::Fragment).hasValue() ==
-              sf::Shader::isAvailable(graphicsContext));
-        CHECK(sf::Shader::loadFromMemory(graphicsContext, vertexSource, fragmentSource).hasValue() ==
-              sf::Shader::isAvailable(graphicsContext));
+        CHECK(sf::Shader::loadFromMemory(graphicsContext, fragmentSource, sf::Shader::Type::Fragment).hasValue());
+        CHECK(sf::Shader::loadFromMemory(graphicsContext, vertexSource, fragmentSource).hasValue());
 
         const auto shader = sf::Shader::loadFromMemory(graphicsContext, vertexSource, geometrySource, fragmentSource);
         CHECK(shader.hasValue() == sf::Shader::isGeometryAvailable(graphicsContext));
         if (shader)
-            CHECK(static_cast<bool>(shader->getNativeHandle()) == sf::Shader::isAvailable(graphicsContext));
+            CHECK(static_cast<bool>(shader->getNativeHandle()));
     }
 
     SECTION("loadFromStream()")
@@ -261,18 +270,15 @@ TEST_CASE("[Graphics] sf::Shader" * doctest::skip(skipShaderFullTest))
         SECTION("One shader")
         {
             CHECK(!sf::Shader::loadFromStream(graphicsContext, emptyStream, sf::Shader::Type::Vertex));
-            CHECK(sf::Shader::loadFromStream(graphicsContext, vertexShaderStream, sf::Shader::Type::Vertex).hasValue() ==
-                  sf::Shader::isAvailable(graphicsContext));
-            CHECK(sf::Shader::loadFromStream(graphicsContext, fragmentShaderStream, sf::Shader::Type::Fragment).hasValue() ==
-                  sf::Shader::isAvailable(graphicsContext));
+            CHECK(sf::Shader::loadFromStream(graphicsContext, vertexShaderStream, sf::Shader::Type::Vertex).hasValue());
+            CHECK(sf::Shader::loadFromStream(graphicsContext, fragmentShaderStream, sf::Shader::Type::Fragment).hasValue());
         }
 
         SECTION("Two shaders")
         {
             CHECK(!sf::Shader::loadFromStream(graphicsContext, emptyStream, fragmentShaderStream));
             CHECK(!sf::Shader::loadFromStream(graphicsContext, vertexShaderStream, emptyStream));
-            CHECK(sf::Shader::loadFromStream(graphicsContext, vertexShaderStream, fragmentShaderStream).hasValue() ==
-                  sf::Shader::isAvailable(graphicsContext));
+            CHECK(sf::Shader::loadFromStream(graphicsContext, vertexShaderStream, fragmentShaderStream).hasValue());
         }
 
         SECTION("Three shaders")

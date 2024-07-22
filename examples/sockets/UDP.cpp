@@ -5,8 +5,9 @@
 #include <SFML/Network/Socket.hpp>
 #include <SFML/Network/UdpSocket.hpp>
 
-#include <iostream>
 #include <SFML/Base/Optional.hpp>
+
+#include <iostream>
 
 #include <cstddef>
 
@@ -26,10 +27,10 @@ void runUdpServer(unsigned short port)
     std::cout << "Server is listening to port " << port << ", waiting for a message... " << std::endl;
 
     // Wait for a message
-    char                         in[128];
-    std::size_t                  received = 0;
+    char                              in[128];
+    std::size_t                       received = 0;
     sf::base::Optional<sf::IpAddress> sender;
-    unsigned short               senderPort = 0;
+    unsigned short                    senderPort = 0;
     if (socket.receive(in, sizeof(in), received, sender, senderPort) != sf::Socket::Status::Done)
         return;
     std::cout << "Message received from client " << sender.value() << ": \"" << in << '"' << std::endl;
@@ -66,10 +67,10 @@ void runUdpClient(unsigned short port)
     std::cout << "Message sent to the server: \"" << out << '"' << std::endl;
 
     // Receive an answer from anyone (but most likely from the server)
-    char                         in[128];
-    std::size_t                  received = 0;
+    char                              in[128];
+    std::size_t                       received = 0;
     sf::base::Optional<sf::IpAddress> sender;
-    unsigned short               senderPort = 0;
+    unsigned short                    senderPort = 0;
     if (socket.receive(in, sizeof(in), received, sender, senderPort) != sf::Socket::Status::Done)
         return;
     std::cout << "Message received from " << sender.value() << ": \"" << in << '"' << std::endl;

@@ -197,37 +197,23 @@ void PlaybackDevice::transferResourcesTo(PlaybackDevice& other)
     ma_engine* engine = &m_impl->maEngine;
 
     // Set master volume, position, velocity, cone and world up vector
-    if (const ma_result result = ma_device_set_master_volume(ma_engine_get_device(engine), listener.getVolume() * 0.01f);
+    if (const ma_result result = ma_device_set_master_volume(ma_engine_get_device(engine), listener.volume * 0.01f);
         result != MA_SUCCESS)
     {
         priv::MiniaudioUtils::fail("set audio device master volume", result);
         return false;
     }
 
-    ma_engine_listener_set_position(engine,
-                                    0,
-                                    listener.getPosition().x,
-                                    listener.getPosition().y,
-                                    listener.getPosition().z);
+    ma_engine_listener_set_position(engine, 0, listener.position.x, listener.position.y, listener.position.z);
+    ma_engine_listener_set_velocity(engine, 0, listener.velocity.x, listener.velocity.y, listener.velocity.z);
 
-    ma_engine_listener_set_velocity(engine,
-                                    0,
-                                    listener.getVelocity().x,
-                                    listener.getVelocity().y,
-                                    listener.getVelocity().z);
-
-    const auto& cone = listener.getCone();
     ma_engine_listener_set_cone(engine,
                                 0,
-                                base::clamp(cone.innerAngle, Angle::Zero, degrees(360.f)).asRadians(),
-                                base::clamp(cone.outerAngle, Angle::Zero, degrees(360.f)).asRadians(),
-                                cone.outerGain);
+                                base::clamp(listener.cone.innerAngle, Angle::Zero, degrees(360.f)).asRadians(),
+                                base::clamp(listener.cone.outerAngle, Angle::Zero, degrees(360.f)).asRadians(),
+                                listener.cone.outerGain);
 
-    ma_engine_listener_set_world_up(engine,
-                                    0,
-                                    listener.getUpVector().x,
-                                    listener.getUpVector().y,
-                                    listener.getUpVector().z);
+    ma_engine_listener_set_world_up(engine, 0, listener.upVector.x, listener.upVector.y, listener.upVector.z);
 
     return true;
 }

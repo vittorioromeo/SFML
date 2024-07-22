@@ -13,16 +13,18 @@
 #include <SFML/Graphics/Vertex.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/EventUtils.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
 #include <SFML/System/Clock.hpp>
-#include <SFML/Base/Optional.hpp>
 #include <SFML/System/Path.hpp>
 #include <SFML/System/String.hpp>
 #include <SFML/System/Time.hpp>
+
+#include <SFML/Base/Optional.hpp>
 
 #include <array>
 #include <iostream>
@@ -62,7 +64,7 @@ public:
     explicit Pixelate(sf::Texture&& texture, sf::Shader&& shader) :
     m_texture(std::move(texture)),
     m_shader(std::move(shader)),
-    m_ulTexture(m_shader.getUniformLocation("texture").value()),
+    m_ulTexture(m_shader.getUniformLocation("sf_u_texture").value()),
     m_ulPixelThreshold(m_shader.getUniformLocation("pixel_threshold").value())
     {
         m_shader.setUniform(m_ulTexture, sf::Shader::CurrentTexture);
@@ -209,7 +211,7 @@ class Edge : public Effect
 public:
     void update(float time, float x, float y) override
     {
-        m_shader.setUniform(m_ulEdgeThreshold, 1 - (x + y) / 2);
+        m_shader.setUniform(m_ulEdgeThreshold, sf::base::clamp(1.f - (x + y) / 2.f, 0.f, 1.f));
 
         // Render the updated scene to the off-screen surface
         m_surface.clear(sf::Color::White);
@@ -329,7 +331,7 @@ sf::base::Optional<Pixelate> tryLoadPixelate(sf::GraphicsContext& graphicsContex
     if (!texture.hasValue())
         return sf::base::nullOpt;
 
-    auto shader = sf::Shader::loadFromFile(graphicsContext, "resources/pixelate.frag", sf::Shader::Type::Fragment);
+    auto shader = sf::Shader::loadFromFile(graphicsContext, "resources/billboard.vert", "resources/pixelate.frag");
     if (!shader.hasValue())
         return sf::base::nullOpt;
 
@@ -378,16 +380,16 @@ sf::base::Optional<Edge> tryLoadEdge(sf::GraphicsContext& graphicsContext)
     entityTexture->setSmooth(true);
 
     // Load the shader
-    auto shader = sf::Shader::loadFromFile(graphicsContext, "resources/edge.frag", sf::Shader::Type::Fragment);
+    auto shader = sf::Shader::loadFromFile(graphicsContext, "resources/billboard.vert", "resources/edge.frag");
     if (!shader.hasValue())
         return sf::base::nullOpt;
 
-    shader->setUniform(shader->getUniformLocation("texture").value(), sf::Shader::CurrentTexture);
+    shader->setUniform(shader->getUniformLocation("sf_u_texture").value(), sf::Shader::CurrentTexture);
 
     return sf::base::makeOptional<Edge>(std::move(*surface),
-                                  std::move(*backgroundTexture),
-                                  std::move(*entityTexture),
-                                  std::move(*shader));
+                                        std::move(*backgroundTexture),
+                                        std::move(*entityTexture),
+                                        std::move(*shader));
 }
 
 sf::base::Optional<Geometry> tryLoadGeometry(sf::GraphicsContext& graphicsContext)
@@ -411,7 +413,7 @@ sf::base::Optional<Geometry> tryLoadGeometry(sf::GraphicsContext& graphicsContex
     if (!shader.hasValue())
         return sf::base::nullOpt;
 
-    shader->setUniform(shader->getUniformLocation("texture").value(), sf::Shader::CurrentTexture);
+    shader->setUniform(shader->getUniformLocation("sf_u_texture").value(), sf::Shader::CurrentTexture);
 
     // Set the render resolution (used for proper scaling)
     shader->setUniform(shader->getUniformLocation("resolution").value(), sf::Vector2f{800, 600});
@@ -430,13 +432,6 @@ int main()
 {
     // Create the graphics context
     sf::GraphicsContext graphicsContext;
-
-    // Exit early if shaders are not available
-    if (!sf::Shader::isAvailable(graphicsContext))
-    {
-        std::cerr << "Shaders not supported on current system, aborting" << std::endl;
-        return EXIT_FAILURE;
-    }
 
     // Open the application font
     const auto font = sf::Font::openFromFile(graphicsContext, "resources/tuffy.ttf").value();
@@ -491,13 +486,8 @@ int main()
         // Process events
         while (const sf::base::Optional event = window.pollEvent())
         {
-            // Window closed or escape key pressed: exit
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
 
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {

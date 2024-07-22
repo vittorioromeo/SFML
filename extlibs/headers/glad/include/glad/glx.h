@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef SF_GLAD_GLX_H_
-#define SF_GLAD_GLX_H_
+#ifndef GLAD_GLX_H_
+#define GLAD_GLX_H_
 
 #ifdef GLX_H
     #error GLX header already included (API: glx), remove previous include!
@@ -40,7 +40,7 @@
 
 #include <glad/gl.h>
 
-#define SF_GLAD_GLX
+#define GLAD_GLX
 #define GLAD_OPTION_GLX_LOADER
 #define GLAD_OPTION_GLX_ALIAS
 #define GLAD_OPTION_GLX_HEADER_ONLY
@@ -453,33 +453,33 @@ typedef struct {
 
 
 #define GLX_VERSION_1_0 1
-GLAD_API_CALL int SF_GLAD_GLX_VERSION_1_0;
+GLAD_API_CALL int GLAD_GLX_VERSION_1_0;
 #define GLX_VERSION_1_1 1
-GLAD_API_CALL int SF_GLAD_GLX_VERSION_1_1;
+GLAD_API_CALL int GLAD_GLX_VERSION_1_1;
 #define GLX_VERSION_1_2 1
-GLAD_API_CALL int SF_GLAD_GLX_VERSION_1_2;
+GLAD_API_CALL int GLAD_GLX_VERSION_1_2;
 #define GLX_VERSION_1_3 1
-GLAD_API_CALL int SF_GLAD_GLX_VERSION_1_3;
+GLAD_API_CALL int GLAD_GLX_VERSION_1_3;
 #define GLX_VERSION_1_4 1
-GLAD_API_CALL int SF_GLAD_GLX_VERSION_1_4;
+GLAD_API_CALL int GLAD_GLX_VERSION_1_4;
 #define GLX_ARB_create_context 1
-GLAD_API_CALL int SF_GLAD_GLX_ARB_create_context;
+GLAD_API_CALL int GLAD_GLX_ARB_create_context;
 #define GLX_ARB_create_context_profile 1
-GLAD_API_CALL int SF_GLAD_GLX_ARB_create_context_profile;
+GLAD_API_CALL int GLAD_GLX_ARB_create_context_profile;
 #define GLX_ARB_framebuffer_sRGB 1
-GLAD_API_CALL int SF_GLAD_GLX_ARB_framebuffer_sRGB;
+GLAD_API_CALL int GLAD_GLX_ARB_framebuffer_sRGB;
 #define GLX_ARB_multisample 1
-GLAD_API_CALL int SF_GLAD_GLX_ARB_multisample;
+GLAD_API_CALL int GLAD_GLX_ARB_multisample;
 #define GLX_EXT_framebuffer_sRGB 1
-GLAD_API_CALL int SF_GLAD_GLX_EXT_framebuffer_sRGB;
+GLAD_API_CALL int GLAD_GLX_EXT_framebuffer_sRGB;
 #define GLX_EXT_swap_control 1
-GLAD_API_CALL int SF_GLAD_GLX_EXT_swap_control;
+GLAD_API_CALL int GLAD_GLX_EXT_swap_control;
 #define GLX_MESA_swap_control 1
-GLAD_API_CALL int SF_GLAD_GLX_MESA_swap_control;
+GLAD_API_CALL int GLAD_GLX_MESA_swap_control;
 #define GLX_SGIX_pbuffer 1
-GLAD_API_CALL int SF_GLAD_GLX_SGIX_pbuffer;
+GLAD_API_CALL int GLAD_GLX_SGIX_pbuffer;
 #define GLX_SGI_swap_control 1
-GLAD_API_CALL int SF_GLAD_GLX_SGI_swap_control;
+GLAD_API_CALL int GLAD_GLX_SGI_swap_control;
 
 
 typedef GLXFBConfig * (GLAD_API_PTR *PFNGLXCHOOSEFBCONFIGPROC)(Display * dpy, int screen, const int * attrib_list, int * nelements);
@@ -641,7 +641,7 @@ GLAD_API_CALL PFNGLXWAITXPROC sf_glad_glXWaitX;
 #endif
 
 /* Source */
-#ifdef SF_GLAD_GLX_IMPLEMENTATION
+#ifdef GLAD_GLX_IMPLEMENTATION
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -658,20 +658,20 @@ GLAD_API_CALL PFNGLXWAITXPROC sf_glad_glXWaitX;
 #endif /* GLAD_IMPL_UTIL_C_ */
 
 
-int SF_GLAD_GLX_VERSION_1_0 = 0;
-int SF_GLAD_GLX_VERSION_1_1 = 0;
-int SF_GLAD_GLX_VERSION_1_2 = 0;
-int SF_GLAD_GLX_VERSION_1_3 = 0;
-int SF_GLAD_GLX_VERSION_1_4 = 0;
-int SF_GLAD_GLX_ARB_create_context = 0;
-int SF_GLAD_GLX_ARB_create_context_profile = 0;
-int SF_GLAD_GLX_ARB_framebuffer_sRGB = 0;
-int SF_GLAD_GLX_ARB_multisample = 0;
-int SF_GLAD_GLX_EXT_framebuffer_sRGB = 0;
-int SF_GLAD_GLX_EXT_swap_control = 0;
-int SF_GLAD_GLX_MESA_swap_control = 0;
-int SF_GLAD_GLX_SGIX_pbuffer = 0;
-int SF_GLAD_GLX_SGI_swap_control = 0;
+int GLAD_GLX_VERSION_1_0 = 0;
+int GLAD_GLX_VERSION_1_1 = 0;
+int GLAD_GLX_VERSION_1_2 = 0;
+int GLAD_GLX_VERSION_1_3 = 0;
+int GLAD_GLX_VERSION_1_4 = 0;
+int GLAD_GLX_ARB_create_context = 0;
+int GLAD_GLX_ARB_create_context_profile = 0;
+int GLAD_GLX_ARB_framebuffer_sRGB = 0;
+int GLAD_GLX_ARB_multisample = 0;
+int GLAD_GLX_EXT_framebuffer_sRGB = 0;
+int GLAD_GLX_EXT_swap_control = 0;
+int GLAD_GLX_MESA_swap_control = 0;
+int GLAD_GLX_SGIX_pbuffer = 0;
+int GLAD_GLX_SGI_swap_control = 0;
 
 
 
@@ -727,7 +727,7 @@ PFNGLXWAITXPROC sf_glad_glXWaitX = NULL;
 
 
 static void glad_glx_load_GLX_VERSION_1_0( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_VERSION_1_0) return;
+    if(!GLAD_GLX_VERSION_1_0) return;
     sf_glad_glXChooseVisual = (PFNGLXCHOOSEVISUALPROC) load(userptr, "glXChooseVisual");
     sf_glad_glXCopyContext = (PFNGLXCOPYCONTEXTPROC) load(userptr, "glXCopyContext");
     sf_glad_glXCreateContext = (PFNGLXCREATECONTEXTPROC) load(userptr, "glXCreateContext");
@@ -747,17 +747,17 @@ static void glad_glx_load_GLX_VERSION_1_0( GLADuserptrloadfunc load, void* userp
     sf_glad_glXWaitX = (PFNGLXWAITXPROC) load(userptr, "glXWaitX");
 }
 static void glad_glx_load_GLX_VERSION_1_1( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_VERSION_1_1) return;
+    if(!GLAD_GLX_VERSION_1_1) return;
     sf_glad_glXGetClientString = (PFNGLXGETCLIENTSTRINGPROC) load(userptr, "glXGetClientString");
     sf_glad_glXQueryExtensionsString = (PFNGLXQUERYEXTENSIONSSTRINGPROC) load(userptr, "glXQueryExtensionsString");
     sf_glad_glXQueryServerString = (PFNGLXQUERYSERVERSTRINGPROC) load(userptr, "glXQueryServerString");
 }
 static void glad_glx_load_GLX_VERSION_1_2( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_VERSION_1_2) return;
+    if(!GLAD_GLX_VERSION_1_2) return;
     sf_glad_glXGetCurrentDisplay = (PFNGLXGETCURRENTDISPLAYPROC) load(userptr, "glXGetCurrentDisplay");
 }
 static void glad_glx_load_GLX_VERSION_1_3( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_VERSION_1_3) return;
+    if(!GLAD_GLX_VERSION_1_3) return;
     sf_glad_glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC) load(userptr, "glXChooseFBConfig");
     sf_glad_glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC) load(userptr, "glXCreateNewContext");
     sf_glad_glXCreatePbuffer = (PFNGLXCREATEPBUFFERPROC) load(userptr, "glXCreatePbuffer");
@@ -777,24 +777,24 @@ static void glad_glx_load_GLX_VERSION_1_3( GLADuserptrloadfunc load, void* userp
     sf_glad_glXSelectEvent = (PFNGLXSELECTEVENTPROC) load(userptr, "glXSelectEvent");
 }
 static void glad_glx_load_GLX_VERSION_1_4( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_VERSION_1_4) return;
+    if(!GLAD_GLX_VERSION_1_4) return;
     sf_glad_glXGetProcAddress = (PFNGLXGETPROCADDRESSPROC) load(userptr, "glXGetProcAddress");
 }
 static void glad_glx_load_GLX_ARB_create_context( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_ARB_create_context) return;
+    if(!GLAD_GLX_ARB_create_context) return;
     sf_glad_glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) load(userptr, "glXCreateContextAttribsARB");
 }
 static void glad_glx_load_GLX_EXT_swap_control( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_EXT_swap_control) return;
+    if(!GLAD_GLX_EXT_swap_control) return;
     sf_glad_glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC) load(userptr, "glXSwapIntervalEXT");
 }
 static void glad_glx_load_GLX_MESA_swap_control( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_MESA_swap_control) return;
+    if(!GLAD_GLX_MESA_swap_control) return;
     sf_glad_glXGetSwapIntervalMESA = (PFNGLXGETSWAPINTERVALMESAPROC) load(userptr, "glXGetSwapIntervalMESA");
     sf_glad_glXSwapIntervalMESA = (PFNGLXSWAPINTERVALMESAPROC) load(userptr, "glXSwapIntervalMESA");
 }
 static void glad_glx_load_GLX_SGIX_pbuffer( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_SGIX_pbuffer) return;
+    if(!GLAD_GLX_SGIX_pbuffer) return;
     sf_glad_glXCreateGLXPbufferSGIX = (PFNGLXCREATEGLXPBUFFERSGIXPROC) load(userptr, "glXCreateGLXPbufferSGIX");
     sf_glad_glXDestroyGLXPbufferSGIX = (PFNGLXDESTROYGLXPBUFFERSGIXPROC) load(userptr, "glXDestroyGLXPbufferSGIX");
     sf_glad_glXGetSelectedEventSGIX = (PFNGLXGETSELECTEDEVENTSGIXPROC) load(userptr, "glXGetSelectedEventSGIX");
@@ -802,7 +802,7 @@ static void glad_glx_load_GLX_SGIX_pbuffer( GLADuserptrloadfunc load, void* user
     sf_glad_glXSelectEventSGIX = (PFNGLXSELECTEVENTSGIXPROC) load(userptr, "glXSelectEventSGIX");
 }
 static void glad_glx_load_GLX_SGI_swap_control( GLADuserptrloadfunc load, void* userptr) {
-    if(!SF_GLAD_GLX_SGI_swap_control) return;
+    if(!GLAD_GLX_SGI_swap_control) return;
     sf_glad_glXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC) load(userptr, "glXSwapIntervalSGI");
 }
 
@@ -852,22 +852,22 @@ static GLADapiproc glad_glx_get_proc_from_userptr(void *userptr, const char* nam
 }
 
 static int glad_glx_find_extensions(Display *display, int screen) {
-    SF_GLAD_GLX_ARB_create_context = glad_glx_has_extension(display, screen, "GLX_ARB_create_context");
-    SF_GLAD_GLX_ARB_create_context_profile = glad_glx_has_extension(display, screen, "GLX_ARB_create_context_profile");
-    SF_GLAD_GLX_ARB_framebuffer_sRGB = glad_glx_has_extension(display, screen, "GLX_ARB_framebuffer_sRGB");
-    SF_GLAD_GLX_ARB_multisample = glad_glx_has_extension(display, screen, "GLX_ARB_multisample");
-    SF_GLAD_GLX_EXT_framebuffer_sRGB = glad_glx_has_extension(display, screen, "GLX_EXT_framebuffer_sRGB");
-    SF_GLAD_GLX_EXT_swap_control = glad_glx_has_extension(display, screen, "GLX_EXT_swap_control");
-    SF_GLAD_GLX_MESA_swap_control = glad_glx_has_extension(display, screen, "GLX_MESA_swap_control");
-    SF_GLAD_GLX_SGIX_pbuffer = glad_glx_has_extension(display, screen, "GLX_SGIX_pbuffer");
-    SF_GLAD_GLX_SGI_swap_control = glad_glx_has_extension(display, screen, "GLX_SGI_swap_control");
+    GLAD_GLX_ARB_create_context = glad_glx_has_extension(display, screen, "GLX_ARB_create_context");
+    GLAD_GLX_ARB_create_context_profile = glad_glx_has_extension(display, screen, "GLX_ARB_create_context_profile");
+    GLAD_GLX_ARB_framebuffer_sRGB = glad_glx_has_extension(display, screen, "GLX_ARB_framebuffer_sRGB");
+    GLAD_GLX_ARB_multisample = glad_glx_has_extension(display, screen, "GLX_ARB_multisample");
+    GLAD_GLX_EXT_framebuffer_sRGB = glad_glx_has_extension(display, screen, "GLX_EXT_framebuffer_sRGB");
+    GLAD_GLX_EXT_swap_control = glad_glx_has_extension(display, screen, "GLX_EXT_swap_control");
+    GLAD_GLX_MESA_swap_control = glad_glx_has_extension(display, screen, "GLX_MESA_swap_control");
+    GLAD_GLX_SGIX_pbuffer = glad_glx_has_extension(display, screen, "GLX_SGIX_pbuffer");
+    GLAD_GLX_SGI_swap_control = glad_glx_has_extension(display, screen, "GLX_SGI_swap_control");
     return 1;
 }
 
 static int glad_glx_find_core_glx(Display **display, int *screen) {
     int major = 0, minor = 0;
     if(*display == NULL) {
-#ifdef SF_GLAD_GLX_NO_X11
+#ifdef GLAD_GLX_NO_X11
         (void) screen;
         return 0;
 #else
@@ -879,11 +879,11 @@ static int glad_glx_find_core_glx(Display **display, int *screen) {
 #endif
     }
     glXQueryVersion(*display, &major, &minor);
-    SF_GLAD_GLX_VERSION_1_0 = (major == 1 && minor >= 0) || major > 1;
-    SF_GLAD_GLX_VERSION_1_1 = (major == 1 && minor >= 1) || major > 1;
-    SF_GLAD_GLX_VERSION_1_2 = (major == 1 && minor >= 2) || major > 1;
-    SF_GLAD_GLX_VERSION_1_3 = (major == 1 && minor >= 3) || major > 1;
-    SF_GLAD_GLX_VERSION_1_4 = (major == 1 && minor >= 4) || major > 1;
+    GLAD_GLX_VERSION_1_0 = (major == 1 && minor >= 0) || major > 1;
+    GLAD_GLX_VERSION_1_1 = (major == 1 && minor >= 1) || major > 1;
+    GLAD_GLX_VERSION_1_2 = (major == 1 && minor >= 2) || major > 1;
+    GLAD_GLX_VERSION_1_3 = (major == 1 && minor >= 3) || major > 1;
+    GLAD_GLX_VERSION_1_4 = (major == 1 && minor >= 4) || major > 1;
     return GLAD_MAKE_VERSION(major, minor);
 }
 
@@ -913,9 +913,9 @@ static int gladLoadGLX(Display *display, int screen, GLADloadfunc load) {
     return gladLoadGLXUserPtr(display, screen, glad_glx_get_proc_from_userptr, GLAD_GNUC_EXTENSION (void*) load);
 }
 
- 
 
-#ifdef SF_GLAD_GLX
+
+#ifdef GLAD_GLX
 
 #ifndef GLAD_LOADER_LIBRARY_C_
 #define GLAD_LOADER_LIBRARY_C_
@@ -1037,7 +1037,6 @@ static int gladLoaderLoadGLX(Display *display, int screen) {
     return version;
 }
 
-#endif /* SF_GLAD_GLX */
+#endif /* GLAD_GLX */
 
-#endif /* SF_GLAD_GLX_IMPLEMENTATION */
-
+#endif /* GLAD_GLX_IMPLEMENTATION */

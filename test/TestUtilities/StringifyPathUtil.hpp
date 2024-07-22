@@ -12,7 +12,7 @@ struct StringMaker<sf::Path>
 {
     static doctest::String convert(const sf::Path&)
     {
-        return ""; // TODO
+        return ""; // TODO P2:
     }
 };
 

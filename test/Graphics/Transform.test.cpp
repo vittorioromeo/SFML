@@ -2,6 +2,8 @@
 
 #include <SFML/System/Angle.hpp>
 
+#include <SFML/Base/Assert.hpp>
+
 #include <Doctest.hpp>
 
 #include <GraphicsUtil.hpp>
@@ -9,8 +11,6 @@
 
 #include <type_traits>
 #include <vector>
-
-#include <SFML/Base/Assert.hpp>
 
 TEST_CASE("[Graphics] sf::Transform")
 {

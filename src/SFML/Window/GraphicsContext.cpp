@@ -174,11 +174,11 @@ struct GraphicsContext::Impl
 
 
 ////////////////////////////////////////////////////////////
-GraphicsContext::GraphicsContext() : m_impl(base::makeUnique<Impl>(*this, 1u, nullptr))
+GraphicsContext::GraphicsContext() : m_impl(base::makeUnique<Impl>(*this, 1u /* id */, nullptr /* shared */))
 {
     SFML_BASE_ASSERT(!hasActiveThreadLocalOrSharedGlContext());
 
-    if (!setActiveThreadLocalGlContext(m_impl->sharedGlContext, true))
+    if (!setActiveThreadLocalGlContextToSharedContext(true))
         priv::err() << "Could not enable shared context in GraphicsContext()";
 
     SFML_BASE_ASSERT(isActiveGlContextSharedContext());
@@ -188,16 +188,11 @@ GraphicsContext::GraphicsContext() : m_impl(base::makeUnique<Impl>(*this, 1u, nu
 
     m_impl->extensions = loadExtensions(m_impl->sharedGlContext);
 
-    if (!setActiveThreadLocalGlContext(m_impl->sharedGlContext, false))
-        priv::err() << "Could not disable shared context in GraphicsContext()";
+    SFML_BASE_ASSERT(isActiveGlContextSharedContext());
 
-    SFML_BASE_ASSERT(!hasActiveThreadLocalOrSharedGlContext());
-
-    if (!setActiveThreadLocalGlContext(m_impl->sharedGlContext, true))
-    {
-        priv::err() << "Failed to enable shared GL context in `GraphicsContext::GraphicsContext`";
-        SFML_BASE_ASSERT(false);
-    }
+    // TODO P0: better shader lifetime management
+    // m_impl->builtInShader = createBuiltInShader(*this);
+    // SFML_BASE_ASSERT(m_impl->builtInShader.hasValue());
 
     priv::ensureExtensionsInit(*this);
 }
@@ -209,6 +204,16 @@ GraphicsContext::~GraphicsContext()
     SFML_BASE_ASSERT(m_impl->unsharedFrameBuffers.empty());
 
     SFML_BASE_ASSERT(hasActiveThreadLocalOrSharedGlContext());
+
+    SFML_BASE_ASSERT(builtInShaderState != 2);
+
+    if (builtInShaderState == 1)
+    {
+        SFML_BASE_ASSERT(builtInShaderDestroyFn != nullptr);
+        builtInShaderState = 2;
+
+        builtInShaderDestroyFn();
+    }
 
     activeGlContext.id  = 0u;
     activeGlContext.ptr = nullptr;
@@ -352,13 +357,20 @@ bool GraphicsContext::setActiveThreadLocalGlContext(priv::GlContext& glContext, 
 
 
 ////////////////////////////////////////////////////////////
+bool GraphicsContext::setActiveThreadLocalGlContextToSharedContext(bool active)
+{
+    return setActiveThreadLocalGlContext(m_impl->sharedGlContext, active);
+}
+
+
+////////////////////////////////////////////////////////////
 void GraphicsContext::onGlContextDestroyed(priv::GlContext& glContext)
 {
     // If `glContext` is not the active one on this thread, don't do anything
     if (glContext.m_id != activeGlContext.id)
         return;
 
-    if (!setActiveThreadLocalGlContext(m_impl->sharedGlContext, true))
+    if (!setActiveThreadLocalGlContextToSharedContext(true))
     {
         priv::err() << "Failed to enable shared GL context in `GraphicsContext::onGlContextDestroyed`";
         SFML_BASE_ASSERT(false);
@@ -383,6 +395,17 @@ void GraphicsContext::onGlContextDestroyed(priv::GlContext& glContext)
 
 
 ////////////////////////////////////////////////////////////
+void GraphicsContext::loadGLEntryPointsViaGLAD() const
+{
+#ifdef SFML_OPENGL_ES
+    gladLoadGLES2(getGLLoadFn());
+#else
+    gladLoadGL(getGLLoadFn());
+#endif
+}
+
+
+////////////////////////////////////////////////////////////
 [[nodiscard]] GraphicsContext::GLLoadFn GraphicsContext::getGLLoadFn() const
 {
     static const sf::GraphicsContext* lastGraphicsContext;
@@ -401,7 +424,7 @@ template <typename... GLContextArgs>
 [[nodiscard]] base::UniquePtr<priv::GlContext> GraphicsContext::createGlContextImpl(const ContextSettings& contextSettings,
                                                                                     GLContextArgs&&... args)
 {
-    // TODO: ?
+    // TODO P0: maybe graphicscontext should take a contextsetttings for teh shared context??
     // If use_count is 2 (GlResource + sharedContext) we know that we are inside sf::Context or sf::Window
     // Only in this situation we allow the user to indirectly re-create the shared context as a core context
 
@@ -430,7 +453,7 @@ template <typename... GLContextArgs>
 
     const std::lock_guard lock(m_impl->sharedGlContextMutex);
 
-    if (!setActiveThreadLocalGlContext(m_impl->sharedGlContext, true))
+    if (!setActiveThreadLocalGlContextToSharedContext(true))
         priv::err() << "Error enabling shared GL context in GraphicsContext::createGlContext()";
 
     auto glContext = base::makeUnique<DerivedGlContextType>(*this,
@@ -438,7 +461,7 @@ template <typename... GLContextArgs>
                                                             &m_impl->sharedGlContext,
                                                             SFML_BASE_FORWARD(args)...);
 
-    if (!setActiveThreadLocalGlContext(m_impl->sharedGlContext, false))
+    if (!setActiveThreadLocalGlContextToSharedContext(false))
         priv::err() << "Error disabling shared GL context in GraphicsContext::createGlContext()";
 
     if (!setActiveThreadLocalGlContext(*glContext, true))

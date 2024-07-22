@@ -203,7 +203,7 @@ Vector2i getMousePosition(const sf::WindowBase& relativeTo)
 
 
 ////////////////////////////////////////////////////////////
-void setMousePosition(const Vector2i& position)
+void setMousePosition(Vector2i position)
 {
     const AutoreleasePool pool;
     // Here we don't need to reverse the coordinates.
@@ -222,7 +222,7 @@ void setMousePosition(const Vector2i& position)
 
 
 ////////////////////////////////////////////////////////////
-void setMousePosition(const Vector2i& position, const WindowBase& relativeTo)
+void setMousePosition(Vector2i position, const WindowBase& relativeTo)
 {
     const AutoreleasePool pool;
     SFOpenGLView* const   view = getSFOpenGLViewFromSFMLWindow(relativeTo);

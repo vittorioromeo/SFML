@@ -422,7 +422,9 @@ private:
     [[nodiscard]] bool checkSize(std::size_t size);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Return the send position stored in the PImpl
+    ///
+    /// Internally invoked by `TcpSocket`
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] std::size_t& getSendPos();

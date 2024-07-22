@@ -470,7 +470,7 @@ void Text::ensureGeometryUpdate() const
     whitespaceWidth += letterSpacing;
     const float lineSpacing = m_impl->font->getLineSpacing(m_impl->characterSize) * m_impl->lineSpacingFactor;
 
-    // TODO
+    // TODO P1: docs and cleanup
     std::size_t fillQuadCount    = 0;
     std::size_t outlineQuadCount = 0;
 

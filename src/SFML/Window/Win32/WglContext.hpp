@@ -82,11 +82,7 @@ public:
     /// \param size     Back buffer width and height, in pixels
     ///
     ////////////////////////////////////////////////////////////
-    WglContext(GraphicsContext& graphicsContext,
-               std::uint64_t    id,
-               WglContext*      shared,
-               ContextSettings  settings,
-               const Vector2u&  size);
+    WglContext(GraphicsContext& graphicsContext, std::uint64_t id, WglContext* shared, ContextSettings settings, Vector2u size);
 
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
@@ -151,7 +147,7 @@ public:
 
 private:
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Data associated with a WGL surface
     ///
     ////////////////////////////////////////////////////////////
     struct SurfaceData
@@ -163,17 +159,17 @@ private:
     };
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Create the context and initialize extensions
     ///
     /// \param shared   Context to share the new one with
     /// \param settings Creation parameters
     ///
     ////////////////////////////////////////////////////////////
-    WglContext(GraphicsContext&   graphicsContext,
-               std::uint64_t      id,
-               WglContext*        shared,
-               ContextSettings&   settings,
-               const SurfaceData& surfaceData);
+    explicit WglContext(GraphicsContext&   graphicsContext,
+                        std::uint64_t      id,
+                        WglContext*        shared,
+                        ContextSettings&   settings,
+                        const SurfaceData& surfaceData);
 
     ////////////////////////////////////////////////////////////
     /// \brief Set the pixel format of the device context
@@ -199,7 +195,7 @@ private:
     ////////////////////////////////////////////////////////////
     [[nodiscard]] static SurfaceData createSurface(ContextSettings& settings,
                                                    WglContext*      shared,
-                                                   const Vector2u&  size,
+                                                   Vector2u         size,
                                                    unsigned int     bitsPerPixel);
 
     ////////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@
 #include <SFML/Audio/SoundBuffer.hpp>
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/EventUtils.hpp>
 #include <SFML/Window/GraphicsContext.hpp>
 #include <SFML/Window/Touch.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -141,13 +142,8 @@ int main()
         // Handle events
         while (const sf::base::Optional event = window.pollEvent())
         {
-            // Window closed or escape key pressed: exit
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
 
             // Space key pressed: play
             if ((event->is<sf::Event::KeyPressed>() &&

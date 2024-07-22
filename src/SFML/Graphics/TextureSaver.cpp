@@ -25,15 +25,16 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Graphics/GLCheck.hpp>
 #include <SFML/Graphics/TextureSaver.hpp>
+
+#include <SFML/Window/GLCheck.hpp>
+#include <SFML/Window/GLExtensions.hpp>
 
 namespace sf::priv
 {
 ////////////////////////////////////////////////////////////
-TextureSaver::TextureSaver()
+TextureSaver::TextureSaver() : m_textureBinding(priv::getGLInteger(GL_TEXTURE_BINDING_2D))
 {
-    glCheck(glGetIntegerv(GL_TEXTURE_BINDING_2D, &m_textureBinding));
 }
 
 

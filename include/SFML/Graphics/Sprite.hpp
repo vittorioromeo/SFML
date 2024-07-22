@@ -40,7 +40,7 @@ namespace sf
 class RenderTarget;
 
 ////////////////////////////////////////////////////////////
-/// \brief TODO representation of a texture, with its
+/// \brief Geometry that can render a texture, with its
 ///        own transformations, color, etc.
 ///
 ////////////////////////////////////////////////////////////
@@ -58,13 +58,9 @@ public:
     [[nodiscard]] explicit Sprite(const IntRect& rectangle);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Set the sub-rectangle of the texture that the sprite will display
+    /// \brief Set the sub-rectagle of the texture that the sprite will display
     ///
-    /// The texture rect is useful when you don't want to display
-    /// the whole texture, but rather a part of it.
-    /// By default, the texture rect covers the entire texture.
-    ///
-    /// \param rectangle Rectangle defining the region of the texture to display
+    /// \param rectangle Rectangle defining the region of the texture to display (specified during drawing)
     ///
     /// \see getTextureRect
     ///

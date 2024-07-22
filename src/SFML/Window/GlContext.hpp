@@ -161,7 +161,7 @@ protected:
                               bool                   sRgb);
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Get the OpenGL context ID for this context
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] std::uint64_t getId() const;

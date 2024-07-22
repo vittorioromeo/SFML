@@ -1,9 +1,9 @@
+#include <SFML/Base/Assert.hpp>
+
 #include <LoadIntoMemoryUtil.hpp>
 
 #include <fstream>
 #include <string>
-
-#include <SFML/Base/Assert.hpp>
 
 std::vector<std::byte> loadIntoMemory(const std::string_view& path)
 {

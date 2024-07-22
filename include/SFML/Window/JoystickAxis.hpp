@@ -55,6 +55,6 @@ enum class Axis
 /// \namespace sf::Joystick
 /// \ingroup window
 ///
-/// TODO
+/// Definition of the `sf::Joystic::Axis` enumeration
 ///
 ////////////////////////////////////////////////////////////

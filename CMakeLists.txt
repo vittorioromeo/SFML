@@ -364,7 +364,6 @@ else()
                        ${PROJECT_SOURCE_DIR}/include/SFML/Config.hpp
                        ${PROJECT_SOURCE_DIR}/include/SFML/OpenGL.hpp
                        ${PROJECT_SOURCE_DIR}/include/SFML/GpuPreference.hpp
-                       ${PROJECT_SOURCE_DIR}/include/SFML/System.hpp
                        ${PROJECT_SOURCE_DIR}/include/SFML/Main.hpp
                        ${PROJECT_SOURCE_DIR}/include/SFML/System
                        $<TARGET_FILE_DIR:SFML>/Headers
@@ -373,7 +372,6 @@ else()
     # add window module headers if enabled
     if(SFML_BUILD_WINDOW)
         add_custom_command(TARGET SFML POST_BUILD COMMAND cp -r
-                           ${PROJECT_SOURCE_DIR}/include/SFML/Window.hpp
                            ${PROJECT_SOURCE_DIR}/include/SFML/Window
                            $<TARGET_FILE_DIR:SFML>/Headers
                            VERBATIM)
@@ -382,7 +380,6 @@ else()
     # add network module headers if enabled
     if(SFML_BUILD_NETWORK)
         add_custom_command(TARGET SFML POST_BUILD COMMAND cp -r
-                           ${PROJECT_SOURCE_DIR}/include/SFML/Network.hpp
                            ${PROJECT_SOURCE_DIR}/include/SFML/Network
                            $<TARGET_FILE_DIR:SFML>/Headers
                            VERBATIM)
@@ -391,7 +388,6 @@ else()
      # add graphics module headers if enabled
     if(SFML_BUILD_GRAPHICS)
         add_custom_command(TARGET SFML POST_BUILD COMMAND cp -r
-                           ${PROJECT_SOURCE_DIR}/include/SFML/Graphics.hpp
                            ${PROJECT_SOURCE_DIR}/include/SFML/Graphics
                            $<TARGET_FILE_DIR:SFML>/Headers
                            VERBATIM)
@@ -400,7 +396,6 @@ else()
      # add audio module headers if enabled
     if(SFML_BUILD_AUDIO)
         add_custom_command(TARGET SFML POST_BUILD COMMAND cp -r
-                           ${PROJECT_SOURCE_DIR}/include/SFML/Audio.hpp
                            ${PROJECT_SOURCE_DIR}/include/SFML/Audio
                            $<TARGET_FILE_DIR:SFML>/Headers
                            VERBATIM)

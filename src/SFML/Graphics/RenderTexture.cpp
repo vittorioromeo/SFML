@@ -53,9 +53,7 @@ RenderTexture& RenderTexture::operator=(RenderTexture&&) noexcept = default;
 
 
 ////////////////////////////////////////////////////////////
-base::Optional<RenderTexture> RenderTexture::create(GraphicsContext&       graphicsContext,
-                                                    const Vector2u&        size,
-                                                    const ContextSettings& settings)
+base::Optional<RenderTexture> RenderTexture::create(GraphicsContext& graphicsContext, Vector2u size, const ContextSettings& settings)
 {
     base::Optional<RenderTexture> result; // Use a single local variable for NRVO
 

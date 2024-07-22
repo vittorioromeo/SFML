@@ -30,7 +30,12 @@ This PR is related to the issue #
 <!-- Please provide a [minimal, complete and verifiable example](https://stackoverflow.com/help/mcve) if possible, you can use the follow template as a start: -->
 
 ```cpp
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+
+#include <SFML/Window/VideoMode.hpp>
+#include <SFML/Window/Event.hpp>
+
+#include <SFML/Base/Optional.hpp>
 
 int main()
 {

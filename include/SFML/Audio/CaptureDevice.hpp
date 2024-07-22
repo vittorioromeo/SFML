@@ -61,7 +61,9 @@ class CaptureDevice
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Create the default capture device from `audioContext`
+    ///
+    /// \return Capture device on success, `sf::nullOpt` otherwise
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] static base::Optional<CaptureDevice> createDefault(AudioContext& audioContext);
@@ -91,13 +93,13 @@ public:
     CaptureDevice& operator=(CaptureDevice&&) noexcept;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Get the device handle
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] const CaptureDeviceHandle& getDeviceHandle() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Set the sample rate of the capture device
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool setSampleRate(unsigned int sampleRate);
@@ -157,31 +159,31 @@ private:
     friend SoundRecorder;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Returns `true` if the device is initialized
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool isDeviceInitialized() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Returns `true` if the device is started
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool isDeviceStarted() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Try to start the device, returns `true` on success
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool startDevice() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Try to stop the device, returns `true` on success
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] bool stopDevice() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Set the "process samples" callback used by miniaudio
     ///
     ////////////////////////////////////////////////////////////
     using ProcessSamplesFunc = bool (*)(void* userData, const std::int16_t* samples, std::size_t sampleCount);

@@ -44,7 +44,7 @@ namespace sf
 struct RenderStates;
 class RenderTarget;
 class Texture;
-class Color;
+struct Color;
 
 ////////////////////////////////////////////////////////////
 /// \brief Base class for textured shapes with outline
@@ -237,7 +237,7 @@ private:
     friend RenderTarget;
 
     ////////////////////////////////////////////////////////////
-    /// \brief TODO
+    /// \brief Draws the shape on `renderTarget` with the given `texture` and `states`
     ///
     ////////////////////////////////////////////////////////////
     void drawOnto(RenderTarget& renderTarget, const Texture* texture, const RenderStates& states) const;

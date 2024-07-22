@@ -30,6 +30,7 @@
 #include <SFML/Graphics/Export.hpp>
 
 #include <SFML/Graphics/CoordinateType.hpp>
+#include <SFML/Graphics/Glsl.hpp>
 
 #include <SFML/System/LifetimeDependee.hpp>
 #include <SFML/System/Rect.hpp>
@@ -102,7 +103,7 @@ public:
     /// \return Texture if creation was successful, otherwise `base::nullOpt`
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] static base::Optional<Texture> create(GraphicsContext& graphicsContext, const Vector2u& size, bool sRgb = false);
+    [[nodiscard]] static base::Optional<Texture> create(GraphicsContext& graphicsContext, Vector2u size, bool sRgb = false);
 
     ////////////////////////////////////////////////////////////
     /// \brief Load the texture from a file on disk
@@ -281,7 +282,7 @@ public:
     /// \param dest   Coordinates of the destination position
     ///
     ////////////////////////////////////////////////////////////
-    void update(const std::uint8_t* pixels, const Vector2u& size, const Vector2u& dest);
+    void update(const std::uint8_t* pixels, Vector2u size, Vector2u dest);
 
     ////////////////////////////////////////////////////////////
     /// \brief Update a part of this texture from another texture
@@ -318,7 +319,7 @@ public:
     /// \param dest    Coordinates of the destination position
     ///
     ////////////////////////////////////////////////////////////
-    void update(const Texture& texture, const Vector2u& dest);
+    void update(const Texture& texture, Vector2u dest);
 
     ////////////////////////////////////////////////////////////
     /// \brief Update the texture from an image
@@ -355,7 +356,7 @@ public:
     /// \param dest  Coordinates of the destination position
     ///
     ////////////////////////////////////////////////////////////
-    void update(const Image& image, const Vector2u& dest);
+    void update(const Image& image, Vector2u dest);
 
     ////////////////////////////////////////////////////////////
     /// \brief Update the texture from the contents of a window
@@ -376,7 +377,7 @@ public:
     /// \param window Window to copy to the texture
     ///
     ////////////////////////////////////////////////////////////
-    void update(const Window& window);
+    [[nodiscard]] bool update(const Window& window);
 
     ////////////////////////////////////////////////////////////
     /// \brief Update a part of the texture from the contents of a window
@@ -392,7 +393,7 @@ public:
     /// \param dest   Coordinates of the destination position
     ///
     ////////////////////////////////////////////////////////////
-    void update(const Window& window, const Vector2u& dest);
+    [[nodiscard]] bool update(const Window& window, Vector2u dest);
 
     ////////////////////////////////////////////////////////////
     /// \brief Enable or disable the smooth filter
@@ -550,9 +551,7 @@ public:
     /// \param coordinateType Type of texture coordinates to use
     ///
     ////////////////////////////////////////////////////////////
-    static void bind(GraphicsContext& graphicsContext,
-                     const Texture*   texture,
-                     CoordinateType   coordinateType = CoordinateType::Normalized);
+    static void bind(GraphicsContext& graphicsContext, const Texture* texture);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the maximum texture size allowed
@@ -565,6 +564,12 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     [[nodiscard]] static unsigned int getMaximumSize(GraphicsContext& graphicsContext);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Compute and return the texture matrix (used by shaders)
+    ///
+    ////////////////////////////////////////////////////////////
+    [[nodiscard]] Glsl::Mat4 getMatrix(CoordinateType coordinateType) const;
 
 private:
     friend class Text;
@@ -582,8 +587,8 @@ public:
     ////////////////////////////////////////////////////////////
     [[nodiscard]] Texture(base::PassKey<Texture>&&,
                           GraphicsContext& graphicsContext,
-                          const Vector2u&  size,
-                          const Vector2u&  actualSize,
+                          Vector2u         size,
+                          Vector2u         actualSize,
                           unsigned int     texture,
                           bool             sRgb);
 
@@ -615,7 +620,7 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    GraphicsContext* m_graphicsContext; //!< TODO
+    GraphicsContext* m_graphicsContext; //!< The graphics context
     Vector2u         m_size;            //!< Public texture size
     Vector2u         m_actualSize;      //!< Actual texture size (can be greater than public size because of padding)
     unsigned int     m_texture{};       //!< Internal texture identifier
@@ -683,7 +688,7 @@ SFML_GRAPHICS_API void swap(Texture& left, Texture& right) noexcept;
 ///
 /// Like sf::Image, sf::Texture can handle a unique internal
 /// representation of pixels, which is RGBA 32 bits. This means
-/// that a pixel must be composed of 8 bits red, green, blue and
+/// that a pixel must be composed of 8 bit red, green, blue and
 /// alpha channels -- just like a sf::Color.
 ///
 /// When providing texture data from an image file or memory, it can

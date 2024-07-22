@@ -45,7 +45,12 @@ body:
           description: Please provide an example how the new API could be used
           value: |
               ```cpp
-              #include <SFML/Graphics.hpp>
+              #include <SFML/Graphics/RenderWindow.hpp>
+
+              #include <SFML/Window/VideoMode.hpp>
+              #include <SFML/Window/Event.hpp>
+
+              #include <SFML/Base/Optional.hpp>
 
               int main()
               {

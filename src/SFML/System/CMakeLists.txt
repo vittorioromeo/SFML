@@ -9,12 +9,15 @@ set(SRC_BASE
     ${BASE_INCROOT}/EnumArray.hpp
     ${BASE_INCROOT}/EnumClassBitwiseOps.hpp
     ${BASE_INCROOT}/FixedFunction.hpp
+    ${BASE_INCROOT}/IndexSequence.hpp
     ${BASE_INCROOT}/InPlacePImpl.hpp
     ${BASE_INCROOT}/Launder.hpp
     ${BASE_INCROOT}/Macros.hpp
+    ${BASE_INCROOT}/MakeIndexSequence.hpp
     ${BASE_INCROOT}/Math.hpp
     ${BASE_INCROOT}/MaxAlignT.hpp
     ${BASE_INCROOT}/Optional.hpp
+    ${BASE_INCROOT}/OverloadSet.hpp
     ${BASE_INCROOT}/PassKey.hpp
     ${BASE_INCROOT}/PlacementNew.hpp
     ${BASE_INCROOT}/SizeT.hpp
@@ -32,11 +35,13 @@ set(SRC_BASE
     ${BASE_INCROOT}/Traits/RemoveCVRef.hpp
     ${BASE_INCROOT}/Traits/RemoveReference.hpp
     ${BASE_INCROOT}/Traits/UnderlyingType.hpp
+    ${BASE_INCROOT}/TypePackElement.hpp
     ${BASE_INCROOT}/UniquePtr.hpp
     ${BASE_INCROOT}/Variant.hpp
 
     # sources
     ${BASE_SRCROOT}/Assert.cpp
+    ${BASE_SRCROOT}/Optional.cpp
 )
 
 

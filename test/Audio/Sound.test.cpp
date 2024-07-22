@@ -5,16 +5,17 @@
 // Other 1st party headers
 #include <SFML/Audio/SoundBuffer.hpp>
 
-#include <SFML/Base/Macros.hpp>
-#include <SFML/System/Time.hpp>
 #include <SFML/System/Path.hpp>
+#include <SFML/System/Time.hpp>
+
+#include <SFML/Base/Macros.hpp>
+#include <SFML/Base/Optional.hpp>
 
 #include <Doctest.hpp>
 
 #include <AudioUtil.hpp>
 #include <SystemUtil.hpp>
 
-#include <SFML/Base/Optional.hpp>
 #include <type_traits>
 
 TEST_CASE("[Audio] sf::Sound" * doctest::skip(skipAudioDeviceTests))

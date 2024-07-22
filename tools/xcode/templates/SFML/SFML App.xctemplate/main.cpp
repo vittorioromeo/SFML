@@ -30,6 +30,7 @@
 
 // Here is a small helper for you! Have a look.
 #include "ResourcePath.hpp"
+#include <SFML/Window/EventUtils.hpp>
 
 
 int main()
@@ -69,13 +70,8 @@ int main()
         // Process events
         while (const sf::base::Optional event = window.pollEvent())
         {
-            // Window closed or escape key pressed: exit
-            if (event->is<sf::Event::Closed>() ||
-                (event->is<sf::Event::KeyPressed>() &&
-                 event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape))
-            {
+            if (sf::EventUtils::isClosedOrEscapeKeyPressed(*event))
                 return EXIT_SUCCESS;
-            }
         }
 
         // Clear screen

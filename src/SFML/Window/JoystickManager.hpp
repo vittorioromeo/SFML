@@ -27,12 +27,19 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/Joystick.hpp>
-#include <SFML/Window/JoystickImpl.hpp>
+#include <SFML/Base/InPlacePImpl.hpp>
 
+
+namespace sf::Joystick
+{
+struct Identification;
+} // namespace sf::Joystick
 
 namespace sf::priv
 {
+struct JoystickCaps;
+struct JoystickState;
+
 ////////////////////////////////////////////////////////////
 /// \brief Global joystick manager
 ///
@@ -110,21 +117,10 @@ private:
     ~JoystickManager();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Joystick information and state
-    ///
-    ////////////////////////////////////////////////////////////
-    struct Item
-    {
-        JoystickImpl             joystick;       //!< Joystick implementation
-        JoystickState            state;          //!< The current joystick state
-        JoystickCaps             capabilities;   //!< The joystick capabilities
-        Joystick::Identification identification; //!< The joystick identification
-    };
-
-    ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    Item m_joysticks[Joystick::Count]; //!< Joysticks information and state
+    struct Impl;
+    base::InPlacePImpl<Impl, 12288> m_impl; //!< Implementation details
 };
 
 } // namespace sf::priv

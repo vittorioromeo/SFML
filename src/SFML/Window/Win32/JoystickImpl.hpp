@@ -29,6 +29,13 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/JoystickImpl.hpp>
 
+#include <SFML/Base/InPlacePImpl.hpp>
+
+
+namespace sf::Joystick
+{
+struct Identification;
+} // namespace sf::Joystick
 
 namespace sf::priv
 {

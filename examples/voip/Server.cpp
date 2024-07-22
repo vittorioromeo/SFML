@@ -13,9 +13,10 @@
 #include <SFML/System/Sleep.hpp>
 #include <SFML/System/Time.hpp>
 
+#include <SFML/Base/Optional.hpp>
+
 #include <iostream>
 #include <mutex>
-#include <SFML/Base/Optional.hpp>
 #include <vector>
 
 #include <cstdint>

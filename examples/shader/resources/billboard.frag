@@ -1,11 +1,13 @@
-#version 150
+#ifdef GL_ES
+precision mediump float;
+#endif
 
-uniform sampler2D texture;
+uniform sampler2D sf_u_texture;
 
-in vec2 tex_coord;
+varying vec4 sf_v_color;
+varying vec2 sf_v_texCoord;
 
 void main()
 {
-    // Read and apply a color from the texture
-    gl_FragColor = texture2D(texture, tex_coord);
+    gl_FragColor = texture2D(sf_u_texture, sf_v_texCoord.st);
 }

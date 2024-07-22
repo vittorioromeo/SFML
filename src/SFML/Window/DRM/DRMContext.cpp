@@ -43,9 +43,9 @@
 
 // We check for this definition in order to avoid multiple definitions of GLAD
 // entities during unity builds of SFML.
-#ifndef SF_GLAD_EGL_IMPLEMENTATION_INCLUDED
-#define SF_GLAD_EGL_IMPLEMENTATION_INCLUDED
-#define SF_GLAD_EGL_IMPLEMENTATION
+#ifndef GLAD_EGL_IMPLEMENTATION_INCLUDED
+#define GLAD_EGL_IMPLEMENTATION_INCLUDED
+#define GLAD_EGL_IMPLEMENTATION
 #include <glad/egl.h>
 #endif
 
@@ -555,7 +555,7 @@ DRMContext::DRMContext(DRMContext* shared, const ContextSettings& settings, cons
 
 
 ////////////////////////////////////////////////////////////
-DRMContext::DRMContext(DRMContext* shared, const ContextSettings& settings, const Vector2u& size)
+DRMContext::DRMContext(DRMContext* shared, const ContextSettings& settings, Vector2u size)
 {
     contextCount++;
 
@@ -710,7 +710,7 @@ void DRMContext::createContext(DRMContext* shared)
 
 
 ////////////////////////////////////////////////////////////
-void DRMContext::createSurface(const Vector2u& size, unsigned int /*bpp*/, bool scanout)
+void DRMContext::createSurface(Vector2u size, unsigned int /*bpp*/, bool scanout)
 {
     std::uint32_t flags = GBM_BO_USE_RENDERING;
 

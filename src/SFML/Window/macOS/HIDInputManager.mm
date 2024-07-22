@@ -467,7 +467,7 @@ Keyboard::Scancode HIDInputManager::nonLocalizedKey(UniChar virtualKeycode)
         case 0x50: return Keyboard::Scan::F19;
         case 0x5A: return Keyboard::Scan::F20;
 
-        /* TODO Those are missing:
+        /* TODO P2: Those are missing:
          * case 0x: return Keyboard::Scan::F21;
          * case 0x: return Keyboard::Scan::F22;
          * case 0x: return Keyboard::Scan::F23;
@@ -476,7 +476,7 @@ Keyboard::Scancode HIDInputManager::nonLocalizedKey(UniChar virtualKeycode)
 
         case 0x39: return Keyboard::Scan::CapsLock;
 
-        /* TODO Those are missing:
+        /* TODO P2: Those are missing:
          * case 0x: return Keyboard::Scan::PrintScreen;
          * case 0x: return Keyboard::Scan::ScrollLock;
          * case 0x: return Keyboard::Scan::Pause;
@@ -514,7 +514,7 @@ Keyboard::Scancode HIDInputManager::nonLocalizedKey(UniChar virtualKeycode)
         case 0x5c: return Keyboard::Scan::Numpad9;
         case 0x52: return Keyboard::Scan::Numpad0;
 
-        /* TODO Those are missing:
+        /* TODO P2: Those are missing:
          * case 0x: return Keyboard::Scan::Application;
          * case 0x: return Keyboard::Scan::Execute;
          * case 0x: return Keyboard::Scan::Help;
@@ -709,7 +709,7 @@ HIDInputManager::HIDInputManager()
 
     if (openStatus != kIOReturnSuccess)
     {
-        priv::err() << "Error when opening the HID manager" ;
+        priv::err() << "Error when opening the HID manager";
         freeUp();
         return;
     }
@@ -748,7 +748,7 @@ void HIDInputManager::initializeKeyboard()
     CFSetRef underlying = copyDevices(kHIDPage_GenericDesktop, kHIDUsage_GD_Keyboard);
     if (underlying == nullptr)
     {
-        priv::err() << "No keyboard detected by the HID manager!" ;
+        priv::err() << "No keyboard detected by the HID manager!";
         freeUp();
         return;
     }
@@ -770,7 +770,7 @@ void HIDInputManager::loadKeyboard(IOHIDDeviceRef keyboard)
     CFArrayRef underlying = IOHIDDeviceCopyMatchingElements(keyboard, nullptr, kIOHIDOptionsTypeNone);
     if ((underlying == nullptr) || (CFArrayGetCount(underlying) == 0))
     {
-        priv::err() << "Detected a keyboard without any keys." ;
+        priv::err() << "Detected a keyboard without any keys.";
         return;
     }
 
@@ -1274,7 +1274,7 @@ std::uint8_t HIDInputManager::scanToVirtualCode(Keyboard::Scancode code)
 
         case Keyboard::Scan::CapsLock: return 0x39;
 
-        /* TODO Those are missing:
+        /* TODO P2: Those are missing:
          * case Keyboard::Scan::PrintScreen: return 0;
          * case Keyboard::Scan::ScrollLock:  return 0;
          * case Keyboard::Scan::Pause:    return 0;
@@ -1313,7 +1313,7 @@ std::uint8_t HIDInputManager::scanToVirtualCode(Keyboard::Scancode code)
 
         case Keyboard::Scan::NonUsBackslash: return 0x32;
 
-        /* TODO Those are missing:
+        /* TODO P2: Those are missing:
          * case Keyboard::Scan::Application: return 0;
          * case Keyboard::Scan::Execute:     return 0;
          * case Keyboard::Scan::Help:        return 0;

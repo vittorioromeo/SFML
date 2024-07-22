@@ -15,6 +15,13 @@ TEST_CASE("[Graphics] sf::Color")
         STATIC_CHECK(std::is_copy_assignable_v<sf::Color>);
         STATIC_CHECK(std::is_nothrow_move_constructible_v<sf::Color>);
         STATIC_CHECK(std::is_nothrow_move_assignable_v<sf::Color>);
+
+        STATIC_CHECK(!std::is_trivial_v<sf::Color>); // because of member initializers
+        STATIC_CHECK(std::is_standard_layout_v<sf::Color>);
+        STATIC_CHECK(std::is_aggregate_v<sf::Color>);
+        STATIC_CHECK(std::is_trivially_copyable_v<sf::Color>);
+        STATIC_CHECK(std::is_trivially_destructible_v<sf::Color>);
+        STATIC_CHECK(std::is_trivially_assignable_v<sf::Color, sf::Color>);
     }
 
     SECTION("Construction")
@@ -48,9 +55,9 @@ TEST_CASE("[Graphics] sf::Color")
 
         SECTION("std::int32_t constructor")
         {
-            STATIC_CHECK(sf::Color(0x00000000) == sf::Color(0, 0, 0, 0));
-            STATIC_CHECK(sf::Color(0x01020304) == sf::Color(1, 2, 3, 4));
-            STATIC_CHECK(sf::Color(0xFFFFFFFF) == sf::Color(255, 255, 255, 255));
+            STATIC_CHECK(sf::Color::fromRGBA(0x00000000) == sf::Color(0, 0, 0, 0));
+            STATIC_CHECK(sf::Color::fromRGBA(0x01020304) == sf::Color(1, 2, 3, 4));
+            STATIC_CHECK(sf::Color::fromRGBA(0xFFFFFFFF) == sf::Color(255, 255, 255, 255));
         }
     }
 

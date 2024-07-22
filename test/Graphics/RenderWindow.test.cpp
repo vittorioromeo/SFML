@@ -1,6 +1,8 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 // Other 1st party headers
+#include "C:/OHWorkspace/SFML/extlibs/headers/glad/include/glad/gl.h"
+
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/View.hpp>
@@ -16,6 +18,7 @@
 #include <WindowUtil.hpp>
 
 #include <type_traits>
+
 
 TEST_CASE("[Graphics] sf::RenderWindow" * doctest::skip(skipDisplayTests))
 {
@@ -42,7 +45,7 @@ TEST_CASE("[Graphics] sf::RenderWindow" * doctest::skip(skipDisplayTests))
                                           sf::ContextSettings{});
             CHECK(window.getSize() == sf::Vector2u{256, 256});
             CHECK(window.getNativeHandle() != sf::WindowHandle());
-            CHECK(window.getSettings().attributeFlags == sf::ContextSettings::Attribute::Default);
+            CHECK(window.getSettings().attributeFlags == sf::ContextSettings{}.attributeFlags);
             CHECK(!window.isSrgb());
             CHECK(window.getView().getCenter() == sf::Vector2f{128, 128});
             CHECK(window.getView().getSize() == sf::Vector2f{256, 256});
@@ -60,7 +63,7 @@ TEST_CASE("[Graphics] sf::RenderWindow" * doctest::skip(skipDisplayTests))
                                           sf::ContextSettings{});
             CHECK(window.getSize() == sf::Vector2u{240, 300});
             CHECK(window.getNativeHandle() != sf::WindowHandle());
-            CHECK(window.getSettings().attributeFlags == sf::ContextSettings::Attribute::Default);
+            CHECK(window.getSettings().attributeFlags == sf::ContextSettings{}.attributeFlags);
             CHECK(!window.isSrgb());
             CHECK(window.getView().getCenter() == sf::Vector2f{120, 150});
             CHECK(window.getView().getSize() == sf::Vector2f{240, 300});
@@ -81,18 +84,18 @@ TEST_CASE("[Graphics] sf::RenderWindow" * doctest::skip(skipDisplayTests))
                                 sf::ContextSettings{});
         REQUIRE(window.getSize() == sf::Vector2u{256, 256});
 
-        auto texture = sf::Texture::create(graphicsContext, window.getSize()).value();
+        auto texture = sf::Texture::create(graphicsContext, sf::Vector2u{256, 256}).value();
 
         window.clear(sf::Color::Red);
-        texture.update(window);
+        CHECK(texture.update(window));
         CHECK(texture.copyToImage().getPixel(sf::Vector2u{64, 64}) == sf::Color::Red);
 
         window.clear(sf::Color::Green);
-        texture.update(window);
+        CHECK(texture.update(window));
         CHECK(texture.copyToImage().getPixel(sf::Vector2u{128, 128}) == sf::Color::Green);
 
         window.clear(sf::Color::Blue);
-        texture.update(window);
+        CHECK(texture.update(window));
         CHECK(texture.copyToImage().getPixel(sf::Vector2u{196, 196}) == sf::Color::Blue);
     }
 }

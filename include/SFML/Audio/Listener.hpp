@@ -37,18 +37,12 @@ namespace sf
 {
 ////////////////////////////////////////////////////////////
 /// \brief The audio listener is the point in the scene
-///        from where all the sounds are heard
+///        from where all the sounds are heard for a given
+///        playback device
 ///
 ////////////////////////////////////////////////////////////
-class Listener
+struct Listener
 {
-public:
-    ////////////////////////////////////////////////////////////
-    /// \brief TODO
-    ///
-    ////////////////////////////////////////////////////////////
-    explicit Listener();
-
     ////////////////////////////////////////////////////////////
     /// \brief Structure defining the properties of a directional cone
     ///
@@ -67,158 +61,12 @@ public:
         float outerGain{}; //!< Outer gain
     };
 
-    ////////////////////////////////////////////////////////////
-    /// \brief Change the global volume of all the sounds and musics
-    ///
-    /// The volume is a number between 0 and 100; it is combined with
-    /// the individual volume of each sound / music.
-    /// The default value for the volume is 100 (maximum).
-    ///
-    /// \param volume New global volume, in the range [0, 100]
-    ///
-    /// \see getVolume
-    ///
-    ////////////////////////////////////////////////////////////
-    SFML_AUDIO_API void setVolume(float volume);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the current value of the global volume
-    ///
-    /// \return Current global volume, in the range [0, 100]
-    ///
-    /// \see setVolume
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] SFML_AUDIO_API float getVolume() const;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Set the position of the listener in the scene
-    ///
-    /// The default listener's position is (0, 0, 0).
-    ///
-    /// \param position New listener's position
-    ///
-    /// \see getPosition, setDirection
-    ///
-    ////////////////////////////////////////////////////////////
-    SFML_AUDIO_API void setPosition(const Vector3f& position);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the current position of the listener in the scene
-    ///
-    /// \return Listener's position
-    ///
-    /// \see setPosition
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] SFML_AUDIO_API Vector3f getPosition() const;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Set the forward vector of the listener in the scene
-    ///
-    /// The direction (also called "at vector") is the vector
-    /// pointing forward from the listener's perspective. Together
-    /// with the up vector, it defines the 3D orientation of the
-    /// listener in the scene. The direction vector doesn't
-    /// have to be normalized.
-    /// The default listener's direction is (0, 0, -1).
-    ///
-    /// \param direction New listener's direction
-    ///
-    /// \see getDirection, setUpVector, setPosition
-    ///
-    ////////////////////////////////////////////////////////////
-    SFML_AUDIO_API void setDirection(const Vector3f& direction);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the current forward vector of the listener in the scene
-    ///
-    /// \return Listener's forward vector (not normalized)
-    ///
-    /// \see setDirection
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] SFML_AUDIO_API Vector3f getDirection() const;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Set the velocity of the listener in the scene
-    ///
-    /// The default listener's velocity is (0, 0, -1).
-    ///
-    /// \param velocity New listener's velocity
-    ///
-    /// \see getVelocity, getDirection, setUpVector, setPosition
-    ///
-    ////////////////////////////////////////////////////////////
-    SFML_AUDIO_API void setVelocity(const Vector3f& velocity);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the current forward vector of the listener in the scene
-    ///
-    /// \return Listener's velocity
-    ///
-    /// \see setVelocity
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] SFML_AUDIO_API Vector3f getVelocity() const;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Set the cone properties of the listener in the audio scene
-    ///
-    /// The cone defines how directional attenuation is applied.
-    /// The default cone of a sound is {2 * PI, 2 * PI, 1}.
-    ///
-    /// \param cone Cone properties of the listener in the scene
-    ///
-    /// \see getCone
-    ///
-    ////////////////////////////////////////////////////////////
-    SFML_AUDIO_API void setCone(const Listener::Cone& cone);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the cone properties of the listener in the audio scene
-    ///
-    /// \return Cone properties of the listener
-    ///
-    /// \see setCone
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] SFML_AUDIO_API Listener::Cone getCone() const;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Set the upward vector of the listener in the scene
-    ///
-    /// The up vector is the vector that points upward from the
-    /// listener's perspective. Together with the direction, it
-    /// defines the 3D orientation of the listener in the scene.
-    /// The up vector doesn't have to be normalized.
-    /// The default listener's up vector is (0, 1, 0). It is usually
-    /// not necessary to change it, especially in 2D scenarios.
-    ///
-    /// \param upVector New listener's up vector
-    ///
-    /// \see getUpVector, setDirection, setPosition
-    ///
-    ////////////////////////////////////////////////////////////
-    SFML_AUDIO_API void setUpVector(const Vector3f& upVector);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the current upward vector of the listener in the scene
-    ///
-    /// \return Listener's upward vector (not normalized)
-    ///
-    /// \see setUpVector
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] SFML_AUDIO_API Vector3f getUpVector() const;
-
-private:
-    float          m_volume{100.f};
-    Vector3f       m_position{0, 0, 0};
-    Vector3f       m_direction{0, 0, -1};
-    Vector3f       m_velocity{0, 0, 0};
-    Listener::Cone m_cone{degrees(360.f), degrees(360.f), 1};
-    Vector3f       m_upVector{0, 1, 0};
+    float    volume{100.f};       //< Volume (between `0` and `100`)
+    Vector3f position{0, 0, 0};   //< Position where audio is heard from
+    Vector3f direction{0, 0, -1}; //< Forward-pointing vector from listener's perspective (not necessarily normalized)
+    Vector3f velocity{0, 0, 0};   //< Velocity of the listener
+    Listener::Cone cone{degrees(360.f), degrees(360.f), 1}; //< Cone properties (affects directional attenuation)
+    Vector3f upVector{0, 1, 0}; //< Upward-pointing vector from the listener's perspective (not necessarily normalized)
 };
 
 } // namespace sf
@@ -227,8 +75,8 @@ private:
 /// \namespace sf::Listener
 /// \ingroup audio
 ///
-/// The audio listener defines the global properties of the
-/// audio environment, it defines where and how sounds and musics
+/// The audio listener defines the properties of the audio environment,
+/// for a particular playback device. It defines where/how sounds/musics
 /// are heard. If sf::View is the eyes of the user, then sf::Listener
 /// is his ears (by the way, they are often linked together --
 /// same position, orientation, etc.).
@@ -239,14 +87,19 @@ private:
 ///
 /// Usage example:
 /// \code
+/// sf::Listener listener;
+///
 /// // Move the listener to the position (1, 0, -5)
-/// sf::Listener::setPosition({1, 0, -5});
+/// listener.position = {1, 0, -5};
 ///
 /// // Make it face the right axis (1, 0, 0)
-/// sf::Listener::setDirection({1, 0, 0});
+/// listener.direction = {1, 0, 0};
 ///
 /// // Reduce the global volume
-/// sf::Listener::setVolume(50);
+/// listener.volume = 50;
+///
+/// // Apply the listener properties
+/// somePlaybackDevice.updateListener(listener);
 /// \endcode
 ///
 ////////////////////////////////////////////////////////////

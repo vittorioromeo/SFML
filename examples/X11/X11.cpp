@@ -54,11 +54,7 @@
     glLoadIdentity();
     const float extent = std::tan(sf::degrees(45).asRadians());
 
-#ifdef SFML_OPENGL_ES
-    glFrustumf(-extent, extent, -extent, extent, 1.0f, 500.0f);
-#else
     glFrustum(-extent, extent, -extent, extent, 1.0f, 500.0f);
-#endif
 
     // Enable position and texture coordinates vertex components
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -238,11 +234,7 @@ int main()
     }
 
     // Load OpenGL or OpenGL ES entry points using glad
-#ifdef SFML_OPENGL_ES
-    gladLoadGLES1(graphicsContext.getGLLoadFn());
-#else
-    gladLoadGL(graphicsContext.getGLLoadFn());
-#endif
+    graphicsContext.loadGLEntryPointsViaGLAD();
 
     // Initialize our views
     if (!initialize(sfmlView1))

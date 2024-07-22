@@ -38,9 +38,9 @@
 
 // We check for this definition in order to avoid multiple definitions of GLAD
 // entities during unity builds of SFML.
-#ifndef SF_GLAD_GLX_IMPLEMENTATION_INCLUDED
-#define SF_GLAD_GLX_IMPLEMENTATION_INCLUDED
-#define SF_GLAD_GLX_IMPLEMENTATION
+#ifndef GLAD_GLX_IMPLEMENTATION_INCLUDED
+#define GLAD_GLX_IMPLEMENTATION_INCLUDED
+#define GLAD_GLX_IMPLEMENTATION
 #include <glad/glx.h>
 #endif
 
@@ -131,7 +131,7 @@ GlxContext::GlxContext(GlxContext* shared, const ContextSettings& settings, cons
 
 
 ////////////////////////////////////////////////////////////
-GlxContext::GlxContext(GlxContext* shared, const ContextSettings& settings, const Vector2u& size)
+GlxContext::GlxContext(GlxContext* shared, const ContextSettings& settings, Vector2u size)
 {
     // Save the creation settings
     m_settings = settings;
@@ -259,15 +259,15 @@ void GlxContext::setVerticalSyncEnabled(bool enabled)
     // We use the direct pointer to the MESA entry point instead of the alias
     // because glx.h declares the entry point as an external function
     // which would require us to link in an additional library
-    if (SF_GLAD_GLX_EXT_swap_control)
+    if (GLAD_GLX_EXT_swap_control)
     {
         glXSwapIntervalEXT(m_display.get(), m_pbuffer ? m_pbuffer : m_window, enabled ? 1 : 0);
     }
-    else if (SF_GLAD_GLX_MESA_swap_control)
+    else if (GLAD_GLX_MESA_swap_control)
     {
         result = glXSwapIntervalMESA(enabled ? 1 : 0);
     }
-    else if (SF_GLAD_GLX_SGI_swap_control)
+    else if (GLAD_GLX_SGI_swap_control)
     {
         result = glXSwapIntervalSGI(enabled ? 1 : 0);
     }
@@ -335,7 +335,7 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
             glXGetConfig(display, &visual, GLX_DEPTH_SIZE, &depth);
             glXGetConfig(display, &visual, GLX_STENCIL_SIZE, &stencil);
 
-            if (SF_GLAD_GLX_ARB_multisample)
+            if (GLAD_GLX_ARB_multisample)
             {
                 glXGetConfig(display, &visual, GLX_SAMPLE_BUFFERS_ARB, &multiSampling);
                 glXGetConfig(display, &visual, GLX_SAMPLES_ARB, &samples);
@@ -346,7 +346,7 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
                 samples       = 0;
             }
 
-            if (SF_GLAD_GLX_EXT_framebuffer_sRGB || SF_GLAD_GLX_ARB_framebuffer_sRGB)
+            if (GLAD_GLX_EXT_framebuffer_sRGB || GLAD_GLX_ARB_framebuffer_sRGB)
             {
                 glXGetConfig(display, &visual, GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB, &sRgb);
             }
@@ -355,7 +355,7 @@ XVisualInfo GlxContext::selectBestVisual(::Display* display, unsigned int bitsPe
                 sRgb = 0;
             }
 
-            // TODO: Replace this with proper acceleration detection
+            // TODO P2: Replace this with proper acceleration detection
             const bool accelerated = true;
 
             // Evaluate the visual
@@ -398,7 +398,7 @@ void GlxContext::updateSettingsFromVisualInfo(XVisualInfo* visualInfo)
     glXGetConfig(m_display.get(), visualInfo, GLX_DEPTH_SIZE, &depth);
     glXGetConfig(m_display.get(), visualInfo, GLX_STENCIL_SIZE, &stencil);
 
-    if (SF_GLAD_GLX_ARB_multisample)
+    if (GLAD_GLX_ARB_multisample)
     {
         glXGetConfig(m_display.get(), visualInfo, GLX_SAMPLE_BUFFERS_ARB, &multiSampling);
         glXGetConfig(m_display.get(), visualInfo, GLX_SAMPLES_ARB, &samples);
@@ -409,7 +409,7 @@ void GlxContext::updateSettingsFromVisualInfo(XVisualInfo* visualInfo)
         samples       = 0;
     }
 
-    if (SF_GLAD_GLX_EXT_framebuffer_sRGB || SF_GLAD_GLX_ARB_framebuffer_sRGB)
+    if (GLAD_GLX_EXT_framebuffer_sRGB || GLAD_GLX_ARB_framebuffer_sRGB)
     {
         glXGetConfig(m_display.get(), visualInfo, GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB, &sRgb);
     }
@@ -452,13 +452,13 @@ void GlxContext::updateSettingsFromWindow()
 
 
 ////////////////////////////////////////////////////////////
-void GlxContext::createSurface(GlxContext* shared, const Vector2u& size, unsigned int bitsPerPixel)
+void GlxContext::createSurface(GlxContext* shared, Vector2u size, unsigned int bitsPerPixel)
 {
     // Choose the visual according to the context settings
     XVisualInfo visualInfo = selectBestVisual(m_display.get(), bitsPerPixel, m_settings);
 
     // Check if the shared context already exists and pbuffers are supported
-    if (shared && SF_GLAD_GLX_SGIX_pbuffer)
+    if (shared && GLAD_GLX_SGIX_pbuffer)
     {
         // There are no GLX versions prior to 1.0
         int major = 0;
@@ -606,7 +606,7 @@ void GlxContext::createContext(GlxContext* shared)
         priv::err() << "Failed to query GLX version, limited to legacy context creation";
 
     // Check if glXCreateContextAttribsARB is available (requires GLX 1.3 or greater)
-    const bool hasCreateContextArb = SF_GLAD_GLX_ARB_create_context && ((major > 1) || (minor >= 3));
+    const bool hasCreateContextArb = GLAD_GLX_ARB_create_context && ((major > 1) || (minor >= 3));
 
     // Create the OpenGL context -- first try using glXCreateContextAttribsARB
     if (hasCreateContextArb)
@@ -652,7 +652,7 @@ void GlxContext::createContext(GlxContext* shared)
             }
 
             // Check if setting the profile is supported
-            if (SF_GLAD_GLX_ARB_create_context_profile)
+            if (GLAD_GLX_ARB_create_context_profile)
             {
                 const int profile = !!(m_settings.attributeFlags & ContextSettings::Attribute::Core)
                                         ? GLX_CONTEXT_CORE_PROFILE_BIT_ARB

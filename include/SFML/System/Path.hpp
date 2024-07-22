@@ -70,7 +70,7 @@ public:
     [[nodiscard]] Path extension() const;
     [[nodiscard]] Path absolute() const;
 
-    [[nodiscard]] const value_type* c_str() const; // TODO: support other platforms
+    [[nodiscard]] const value_type* c_str() const; // TODO P1: support other platforms
     // [[nodiscard]] std::string       string() const;
 
     // [[nodiscard]] operator std::string() const;
