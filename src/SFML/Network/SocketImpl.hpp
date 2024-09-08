@@ -28,6 +28,14 @@
 
 #endif
 
+#ifdef htons
+#undef htons
+#endif
+
+#ifdef htonl
+#undef htonl
+#endif
+
 #include <cstdint>
 
 struct sockaddr_in;

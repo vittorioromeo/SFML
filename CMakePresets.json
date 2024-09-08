@@ -13,7 +13,8 @@
         "SFML_BUILD_EXAMPLES": "ON",
         "SFML_BUILD_TEST_SUITE": "ON",
         "SFML_ENABLE_PCH": "OFF",
-        "SFML_WARNINGS_AS_ERRORS": "OFF"
+        "SFML_WARNINGS_AS_ERRORS": "OFF",
+        "SFML_USE_SYSTEM_DEPS": "OFF"
       },
       "environment": {
         "CXX_WARNINGS": "-Wall -Wextra -Wpedantic -Wno-ignored-attributes -Wno-unused-command-line-argument"
@@ -58,7 +59,7 @@
       "installDir": "${sourceDir}/build_vrdev_gcc/install",
       "cacheVariables": {
         "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_CXX_FLAGS": "-fuse-ld=lld -Wnrvo $env{CXX_WARNINGS}"
+        "CMAKE_CXX_FLAGS": "$env{CXX_WARNINGS}"
       }
     },
     {
@@ -82,7 +83,7 @@
       "installDir": "${sourceDir}/build_vrdev_gcc_rel/install",
       "cacheVariables": {
         "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_CXX_FLAGS": "-fuse-ld=lld -Wnrvo -Ofast $env{CXX_WARNINGS}"
+        "CMAKE_CXX_FLAGS": "-Ofast $env{CXX_WARNINGS}"
       }
     },
     {

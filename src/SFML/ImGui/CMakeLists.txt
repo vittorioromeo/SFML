@@ -33,7 +33,7 @@ endif()
 
 
 if(SFML_USE_SYSTEM_DEPS)
-    find_package(ImGui REQUIRED)
+    find_package(ImGui 1.91.0 REQUIRED)
 else()
     # use an immediately invoked function to scope option variables we have to set
     function(sfml_add_imgui_dependencies)

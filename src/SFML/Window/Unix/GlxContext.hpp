@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include "SFML/System/Vector2.hpp"
 #include "SFML/Window/GlContext.hpp"
 #include "SFML/Window/WindowEnums.hpp" // Prevent conflict with macro None from Xlib
 
